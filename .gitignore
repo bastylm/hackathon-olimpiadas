@@ -1,0 +1,7 @@
+node_modules/
+responses-db.json
+upload-*.docx
+*.log
+.env
+.DS_Store
+Thumbs.db

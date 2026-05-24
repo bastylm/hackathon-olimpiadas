@@ -1,0 +1,1837 @@
+{
+  "source": {
+    "sections": "C:\\Users\\Miguel A.C.O\\OneDrive\\Desktop\\Olimpiadas calendario.xlsx",
+    "questions": "C:\\Users\\Miguel A.C.O\\OneDrive\\Desktop\\Preguntas lunes 25.docx"
+  },
+  "sections": [
+    {
+      "id": "admo05-d-fae0-n3-p4-c1-2",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Administración de Empresas",
+      "code": "ADMO05",
+      "subject": "Software ERP",
+      "section": "D-FAE0-N3-P4-C1",
+      "teacher": "Márquez Rivera Bercia",
+      "date": "2026-06-08"
+    },
+    {
+      "id": "admo05-d-iad-n3-p2-c1-3",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Administración de Empresas",
+      "code": "ADMO05",
+      "subject": "Software ERP",
+      "section": "D-IAD-N3-P2-C1",
+      "teacher": "Márquez Rivera Bercia",
+      "date": "2026-06-12"
+    },
+    {
+      "id": "avc403-v-fae0-n3-p5-c1-ciclo-2-4",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Administración de Empresas",
+      "code": "AVC403",
+      "subject": "Gestión de Personas",
+      "section": "V-FAE0-N3-P5-C1 (ciclo 2)",
+      "teacher": "Guevara Ruiz Marcela Denis",
+      "date": "2026-06-11"
+    },
+    {
+      "id": "avc403-v-iad-n3-p3-c1-ciclo-2-5",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Administración de Empresas",
+      "code": "AVC403",
+      "subject": "Gestión de Personas",
+      "section": "V-IAD-N3-P3-C1 (Ciclo 2)",
+      "teacher": "Jara Valdebenito Nataly Javiera",
+      "date": "2026-06-09"
+    },
+    {
+      "id": "adg501-d-iad-n5-p2-c1-6",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Ingeniería en Administración de Empresas",
+      "code": "ADG501",
+      "subject": "Liderazgo y Trabajo en Equipo",
+      "section": "D-IAD-N5-P2-C1",
+      "teacher": "San Cristóbal Muñoz Christian Ariel",
+      "date": "2026-06-04"
+    },
+    {
+      "id": "avh502-v-iad-n5-p3-c1-ciclo-2-7",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Ingeniería en Administración de Empresas",
+      "code": "AVH502",
+      "subject": "Finanzas para la Toma de Decisiones",
+      "section": "V-IAD-N5-P3-C1 (Ciclo 2)",
+      "teacher": "Gutiérrez Vásquez Luis Anibal",
+      "date": "2026-06-05"
+    },
+    {
+      "id": "avh502-v-iad-n5-p3-c2-ciclo-2-8",
+      "sectorial": "Administración y Servicios",
+      "area": "Administración",
+      "career": "Ingeniería en Administración de Empresas",
+      "code": "AVH502",
+      "subject": "Finanzas para la Toma de Decisiones",
+      "section": "V-IAD-N5-P3-C2 (Ciclo 2)",
+      "teacher": "García Moscoso Richard Fabian",
+      "date": "2026-06-09"
+    },
+    {
+      "id": "gad404-d-aga-n5-p1-c1-9",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Administración Gastronómica",
+      "code": "GAD404",
+      "subject": "Gestión y Control de Inventario",
+      "section": "D-AGA-N5-P1-C1",
+      "teacher": "Figueroa Barra Carmen Patricia",
+      "date": "2026-06-17"
+    },
+    {
+      "id": "gad404-d-aga-n5-p1-c2-creada-10",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Administración Gastronómica",
+      "code": "GAD404",
+      "subject": "Gestión y Control de Inventario",
+      "section": "D-AGA-N5-P1-C2(CREADA)",
+      "teacher": "Figueroa Barra Carmen Patricia",
+      "date": "2026-06-08"
+    },
+    {
+      "id": "gac303-d-fga-n3-p1-c2-11",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Gastronomía",
+      "code": "GAC303",
+      "subject": "Taller de Producción y Seguridad Alimentaria",
+      "section": "D-FGA-N3-P1-C2",
+      "teacher": "Sekul Muñoz Fernanda Andrea",
+      "date": "2026-06-25"
+    },
+    {
+      "id": "gac303-d-aga-n3-p1-c1-12",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Gastronomía",
+      "code": "GAC303",
+      "subject": "Taller de Producción y Seguridad Alimentaria",
+      "section": "D-AGA-N3-P1-C1",
+      "teacher": "Pacheco García Ricardo Alejandro",
+      "date": "2026-06-15"
+    },
+    {
+      "id": "gac303-v-fga-n3-p1-c1-13",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Gastronomía",
+      "code": "GAC303",
+      "subject": "Taller de Producción y Seguridad Alimentaria",
+      "section": "V-FGA-N3-P1-C1",
+      "teacher": "Carrillo Rubilar Danilo Rodrigo",
+      "date": "2026-06-15"
+    },
+    {
+      "id": "gac303-v-fga-n3-p1-c2-14",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Gastronomía",
+      "code": "GAC303",
+      "subject": "Taller de Producción y Seguridad Alimentaria",
+      "section": "V-FGA-N3-P1-C2",
+      "teacher": "Cifuentes Rioseco Carlos Enrique",
+      "date": "2026-06-25"
+    },
+    {
+      "id": "gac303-d-fga-n3-p1-c1-15",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Gastronomía",
+      "code": "GAC303",
+      "subject": "Taller de Producción y Seguridad Alimentaria",
+      "section": "D-FGA-N3-P1-C1",
+      "teacher": "Torres Torres Pedro César",
+      "date": "2026-06-18"
+    },
+    {
+      "id": "gac303-d-fga-n3-p1-c3-f-16",
+      "sectorial": "Administración y Servicios",
+      "area": "Gastronomía",
+      "career": "Gastronomía",
+      "code": "GAC303",
+      "subject": "Taller de Producción y Seguridad Alimentaria",
+      "section": "D-FGA-N3-P1-C3(F)",
+      "teacher": "Torres Torres Pedro César",
+      "date": "2026-06-17"
+    },
+    {
+      "id": "agd405-d-885-n7-p3-c1-17",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Agroindustria Y Medioambiente",
+      "career": "Ingeniería Agrícola",
+      "code": "AGD405",
+      "subject": "Plan de Marketing de Productos y Servicios",
+      "section": "D-885-N7-P3-C1",
+      "teacher": "García Moscoso Richard Fabian",
+      "date": "2026-06-17"
+    },
+    {
+      "id": "ago431-d-885-n3-p4-c1-e-f-18",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Agroindustria Y Medioambiente",
+      "career": "Técnico Agrícola",
+      "code": "AGO431",
+      "subject": "Seguridad y Salud Laboral",
+      "section": "D-885-N3-P4-C1(E-F)",
+      "teacher": "Caro Flores Gonzalo Daniel",
+      "date": "2026-06-10"
+    },
+    {
+      "id": "ago431-v-ftea-n3-p2-c1-19",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Agroindustria Y Medioambiente",
+      "career": "Técnico Agrícola",
+      "code": "AGO431",
+      "subject": "Seguridad y Salud Laboral",
+      "section": "V-FTEA-N3-P2-C1",
+      "teacher": "Caro Flores Gonzalo Daniel",
+      "date": "2026-06-12"
+    },
+    {
+      "id": "cccm05-v-cc0-n5-p5-c1-20",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Construcción Civil",
+      "code": "CCCM05",
+      "subject": "Mecánica de Suelos",
+      "section": "V-CC0-N5-P5-C1",
+      "teacher": "Valenzuela Arias Cristian Mauricio",
+      "date": "2026-06-09"
+    },
+    {
+      "id": "cccm05-d-cc0-n5-p5-c1-21",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Construcción Civil",
+      "code": "CCCM05",
+      "subject": "Mecánica de Suelos",
+      "section": "D-CC0-N5-P5-C1",
+      "teacher": "Infante Pinto Alexis Antonio",
+      "date": "2026-06-16"
+    },
+    {
+      "id": "cccm05-d-cc0-n5-p5-c2-22",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Construcción Civil",
+      "code": "CCCM05",
+      "subject": "Mecánica de Suelos",
+      "section": "D-CC0-N5-P5-C2",
+      "teacher": "Infante Pinto Alexis Antonio",
+      "date": "2026-06-18"
+    },
+    {
+      "id": "cccp23-d-cc0-n3-p5-c1-23",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP23",
+      "subject": "Calidad y Supervisión de Obras",
+      "section": "D-CC0-N3-P5-C1",
+      "teacher": "Arévalo Lobos Pamela Andrea",
+      "date": "2026-06-03"
+    },
+    {
+      "id": "cccp23-d-ftco-n3-p2-c1-24",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP23",
+      "subject": "Calidad y Supervisión de Obras",
+      "section": "D-FTCO-N3-P2-C1",
+      "teacher": "Arévalo Lobos Pamela Andrea",
+      "date": "2026-06-02"
+    },
+    {
+      "id": "cccp23-v-ftco-n3-p2-c1-25",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP23",
+      "subject": "Calidad y Supervisión de Obras",
+      "section": "V-FTCO-N3-P2-C1",
+      "teacher": "Arévalo Lobos Pamela Andrea",
+      "date": "2026-06-25"
+    },
+    {
+      "id": "cccp01-d-cc0-n1-p6-c1-f-26",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP01",
+      "subject": "Taller de Interpretación de Planos",
+      "section": "D-CC0-N1-P6-C1(F)",
+      "teacher": "Valenzuela Arias Cristian Mauricio",
+      "date": "2026-06-02"
+    },
+    {
+      "id": "cccp01-d-ftco-n1-p3-c1-27",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP01",
+      "subject": "Taller de Interpretación de Planos",
+      "section": "D-FTCO-N1-P3-C1",
+      "teacher": "Valenzuela Arias Cristian Mauricio",
+      "date": "2026-06-22"
+    },
+    {
+      "id": "cccp01-d-ftco-n1-p3-c2-28",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP01",
+      "subject": "Taller de Interpretación de Planos",
+      "section": "D-FTCO-N1-P3-C2",
+      "teacher": "Valenzuela Arias Cristian Mauricio",
+      "date": "2026-06-12"
+    },
+    {
+      "id": "cccp01-v-ftco-n1-p3-c1-29",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP01",
+      "subject": "Taller de Interpretación de Planos",
+      "section": "V-FTCO-N1-P3-C1",
+      "teacher": "Valenzuela Arias Cristian Mauricio",
+      "date": "2026-06-23"
+    },
+    {
+      "id": "cccp01-v-ftco-n1-p3-c2-30",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Construcción",
+      "career": "Técnico en Construcción",
+      "code": "CCCP01",
+      "subject": "Taller de Interpretación de Planos",
+      "section": "V-FTCO-N1-P3-C2",
+      "teacher": "Valenzuela Arias Cristian Mauricio",
+      "date": "2026-06-12"
+    },
+    {
+      "id": "ieo504-d-iel-n5-p2-c2-31",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Ingeniería Eléctrica",
+      "code": "IEO504",
+      "subject": "Telecomunicaciones y Conectividad",
+      "section": "D-IEL-N5-P2-C2",
+      "teacher": "Estrada Beltrán Henry Antonio",
+      "date": "2026-06-24"
+    },
+    {
+      "id": "ieo504-v-iel-n5-p2-c1-32",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Ingeniería Eléctrica",
+      "code": "IEO504",
+      "subject": "Telecomunicaciones y Conectividad",
+      "section": "V-IEL-N5-P2-C1",
+      "teacher": "Estrada Beltrán Henry Antonio",
+      "date": "2026-06-15"
+    },
+    {
+      "id": "ieo504-d-iel-n5-p2-c1-33",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Ingeniería Eléctrica",
+      "code": "IEO504",
+      "subject": "Telecomunicaciones y Conectividad",
+      "section": "D-IEL-N5-P2-C1",
+      "teacher": "Cuevas Navarrete Diego Alberto",
+      "date": "2026-06-23"
+    },
+    {
+      "id": "eep501-d-ien-n5-p1-c1-34",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Ingeniería en Energía",
+      "code": "EEP501",
+      "subject": "Desarrollo de Proyectos de Energía Solar Fotovoltaica",
+      "section": "D-IEN-N5-P1-C1",
+      "teacher": "Abuter Gangas Carlos Alberto",
+      "date": "2026-05-27"
+    },
+    {
+      "id": "eep501-d-ien-n5-p1-c2-35",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Ingeniería en Energía",
+      "code": "EEP501",
+      "subject": "Desarrollo de Proyectos de Energía Solar Fotovoltaica",
+      "section": "D-IEN-N5-P1-C2",
+      "teacher": "Abuter Gangas Carlos Alberto",
+      "date": "2026-06-04"
+    },
+    {
+      "id": "eeo406-d-ftei-n3-p1-c1-36",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Electricidad Industrial",
+      "code": "EEO406",
+      "subject": "Diseño de Proyectos Eléctricos en Baja Tensión",
+      "section": "D-FTEI-N3-P1-C1",
+      "teacher": "Troncoso Leiva Danilo Eduardo",
+      "date": "2026-06-09"
+    },
+    {
+      "id": "eeo406-d-ftei-n3-p1-c2-37",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Electricidad Industrial",
+      "code": "EEO406",
+      "subject": "Diseño de Proyectos Eléctricos en Baja Tensión",
+      "section": "D-FTEI-N3-P1-C2",
+      "teacher": "Troncoso Leiva Danilo Eduardo",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "eeo406-d-iel-n3-p2-c1-38",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Electricidad Industrial",
+      "code": "EEO406",
+      "subject": "Diseño de Proyectos Eléctricos en Baja Tensión",
+      "section": "D-IEL-N3-P2-C1",
+      "teacher": "Troncoso Leiva Danilo Eduardo",
+      "date": "2026-06-09"
+    },
+    {
+      "id": "eeo406-d-iel-n3-p2-c2-39",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Electricidad Industrial",
+      "code": "EEO406",
+      "subject": "Diseño de Proyectos Eléctricos en Baja Tensión",
+      "section": "D-IEL-N3-P2-C2",
+      "teacher": "Troncoso Leiva Danilo Eduardo",
+      "date": "2026-06-03"
+    },
+    {
+      "id": "eeo406-v-ftei-n3-p1-c1-40",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Electricidad Industrial",
+      "code": "EEO406",
+      "subject": "Diseño de Proyectos Eléctricos en Baja Tensión",
+      "section": "V-FTEI-N3-P1-C1",
+      "teacher": "Troncoso Leiva Danilo Eduardo",
+      "date": "2026-05-25"
+    },
+    {
+      "id": "eeo406-v-ftei-n3-p1-c2-41",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Electricidad Industrial",
+      "code": "EEO406",
+      "subject": "Diseño de Proyectos Eléctricos en Baja Tensión",
+      "section": "V-FTEI-N3-P1-C2",
+      "teacher": "Troncoso Leiva Danilo Eduardo",
+      "date": "2026-06-03"
+    },
+    {
+      "id": "ees401-d-fer-n3-p1-c1-42",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Energías Renovables",
+      "code": "EES401",
+      "subject": "Normativa Aplicada a Energías Renovables",
+      "section": "D-FER-N3-P1-C1",
+      "teacher": "Mieres Vargas Héctor Aciel",
+      "date": "2026-06-24"
+    },
+    {
+      "id": "ees401-d-ien-n3-p1-c1-43",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Energías Renovables",
+      "code": "EES401",
+      "subject": "Normativa Aplicada a Energías Renovables",
+      "section": "D-IEN-N3-P1-C1",
+      "teacher": "Mieres Vargas Héctor Aciel",
+      "date": "2026-05-26"
+    },
+    {
+      "id": "ees401-v-fter-n3-p1-c1-44",
+      "sectorial": "Energía y Sostenibilidad",
+      "area": "Energía",
+      "career": "Técnico en Energías Renovables",
+      "code": "EES401",
+      "subject": "Normativa Aplicada a Energías Renovables",
+      "section": "V-FTER-N3-P1-C1",
+      "teacher": "Mieres Vargas Héctor Aciel",
+      "date": "2026-06-04"
+    },
+    {
+      "id": "aate01-v-ilo-n5-p1-c1-45",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Logística",
+      "career": "Ingeniería en Logística",
+      "code": "AATE01",
+      "subject": "Liderazgo y Trabajo en Equipo",
+      "section": "V-ILO-N5-P1-C1",
+      "teacher": "San Cristóbal Muñoz Christian Ariel",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "lops01-d-ftlo-n1-p2-c1-46",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Logística",
+      "career": "Técnico en Logística",
+      "code": "LOPS01",
+      "subject": "Prácticas Seguras en las Operaciones Logísticas",
+      "section": "D-FTLO-N1-P2-C1",
+      "teacher": "Rondan Tafur Efren Huler",
+      "date": "2026-06-17"
+    },
+    {
+      "id": "lotd04-d-ftlo-n3-p2-c1-47",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Logística",
+      "career": "Técnico en Logística",
+      "code": "LOTD04",
+      "subject": "Administración del Transporte y Distribución",
+      "section": "D-FTLO-N3-P2-C1",
+      "teacher": "Guevara Ruiz Marcela Denis",
+      "date": "2026-05-25"
+    },
+    {
+      "id": "mfc404-d-imi-n5-p1-c1-91-48",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mantenimiento Industrial",
+      "code": "MFC404",
+      "subject": "Gestión de Resultados Operacionales",
+      "section": "D-IMI-N5-P1-C1-91",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-06-02"
+    },
+    {
+      "id": "mfc404-d-imi-n5-p1-c2-94-49",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mantenimiento Industrial",
+      "code": "MFC404",
+      "subject": "Gestión de Resultados Operacionales",
+      "section": "D-IMI-N5-P1-C2-94",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-06-11"
+    },
+    {
+      "id": "mfc404-v-imi-n5-p1-c1-93-50",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mantenimiento Industrial",
+      "code": "MFC404",
+      "subject": "Gestión de Resultados Operacionales",
+      "section": "V-IMI-N5-P1-C1-93",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-06-23"
+    },
+    {
+      "id": "mama51-d-mi1-n5-p1-c1-21-51",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mecánica y Electromovilidad Automotriz",
+      "code": "MAMA51",
+      "subject": "Análisis de Materiales Automotrices",
+      "section": "D-MI1-N5-P1-C1-21",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-05-26"
+    },
+    {
+      "id": "mama51-d-mi1-n5-p1-c2-24-52",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mecánica y Electromovilidad Automotriz",
+      "code": "MAMA51",
+      "subject": "Análisis de Materiales Automotrices",
+      "section": "D-MI1-N5-P1-C2-24",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-05-26"
+    },
+    {
+      "id": "mama51-d-mi1-n5-p1-c3-25-53",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mecánica y Electromovilidad Automotriz",
+      "code": "MAMA51",
+      "subject": "Análisis de Materiales Automotrices",
+      "section": "D-MI1-N5-P1-C3-25",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-05-28"
+    },
+    {
+      "id": "mama51-v-mi1-n5-p1-c1-26-54",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Ingeniería en Mecánica y Electromovilidad Automotriz",
+      "code": "MAMA51",
+      "subject": "Análisis de Materiales Automotrices",
+      "section": "V-MI1-N5-P1-C1-26",
+      "teacher": "Viveros Díaz José",
+      "date": "2026-05-27"
+    },
+    {
+      "id": "mfa402-d-imi-n3-p1-c1-91-55",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mantenimiento Industrial",
+      "code": "MFA402",
+      "subject": "Mantenimiento de Sistemas Electrohidráulicos y Electroneumáticos",
+      "section": "D-IMI-N3-P1-C1-91",
+      "teacher": "Álvarez Contreras Luis Alfredo",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "mfa402-d-imi-n3-p1-c2-92-56",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mantenimiento Industrial",
+      "code": "MFA402",
+      "subject": "Mantenimiento de Sistemas Electrohidráulicos y Electroneumáticos",
+      "section": "D-IMI-N3-P1-C2-92",
+      "teacher": "Álvarez Contreras Luis Alfredo",
+      "date": "2026-06-11"
+    },
+    {
+      "id": "mfa402-d-imi-n3-p1-c3-94-57",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mantenimiento Industrial",
+      "code": "MFA402",
+      "subject": "Mantenimiento de Sistemas Electrohidráulicos y Electroneumáticos",
+      "section": "D-IMI-N3-P1-C3-94",
+      "teacher": "Álvarez Contreras Luis Alfredo",
+      "date": "2026-06-16"
+    },
+    {
+      "id": "mfa402-d-imi-n3-p1-c4-95-58",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mantenimiento Industrial",
+      "code": "MFA402",
+      "subject": "Mantenimiento de Sistemas Electrohidráulicos y Electroneumáticos",
+      "section": "D-IMI-N3-P1-C4-95",
+      "teacher": "Álvarez Contreras Luis Alfredo",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "mfa402-v-imi-n3-p1-c1-93-59",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mantenimiento Industrial",
+      "code": "MFA402",
+      "subject": "Mantenimiento de Sistemas Electrohidráulicos y Electroneumáticos",
+      "section": "V-IMI-N3-P1-C1-93",
+      "teacher": "Álvarez Contreras Luis Alfredo",
+      "date": "2026-06-15"
+    },
+    {
+      "id": "maea32-d-mi1-n3-p1-c1-20-60",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "D-MI1-N3-P1-C1-20",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-25"
+    },
+    {
+      "id": "maea32-d-mi1-n3-p1-c2-21-61",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "D-MI1-N3-P1-C2-21",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-02"
+    },
+    {
+      "id": "maea32-d-mi1-n3-p1-c3-22-62",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "D-MI1-N3-P1-C3-22",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-16"
+    },
+    {
+      "id": "maea32-d-mi1-n3-p1-c4-24-63",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "D-MI1-N3-P1-C4-24",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-05"
+    },
+    {
+      "id": "maea32-d-mi1-n3-p1-c5-25-64",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "D-MI1-N3-P1-C5-25",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-18"
+    },
+    {
+      "id": "maea32-d-mi1-n3-p1-c6-30-65",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "D-MI1-N3-P1-C6-30",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-23"
+    },
+    {
+      "id": "maea32-v-mi1-n3-p1-c3-27-66",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "V-MI1-N3-P1-C3-27",
+      "teacher": "Espinoza Peña Carlos Antonio",
+      "date": "2026-06-16"
+    },
+    {
+      "id": "maea32-v-mi1-n3-p1-c1-23-67",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "V-MI1-N3-P1-C1-23",
+      "teacher": "Escobar Galaz Daniel Eduardo",
+      "date": "2026-05-27"
+    },
+    {
+      "id": "maea32-v-mi1-n3-p1-c2-26-68",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Mecánica",
+      "career": "Técnico en Mecánica y Electromovilidad Automotriz",
+      "code": "MAEA32",
+      "subject": "Sistemas Electrónicos del Automóvil",
+      "section": "V-MI1-N3-P1-C2-26",
+      "teacher": "Parra Yévenez Brayan Eugenio",
+      "date": "2026-06-25"
+    },
+    {
+      "id": "mvh303-v-fpre-n1-p2-c1-ciclo-2-69",
+      "sectorial": "Mantenimiento y Logística",
+      "area": "Minería",
+      "career": "Técnico en Prevención de Riesgos y Gestión de Emergencias",
+      "code": "MVH303",
+      "subject": "Taller de Legislación",
+      "section": "V-FPRE-N1-P2-C1 (ciclo 2)",
+      "teacher": "Docente NN",
+      "date": ""
+    },
+    {
+      "id": "dcpc05-d-ira-n5-p1-c1-70",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Automatización, Electrónica Y Robótica",
+      "career": "Ingeniería en Automatización y Robótica",
+      "code": "DCPC05",
+      "subject": "Programación Avanzada de Controladores",
+      "section": "D-IRA-N5-P1-C1",
+      "teacher": "Cuevas Navarrete Diego Alberto",
+      "date": "2026-06-03"
+    },
+    {
+      "id": "dcpc05-v-ira-n5-p1-c1-71",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Automatización, Electrónica Y Robótica",
+      "career": "Ingeniería en Automatización y Robótica",
+      "code": "DCPC05",
+      "subject": "Programación Avanzada de Controladores",
+      "section": "V-IRA-N5-P1-C1",
+      "teacher": "Cuevas Navarrete Diego Alberto",
+      "date": "2026-06-25"
+    },
+    {
+      "id": "arai03-d-faro-n3-p2-c1-72",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Automatización, Electrónica Y Robótica",
+      "career": "Técnico en Automatización y Robótica",
+      "code": "ARAI03",
+      "subject": "Automatización Industrial",
+      "section": "D-FARO-N3-P2-C1",
+      "teacher": "Cuevas Navarrete Diego Alberto",
+      "date": "2026-06-03"
+    },
+    {
+      "id": "arai03-d-ira-n3-p2-c1-73",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Automatización, Electrónica Y Robótica",
+      "career": "Técnico en Automatización y Robótica",
+      "code": "ARAI03",
+      "subject": "Automatización Industrial",
+      "section": "D-IRA-N3-P2-C1",
+      "teacher": "Cuevas Navarrete Diego Alberto",
+      "date": "2026-05-26"
+    },
+    {
+      "id": "dva302-d-fadv-n1-p1-c1-74",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Animación Digital y Videojuegos",
+      "code": "DVA302",
+      "subject": "Laboratorio Modelado Digital",
+      "section": "D-FADV-N1-P1-C1",
+      "teacher": "Flores Becerra Fernanda Patricia",
+      "date": "2026-06-08"
+    },
+    {
+      "id": "dva302-d-fadv-n1-p1-c2-75",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Animación Digital y Videojuegos",
+      "code": "DVA302",
+      "subject": "Laboratorio Modelado Digital",
+      "section": "D-FADV-N1-P1-C2",
+      "teacher": "Flores Becerra Fernanda Patricia",
+      "date": "2026-06-08"
+    },
+    {
+      "id": "dva302-d-fadv-n1-p1-c3-76",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Animación Digital y Videojuegos",
+      "code": "DVA302",
+      "subject": "Laboratorio Modelado Digital",
+      "section": "D-FADV-N1-P1-C3",
+      "teacher": "Flores Becerra Fernanda Patricia",
+      "date": "2026-06-03"
+    },
+    {
+      "id": "dvc402-d-fadv-n3-p1-c1-77",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Animación Digital y Videojuegos",
+      "code": "DVC402",
+      "subject": "Efectos Visuales en Animación Digital",
+      "section": "D-FADV-N3-P1-C1",
+      "teacher": "Garrido Rebolledo Jonathan Edward",
+      "date": "2026-06-04"
+    },
+    {
+      "id": "dvc402-d-fadv-n3-p1-c2-78",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Animación Digital y Videojuegos",
+      "code": "DVC402",
+      "subject": "Efectos Visuales en Animación Digital",
+      "section": "D-FADV-N3-P1-C2",
+      "teacher": "Garrido Rebolledo Jonathan Edward",
+      "date": "2026-06-04"
+    },
+    {
+      "id": "dda302-d-fddw-n1-p1-c1-79",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Diseño Digital y Web",
+      "code": "DDA302",
+      "subject": "Diseño y Programación",
+      "section": "D-FDDW-N1-P1-C1",
+      "teacher": "Contreras Bustos Juan Pablo",
+      "date": "2026-06-10"
+    },
+    {
+      "id": "ddb402-d-fddw-n3-p1-c1-80",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Diseño Digital y Web",
+      "code": "DDB402",
+      "subject": "Diseño Digital 3D",
+      "section": "D-FDDW-N3-P1-C1",
+      "teacher": "Eloz Palma Daniel Iván",
+      "date": "2026-06-11"
+    },
+    {
+      "id": "ddb402-d-fddw-n3-p1-c2-81",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Diseño E Industria Digital",
+      "career": "Diseño Digital y Web",
+      "code": "DDB402",
+      "subject": "Diseño Digital 3D",
+      "section": "D-FDDW-N3-P1-C2",
+      "teacher": "Eloz Palma Daniel Iván",
+      "date": "2026-06-10"
+    },
+    {
+      "id": "ti3012-d-iei-n1-p2-c2-82",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3012",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "D-IEI-N1-P2-C2",
+      "teacher": "Varela Monsalve César Lisandro",
+      "date": "2026-06-17"
+    },
+    {
+      "id": "ti3012-d-iec-n1-p1-c1-f-83",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3012",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "D-IEC-N1-P1-C1(F)",
+      "teacher": "Sepulveda Riquelme Eliseth Paz",
+      "date": "2026-06-10"
+    },
+    {
+      "id": "ti3012-d-fb50-n1-p13-c1-84",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3012",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "D-FB50-N1-P13-C1",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "ti3012-d-fb50-n1-p13-c2-85",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3012",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "D-FB50-N1-P13-C2",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-08"
+    },
+    {
+      "id": "ti3012-d-iei-n1-p2-c1-86",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3012",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "D-IEI-N1-P2-C1",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-15"
+    },
+    {
+      "id": "ti3v12-v-fb50-n1-p14-c1-ciclo2-87",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3V12",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "V-FB50-N1-P14-C1-Ciclo2",
+      "teacher": "Garrido Rebolledo Jonathan Edward",
+      "date": "2026-06-08"
+    },
+    {
+      "id": "ti3v12-v-iei-n1-p3-c1-ciclo2-88",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Analista Programador",
+      "code": "TI3V12",
+      "subject": "Fundamentos de Base de Datos",
+      "section": "V-IEI-N1-P3-C1-Ciclo2",
+      "teacher": "Hernández Viveros Sebastián Alejandro",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "ti3031-d-fb50-n3-p13-c1-89",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Ciberseguridad",
+      "code": "TI3031",
+      "subject": "Programación Front End",
+      "section": "D-FB50-N3-P13-C1",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-23"
+    },
+    {
+      "id": "ti3031-d-fb50-n3-p13-c2-90",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Ciberseguridad",
+      "code": "TI3031",
+      "subject": "Programación Front End",
+      "section": "D-FB50-N3-P13-C2",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-22"
+    },
+    {
+      "id": "ti3031-d-iei-n3-p2-c1-91",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Ciberseguridad",
+      "code": "TI3031",
+      "subject": "Programación Front End",
+      "section": "D-IEI-N3-P2-C1",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-24"
+    },
+    {
+      "id": "ti3v31-v-fb50-n3-p14-c1-ciclo2-92",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Ciberseguridad",
+      "code": "TI3V31",
+      "subject": "Programación Front End",
+      "section": "V-FB50-N3-P14-C1-Ciclo2",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-12"
+    },
+    {
+      "id": "ti3v31-v-iei-n3-p3-c1-ciclo2-93",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Ciberseguridad",
+      "code": "TI3V31",
+      "subject": "Programación Front End",
+      "section": "V-IEI-N3-P3-C1-Ciclo2",
+      "teacher": "Guidotti Robles Enso Stefano",
+      "date": "2026-06-05"
+    },
+    {
+      "id": "ti3051-d-iei-n5-p2-c1-94",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Informática",
+      "code": "TI3051",
+      "subject": "Arquitectura y Almacenamiento de Datos",
+      "section": "D-IEI-N5-P2-C1",
+      "teacher": "Polanco Hernández Víctor Patricio",
+      "date": "2026-05-28"
+    },
+    {
+      "id": "ti3051-d-iei-n5-p2-c2-95",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Informática",
+      "code": "TI3051",
+      "subject": "Arquitectura y Almacenamiento de Datos",
+      "section": "D-IEI-N5-P2-C2",
+      "teacher": "Polanco Hernández Víctor Patricio",
+      "date": "2026-05-25"
+    },
+    {
+      "id": "ti3051-d-iei-n5-p2-c3-96",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Informática",
+      "code": "TI3051",
+      "subject": "Arquitectura y Almacenamiento de Datos",
+      "section": "D-IEI-N5-P2-C3",
+      "teacher": "Polanco Hernández Víctor Patricio",
+      "date": "2026-05-28"
+    },
+    {
+      "id": "ti3v52-v-iei-n5-p3-c1-ciclo2-97",
+      "sectorial": "Tecnología Aplicada",
+      "area": "Informática, Ciberseguridad Y Telecomunicaciones",
+      "career": "Ingeniería en Informática",
+      "code": "TI3V52",
+      "subject": "Redes de Datos",
+      "section": "V-IEI-N5-P3-C1-Ciclo2",
+      "teacher": "Polanco Hernández Víctor Patricio",
+      "date": "2026-06-05"
+    }
+  ],
+  "banks": [
+    {
+      "id": "bank-1",
+      "name": "Telecomunicaciones y Conectividad (IEO504)",
+      "area": "Área Energía",
+      "questions": [
+        {
+          "text": "1. ¿Qué característica es más importante al definir la arquitectura de conectividad del sistema?",
+          "answers": [
+            {
+              "text": "Comunicación confiable entre sensores y controladores",
+              "points": 100,
+              "justification": "La confiabilidad es crítica para monitoreo y control del sistema autónomo."
+            },
+            {
+              "text": "Alta complejidad tecnológica",
+              "points": 75,
+              "justification": "La confiabilidad es crítica para monitoreo y control del sistema autónomo."
+            },
+            {
+              "text": "Uso exclusivo de conexiones cableadas",
+              "points": 50,
+              "justification": "La confiabilidad es crítica para monitoreo y control del sistema autónomo."
+            },
+            {
+              "text": "Cantidad de dispositivos conectados",
+              "points": 25,
+              "justification": "La confiabilidad es crítica para monitoreo y control del sistema autónomo."
+            }
+          ]
+        },
+        {
+          "text": "2. ¿Qué protocolo sería más adecuado para comunicación industrial y monitoreo?",
+          "answers": [
+            {
+              "text": "Modbus TCP/IP por integración y simplicidad",
+              "points": 100,
+              "justification": "Modbus TCP/IP es ampliamente utilizado en automatización industrial."
+            },
+            {
+              "text": "Bluetooth doméstico",
+              "points": 75,
+              "justification": "Modbus TCP/IP es ampliamente utilizado en automatización industrial."
+            },
+            {
+              "text": "Comunicación manual vía operador",
+              "points": 50,
+              "justification": "Modbus TCP/IP es ampliamente utilizado en automatización industrial."
+            },
+            {
+              "text": "Correo electrónico automatizado",
+              "points": 25,
+              "justification": "Modbus TCP/IP es ampliamente utilizado en automatización industrial."
+            }
+          ]
+        },
+        {
+          "text": "3. ¿Qué variable debería transmitirse prioritariamente al sistema de monitoreo?",
+          "answers": [
+            {
+              "text": "Estado operativo y variables críticas del sistema",
+              "points": 100,
+              "justification": "Las variables críticas permiten supervisión y toma de decisiones."
+            },
+            {
+              "text": "Cantidad de usuarios conectados",
+              "points": 75,
+              "justification": "Las variables críticas permiten supervisión y toma de decisiones."
+            },
+            {
+              "text": "Horarios administrativos",
+              "points": 50,
+              "justification": "Las variables críticas permiten supervisión y toma de decisiones."
+            },
+            {
+              "text": "Historial de reuniones",
+              "points": 25,
+              "justification": "Las variables críticas permiten supervisión y toma de decisiones."
+            }
+          ]
+        },
+        {
+          "text": "4. ¿Qué estrategia mejora más la estabilidad de comunicación?",
+          "answers": [
+            {
+              "text": "Red con arquitectura organizada y redundancia básica",
+              "points": 100,
+              "justification": "La segmentación y estabilidad son fundamentales en redes industriales."
+            },
+            {
+              "text": "Conectar dispositivos sin segmentación",
+              "points": 75,
+              "justification": "La segmentación y estabilidad son fundamentales en redes industriales."
+            },
+            {
+              "text": "Compartir toda la red con servicios externos",
+              "points": 50,
+              "justification": "La segmentación y estabilidad son fundamentales en redes industriales."
+            },
+            {
+              "text": "Utilizar únicamente comunicación manual",
+              "points": 25,
+              "justification": "La segmentación y estabilidad son fundamentales en redes industriales."
+            }
+          ]
+        },
+        {
+          "text": "5. ¿Qué aporta mayor valor a un sistema de monitoreo remoto?",
+          "answers": [
+            {
+              "text": "Visualización en tiempo real de variables críticas",
+              "points": 100,
+              "justification": "El monitoreo continuo mejora respuesta ante fallas."
+            },
+            {
+              "text": "Reportes impresos semanales",
+              "points": 75,
+              "justification": "El monitoreo continuo mejora respuesta ante fallas."
+            },
+            {
+              "text": "Supervisión solo presencial",
+              "points": 50,
+              "justification": "El monitoreo continuo mejora respuesta ante fallas."
+            },
+            {
+              "text": "Control únicamente al inicio de operación",
+              "points": 25,
+              "justification": "El monitoreo continuo mejora respuesta ante fallas."
+            }
+          ]
+        },
+        {
+          "text": "6. ¿Qué característica debería tener la transmisión de datos del sistema?",
+          "answers": [
+            {
+              "text": "Baja latencia y alta confiabilidad",
+              "points": 100,
+              "justification": "El control industrial requiere comunicación rápida y estable."
+            },
+            {
+              "text": "Alta complejidad de configuración",
+              "points": 75,
+              "justification": "El control industrial requiere comunicación rápida y estable."
+            },
+            {
+              "text": "Dependencia exclusiva de internet público",
+              "points": 50,
+              "justification": "El control industrial requiere comunicación rápida y estable."
+            },
+            {
+              "text": "Actualización esporádica de datos",
+              "points": 25,
+              "justification": "El control industrial requiere comunicación rápida y estable."
+            }
+          ]
+        },
+        {
+          "text": "7. ¿Qué elemento fortalece más la seguridad de la red industrial?",
+          "answers": [
+            {
+              "text": "Control de acceso y segmentación de comunicación",
+              "points": 100,
+              "justification": "La seguridad es esencial en sistemas conectados industriales."
+            },
+            {
+              "text": "Compartir credenciales entre operadores",
+              "points": 75,
+              "justification": "La seguridad es esencial en sistemas conectados industriales."
+            },
+            {
+              "text": "Eliminar autenticación para agilizar acceso",
+              "points": 50,
+              "justification": "La seguridad es esencial en sistemas conectados industriales."
+            },
+            {
+              "text": "Uso de una sola contraseña general",
+              "points": 25,
+              "justification": "La seguridad es esencial en sistemas conectados industriales."
+            }
+          ]
+        },
+        {
+          "text": "8. ¿Qué arquitectura sería más viable para el desafío?",
+          "answers": [
+            {
+              "text": "Sensores conectados a PLC/HMI con monitoreo centralizado",
+              "points": 100,
+              "justification": "La integración mejora control y eficiencia operativa."
+            },
+            {
+              "text": "Comunicación independiente entre dispositivos",
+              "points": 75,
+              "justification": "La integración mejora control y eficiencia operativa."
+            },
+            {
+              "text": "Registro manual de variables",
+              "points": 50,
+              "justification": "La integración mejora control y eficiencia operativa."
+            },
+            {
+              "text": "Operación sin sistema de supervisión",
+              "points": 25,
+              "justification": "La integración mejora control y eficiencia operativa."
+            }
+          ]
+        },
+        {
+          "text": "9. ¿Qué indicador demostraría mejor desempeño de conectividad?",
+          "answers": [
+            {
+              "text": "Disponibilidad y continuidad de comunicación",
+              "points": 100,
+              "justification": "La continuidad operacional depende de estabilidad de red."
+            },
+            {
+              "text": "Cantidad de cables instalados",
+              "points": 75,
+              "justification": "La continuidad operacional depende de estabilidad de red."
+            },
+            {
+              "text": "Número de dispositivos físicos",
+              "points": 50,
+              "justification": "La continuidad operacional depende de estabilidad de red."
+            },
+            {
+              "text": "Tiempo dedicado a configuración",
+              "points": 25,
+              "justification": "La continuidad operacional depende de estabilidad de red."
+            }
+          ]
+        },
+        {
+          "text": "10. ¿Qué fortalece más la argumentación técnica de la propuesta?",
+          "answers": [
+            {
+              "text": "Relacionar conectividad con control y monitoreo eficiente",
+              "points": 100,
+              "justification": "La propuesta debe demostrar impacto funcional real."
+            },
+            {
+              "text": "Priorizar complejidad tecnológica",
+              "points": 75,
+              "justification": "La propuesta debe demostrar impacto funcional real."
+            },
+            {
+              "text": "Basarse solo en teoría de redes",
+              "points": 50,
+              "justification": "La propuesta debe demostrar impacto funcional real."
+            },
+            {
+              "text": "Describir únicamente equipos utilizados",
+              "points": 25,
+              "justification": "La propuesta debe demostrar impacto funcional real."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bank-2",
+      "name": "Normativa Aplicada a Energías Renovables (EES401)",
+      "area": "Telecomunicaciones y Conectividad (IEO504)",
+      "questions": [
+        {
+          "text": "1. ¿Qué aspecto debería evaluarse primero antes de implementar el sistema energético?",
+          "answers": [
+            {
+              "text": "Cumplimiento normativo y seguridad operacional",
+              "points": 100,
+              "justification": "La normativa condiciona viabilidad y seguridad del proyecto."
+            },
+            {
+              "text": "Diseño visual del proyecto",
+              "points": 75,
+              "justification": "La normativa condiciona viabilidad y seguridad del proyecto."
+            },
+            {
+              "text": "Cantidad de equipos disponibles",
+              "points": 50,
+              "justification": "La normativa condiciona viabilidad y seguridad del proyecto."
+            },
+            {
+              "text": "Tiempo estimado de presentación",
+              "points": 25,
+              "justification": "La normativa condiciona viabilidad y seguridad del proyecto."
+            }
+          ]
+        },
+        {
+          "text": "2. ¿Qué elemento tiene mayor relevancia en proyectos con energías renovables?",
+          "answers": [
+            {
+              "text": "Cumplimiento ambiental y técnico",
+              "points": 100,
+              "justification": "La sostenibilidad requiere cumplimiento técnico y ambiental."
+            },
+            {
+              "text": "Cantidad de participantes",
+              "points": 75,
+              "justification": "La sostenibilidad requiere cumplimiento técnico y ambiental."
+            },
+            {
+              "text": "Complejidad del sistema",
+              "points": 50,
+              "justification": "La sostenibilidad requiere cumplimiento técnico y ambiental."
+            },
+            {
+              "text": "Velocidad de implementación",
+              "points": 25,
+              "justification": "La sostenibilidad requiere cumplimiento técnico y ambiental."
+            }
+          ]
+        },
+        {
+          "text": "3. ¿Qué riesgo puede generar una implementación sin análisis normativo?",
+          "answers": [
+            {
+              "text": "Incumplimiento legal y fallas de seguridad",
+              "points": 100,
+              "justification": "La normativa protege seguridad y viabilidad del sistema."
+            },
+            {
+              "text": "Mayor velocidad de operación",
+              "points": 75,
+              "justification": "La normativa protege seguridad y viabilidad del sistema."
+            },
+            {
+              "text": "Reducción de monitoreo",
+              "points": 50,
+              "justification": "La normativa protege seguridad y viabilidad del sistema."
+            },
+            {
+              "text": "Incremento automático de eficiencia",
+              "points": 25,
+              "justification": "La normativa protege seguridad y viabilidad del sistema."
+            }
+          ]
+        },
+        {
+          "text": "4. ¿Qué documento aporta mayor valor al análisis regulatorio?",
+          "answers": [
+            {
+              "text": "Matriz de requisitos normativos aplicables",
+              "points": 100,
+              "justification": "La matriz normativa permite identificar exigencias críticas."
+            },
+            {
+              "text": "Cronograma administrativo",
+              "points": 75,
+              "justification": "La matriz normativa permite identificar exigencias críticas."
+            },
+            {
+              "text": "Organigrama del equipo",
+              "points": 50,
+              "justification": "La matriz normativa permite identificar exigencias críticas."
+            },
+            {
+              "text": "Registro de reuniones",
+              "points": 25,
+              "justification": "La matriz normativa permite identificar exigencias críticas."
+            }
+          ]
+        },
+        {
+          "text": "5. ¿Qué criterio fortalece más una recomendación regulatoria?",
+          "answers": [
+            {
+              "text": "Relacionar normativa con operación segura del sistema",
+              "points": 100,
+              "justification": "La normativa debe vincularse con seguridad y operación."
+            },
+            {
+              "text": "Basarse únicamente en costos",
+              "points": 75,
+              "justification": "La normativa debe vincularse con seguridad y operación."
+            },
+            {
+              "text": "Priorizar rapidez de implementación",
+              "points": 50,
+              "justification": "La normativa debe vincularse con seguridad y operación."
+            },
+            {
+              "text": "Reducir requisitos documentales",
+              "points": 25,
+              "justification": "La normativa debe vincularse con seguridad y operación."
+            }
+          ]
+        },
+        {
+          "text": "6. ¿Qué aspecto ambiental sería más importante evaluar?",
+          "answers": [
+            {
+              "text": "Impacto operativo y manejo energético sostenible",
+              "points": 100,
+              "justification": "La evaluación ambiental es parte esencial de energías renovables."
+            },
+            {
+              "text": "Cantidad de usuarios del sistema",
+              "points": 75,
+              "justification": "La evaluación ambiental es parte esencial de energías renovables."
+            },
+            {
+              "text": "Color de los equipos",
+              "points": 50,
+              "justification": "La evaluación ambiental es parte esencial de energías renovables."
+            },
+            {
+              "text": "Distribución administrativa",
+              "points": 25,
+              "justification": "La evaluación ambiental es parte esencial de energías renovables."
+            }
+          ]
+        },
+        {
+          "text": "7. ¿Qué acción mejora más el cumplimiento regulatorio?",
+          "answers": [
+            {
+              "text": "Identificar normas aplicables desde la etapa inicial",
+              "points": 100,
+              "justification": "La planificación normativa evita reprocesos y riesgos."
+            },
+            {
+              "text": "Evaluar requisitos solo al finalizar",
+              "points": 75,
+              "justification": "La planificación normativa evita reprocesos y riesgos."
+            },
+            {
+              "text": "Basarse únicamente en experiencia previa",
+              "points": 50,
+              "justification": "La planificación normativa evita reprocesos y riesgos."
+            },
+            {
+              "text": "Reducir controles técnicos",
+              "points": 25,
+              "justification": "La planificación normativa evita reprocesos y riesgos."
+            }
+          ]
+        },
+        {
+          "text": "8. ¿Qué propuesta sería más viable para el desafío?",
+          "answers": [
+            {
+              "text": "Sistema técnicamente eficiente y normativamente compatible",
+              "points": 100,
+              "justification": "La viabilidad depende del equilibrio técnico y regulatorio."
+            },
+            {
+              "text": "Sistema de bajo costo sin evaluación técnica",
+              "points": 75,
+              "justification": "La viabilidad depende del equilibrio técnico y regulatorio."
+            },
+            {
+              "text": "Implementación rápida sin análisis ambiental",
+              "points": 50,
+              "justification": "La viabilidad depende del equilibrio técnico y regulatorio."
+            },
+            {
+              "text": "Operación experimental sin documentación",
+              "points": 25,
+              "justification": "La viabilidad depende del equilibrio técnico y regulatorio."
+            }
+          ]
+        },
+        {
+          "text": "9. ¿Qué indicador demostraría mejor cumplimiento normativo?",
+          "answers": [
+            {
+              "text": "Reducción de riesgos operacionales y ambientales",
+              "points": 100,
+              "justification": "El cumplimiento debe reflejar seguridad y sostenibilidad."
+            },
+            {
+              "text": "Incremento de complejidad técnica",
+              "points": 75,
+              "justification": "El cumplimiento debe reflejar seguridad y sostenibilidad."
+            },
+            {
+              "text": "Disminución de documentación",
+              "points": 50,
+              "justification": "El cumplimiento debe reflejar seguridad y sostenibilidad."
+            },
+            {
+              "text": "Cantidad de reuniones técnicas",
+              "points": 25,
+              "justification": "El cumplimiento debe reflejar seguridad y sostenibilidad."
+            }
+          ]
+        },
+        {
+          "text": "10. ¿Qué fortalece más la argumentación de la propuesta normativa?",
+          "answers": [
+            {
+              "text": "Relacionar regulación con viabilidad y seguridad",
+              "points": 100,
+              "justification": "La normativa debe justificarse desde el impacto práctico del proyecto."
+            },
+            {
+              "text": "Describir únicamente leyes y artículos",
+              "points": 75,
+              "justification": "La normativa debe justificarse desde el impacto práctico del proyecto."
+            },
+            {
+              "text": "Basarse solo en opiniones del equipo",
+              "points": 50,
+              "justification": "La normativa debe justificarse desde el impacto práctico del proyecto."
+            },
+            {
+              "text": "Priorizar extensión del informe",
+              "points": 25,
+              "justification": "La normativa debe justificarse desde el impacto práctico del proyecto."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bank-3",
+      "name": "Laboratorio de Modelado Digital (DVA302)",
+      "area": "Diseño E Industria Digital",
+      "questions": [
+        {
+          "text": "1. ¿Qué elemento debería modelarse primero para validar el funcionamiento general del sistema?",
+          "answers": [
+            {
+              "text": "Camión autónomo y recorrido principal",
+              "points": 100,
+              "justification": "El modelo debe priorizar funcionalidad y validación conceptual."
+            },
+            {
+              "text": "Detalles decorativos del entorno",
+              "points": 75,
+              "justification": "El modelo debe priorizar funcionalidad y validación conceptual."
+            },
+            {
+              "text": "Texturas avanzadas del modelo",
+              "points": 50,
+              "justification": "El modelo debe priorizar funcionalidad y validación conceptual."
+            },
+            {
+              "text": "Elementos secundarios sin interacción",
+              "points": 25,
+              "justification": "El modelo debe priorizar funcionalidad y validación conceptual."
+            }
+          ]
+        },
+        {
+          "text": "2. ¿Qué característica aporta mayor valor a un modelo 3D funcional?",
+          "answers": [
+            {
+              "text": "Representar correctamente interacción y operación",
+              "points": 100,
+              "justification": "La utilidad del modelo depende de su capacidad para representar el sistema."
+            },
+            {
+              "text": "Alta complejidad visual sin funcionalidad",
+              "points": 75,
+              "justification": "La utilidad del modelo depende de su capacidad para representar el sistema."
+            },
+            {
+              "text": "Uso excesivo de efectos gráficos",
+              "points": 50,
+              "justification": "La utilidad del modelo depende de su capacidad para representar el sistema."
+            },
+            {
+              "text": "Cantidad de objetos modelados",
+              "points": 25,
+              "justification": "La utilidad del modelo depende de su capacidad para representar el sistema."
+            }
+          ]
+        },
+        {
+          "text": "3. ¿Qué estrategia optimiza mejor un modelo para prototipado?",
+          "answers": [
+            {
+              "text": "Reducir complejidad innecesaria manteniendo funcionalidad",
+              "points": 100,
+              "justification": "La optimización facilita validación y fabricación futura."
+            },
+            {
+              "text": "Agregar máximo nivel de detalle visual",
+              "points": 75,
+              "justification": "La optimización facilita validación y fabricación futura."
+            },
+            {
+              "text": "Modelar sin considerar escalabilidad",
+              "points": 50,
+              "justification": "La optimización facilita validación y fabricación futura."
+            },
+            {
+              "text": "Priorizar únicamente estética",
+              "points": 25,
+              "justification": "La optimización facilita validación y fabricación futura."
+            }
+          ]
+        },
+        {
+          "text": "4. ¿Qué elemento sería más importante representar en la ruta del sistema?",
+          "answers": [
+            {
+              "text": "Puntos de carga, descarga y circulación",
+              "points": 100,
+              "justification": "La ruta debe reflejar funcionamiento real del sistema."
+            },
+            {
+              "text": "Decoración ambiental del escenario",
+              "points": 75,
+              "justification": "La ruta debe reflejar funcionamiento real del sistema."
+            },
+            {
+              "text": "Elementos sin relación operacional",
+              "points": 50,
+              "justification": "La ruta debe reflejar funcionamiento real del sistema."
+            },
+            {
+              "text": "Objetos aleatorios del entorno",
+              "points": 25,
+              "justification": "La ruta debe reflejar funcionamiento real del sistema."
+            }
+          ]
+        },
+        {
+          "text": "5. ¿Qué aporta mayor aplicabilidad al diseño digital?",
+          "answers": [
+            {
+              "text": "Relación entre modelo y operación real del desafío",
+              "points": 100,
+              "justification": "El modelado debe apoyar comprensión y validación técnica."
+            },
+            {
+              "text": "Complejidad gráfica extrema",
+              "points": 75,
+              "justification": "El modelado debe apoyar comprensión y validación técnica."
+            },
+            {
+              "text": "Gran cantidad de texturas",
+              "points": 50,
+              "justification": "El modelado debe apoyar comprensión y validación técnica."
+            },
+            {
+              "text": "Modelado únicamente artístico",
+              "points": 25,
+              "justification": "El modelado debe apoyar comprensión y validación técnica."
+            }
+          ]
+        },
+        {
+          "text": "6. ¿Qué componente sería más relevante para validar el sistema autónomo?",
+          "answers": [
+            {
+              "text": "Estaciones de abastecimiento y recorrido operativo",
+              "points": 100,
+              "justification": "Los elementos funcionales permiten evaluar viabilidad del sistema."
+            },
+            {
+              "text": "Objetos decorativos secundarios",
+              "points": 75,
+              "justification": "Los elementos funcionales permiten evaluar viabilidad del sistema."
+            },
+            {
+              "text": "Iluminación cinematográfica",
+              "points": 50,
+              "justification": "Los elementos funcionales permiten evaluar viabilidad del sistema."
+            },
+            {
+              "text": "Fondos visuales estáticos",
+              "points": 25,
+              "justification": "Los elementos funcionales permiten evaluar viabilidad del sistema."
+            }
+          ]
+        },
+        {
+          "text": "7. ¿Qué acción mejora más la coherencia del diseño?",
+          "answers": [
+            {
+              "text": "Mantener proporciones y relación funcional entre componentes",
+              "points": 100,
+              "justification": "La coherencia mejora comprensión técnica y visual."
+            },
+            {
+              "text": "Cambiar escalas para efectos visuales",
+              "points": 75,
+              "justification": "La coherencia mejora comprensión técnica y visual."
+            },
+            {
+              "text": "Modelar componentes sin integración",
+              "points": 50,
+              "justification": "La coherencia mejora comprensión técnica y visual."
+            },
+            {
+              "text": "Priorizar únicamente creatividad visual",
+              "points": 25,
+              "justification": "La coherencia mejora comprensión técnica y visual."
+            }
+          ]
+        },
+        {
+          "text": "8. ¿Qué propuesta sería más útil para la presentación del desafío?",
+          "answers": [
+            {
+              "text": "Modelo conceptual interactivo del sistema completo",
+              "points": 100,
+              "justification": "La representación debe comunicar funcionamiento y solución."
+            },
+            {
+              "text": "Render estático sin contexto operacional",
+              "points": 75,
+              "justification": "La representación debe comunicar funcionamiento y solución."
+            },
+            {
+              "text": "Escenario visual sin elementos funcionales",
+              "points": 50,
+              "justification": "La representación debe comunicar funcionamiento y solución."
+            },
+            {
+              "text": "Boceto básico sin relación técnica",
+              "points": 25,
+              "justification": "La representación debe comunicar funcionamiento y solución."
+            }
+          ]
+        },
+        {
+          "text": "9. ¿Qué indicador reflejaría mejor calidad del modelado?",
+          "answers": [
+            {
+              "text": "Capacidad del modelo para representar el sistema real",
+              "points": 100,
+              "justification": "La calidad depende de aplicabilidad y representación funcional."
+            },
+            {
+              "text": "Cantidad de efectos aplicados",
+              "points": 75,
+              "justification": "La calidad depende de aplicabilidad y representación funcional."
+            },
+            {
+              "text": "Número total de objetos",
+              "points": 50,
+              "justification": "La calidad depende de aplicabilidad y representación funcional."
+            },
+            {
+              "text": "Complejidad del software utilizado",
+              "points": 25,
+              "justification": "La calidad depende de aplicabilidad y representación funcional."
+            }
+          ]
+        },
+        {
+          "text": "10. ¿Qué fortalece más la argumentación técnica del modelo digital?",
+          "answers": [
+            {
+              "text": "Relacionar diseño, funcionalidad y viabilidad del prototipo",
+              "points": 100,
+              "justification": "La propuesta debe demostrar utilidad dentro del desafío global."
+            },
+            {
+              "text": "Explicar únicamente herramientas utilizadas",
+              "points": 75,
+              "justification": "La propuesta debe demostrar utilidad dentro del desafío global."
+            },
+            {
+              "text": "Basarse solo en creatividad visual",
+              "points": 50,
+              "justification": "La propuesta debe demostrar utilidad dentro del desafío global."
+            },
+            {
+              "text": "Priorizar extensión de la presentación",
+              "points": 25,
+              "justification": "La propuesta debe demostrar utilidad dentro del desafío global."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

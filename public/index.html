@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Olimpiadas - levantamiento de respuestas</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <img class="brand-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+          <p class="eyebrow">Etapa Hackathon</p>
+          <h1 id="pageTitle">Levantamiento de respuestas</h1>
+        </div>
+        <nav class="role-nav" aria-label="Perfiles">
+          <a id="navAdmin" href="/admin">Administrador</a>
+          <a id="navProjection" href="/proyeccion">Proyección</a>
+          <a id="navStudent" href="/estudiante">Estudiante</a>
+        </nav>
+      </section>
+
+      <section id="loginView" class="view">
+        <section class="login-card">
+          <h2 id="loginTitle">Ingreso</h2>
+          <label>
+            Usuario
+            <input id="loginUser" autocomplete="username" />
+          </label>
+          <label>
+            Clave
+            <input id="loginPass" type="password" autocomplete="current-password" />
+          </label>
+          <button id="loginButton" class="primary" type="button">Entrar</button>
+          <p id="loginHint" class="hint"></p>
+        </section>
+      </section>
+
+      <section id="adminView" class="view">
+        <div class="admin-grid">
+          <section class="panel setup">
+            <h2>Administrador</h2>
+            <label>
+              Sección
+              <select id="sectionSelect"></select>
+            </label>
+            <label>
+              Banco de preguntas
+              <select id="bankSelect"></select>
+            </label>
+            <button id="deleteBank" type="button">Eliminar banco de preguntas</button>
+            <label>
+              Cargar cuestionario Word
+              <input id="wordUpload" type="file" accept=".docx" />
+            </label>
+            <div id="uploadManager" class="upload-manager"></div>
+            <label>
+              Duración del cuestionario (minutos)
+              <input id="durationMinutes" type="number" min="1" max="180" value="10" />
+            </label>
+            <label>
+              Cantidad esperada de participantes
+              <input id="expectedParticipants" type="number" min="0" max="500" value="0" />
+            </label>
+            <button id="createSession" class="primary" type="button">Crear código QR</button>
+            <div id="sessionCard" class="session-card hidden">
+              <span>Código estudiantes</span>
+              <strong id="sessionCode">-----</strong>
+              <img id="qrImage" alt="QR para estudiantes" />
+              <p id="joinUrl"></p>
+              <a id="projectionLink" class="button-link" href="/proyeccion" target="_blank">Abrir proyección</a>
+            </div>
+          </section>
+
+          <section class="panel questions">
+            <div class="panel-head">
+              <h2>Preguntas autorizadas</h2>
+              <button id="publishQuiz" class="primary" type="button">Guardar selección</button>
+            </div>
+            <p id="selectionStatus" class="hint">La selección se guarda sin generar código.</p>
+            <div id="questionList" class="question-list"></div>
+          </section>
+
+          <section class="panel live">
+            <h2>Control Hackathon</h2>
+            <div id="currentQuestion" class="current-question">Crea una sesión para iniciar.</div>
+            <div class="control-grid">
+              <button id="toggleAnswers" type="button">Abrir respuestas</button>
+              <button id="toggleRanking" type="button">Mostrar ranking</button>
+              <div id="rankingStatus" class="status-pill">Ranking oculto</div>
+              <button id="publishWinners" class="mystery" type="button">Publicar ganadores</button>
+            </div>
+            <div class="timer-strip">
+              <span>Tiempo restante</span>
+              <strong id="adminElapsed">00:00</strong>
+            </div>
+            <ol id="leaderboard" class="leaderboard"></ol>
+            <div id="podium" class="podium hidden"></div>
+            <h2>Respuestas por sección</h2>
+            <div id="responsesSummary" class="responses-summary"></div>
+            <input id="responsesSearch" class="responses-search" placeholder="Buscar por nombre o RUT" />
+            <div id="responsesList" class="responses-list"></div>
+            <h2>Registro de intervención</h2>
+            <textarea id="interventionLog" class="intervention-log" placeholder="Escribe una intervención por línea. Ej: [x] Presentación inicial realizada"></textarea>
+            <button id="downloadRecord" type="button">Descargar registro Word</button>
+          </section>
+        </div>
+      </section>
+
+      <section id="projectionView" class="view">
+        <div class="projection-grid">
+          <section class="projection-hero">
+            <p class="eyebrow">Etapa Hackathon · Ingreso estudiantes</p>
+            <h2 id="projectionCode">Código -----</h2>
+            <img id="projectionQr" alt="QR para estudiantes" />
+            <p id="projectionJoin"></p>
+          </section>
+          <section class="projection-side">
+            <div class="timer-card">
+              <img class="timer-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+              <span>Tiempo restante</span>
+              <strong id="projectionElapsed">00:00</strong>
+            </div>
+            <div id="projectionStats" class="participation-stats"></div>
+            <div id="projectionQuestion" class="current-question">Esperando al administrador.</div>
+            <ol id="projectionRanking" class="leaderboard hidden"></ol>
+            <div id="projectionPodium" class="podium hidden"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="studentView" class="view">
+        <section class="student-card">
+          <p class="eyebrow">Etapa Hackathon</p>
+          <div id="joinBox">
+            <h2>Identificación</h2>
+            <label id="studentCodeLabel">
+              Código
+              <input id="studentCode" autocomplete="one-time-code" placeholder="ABCDE" />
+            </label>
+            <label>
+              Nombre
+              <input id="studentName" autocomplete="name" placeholder="Nombre y apellido" />
+            </label>
+            <label>
+              RUT
+              <input id="studentRut" autocomplete="off" placeholder="12.345.678-9" />
+            </label>
+            <button id="joinSession" class="primary" type="button">Entrar</button>
+          </div>
+          <div id="answerBox" class="hidden">
+            <div class="student-meta">
+              <p id="studentStatus" class="status"></p>
+              <strong id="studentElapsed">00:00</strong>
+            </div>
+            <h2 id="studentQuestion"></h2>
+            <p class="student-warning">Lee bien cada pregunta antes de seleccionar. Una vez marcada una alternativa, no se puede cambiar.</p>
+            <div id="answerOptions" class="answers"></div>
+            <div id="quizQuestions" class="quiz-questions"></div>
+            <button id="finishQuiz" class="primary hidden" type="button">Finalizar y ver respuestas</button>
+            <div id="answerReview" class="answer-review hidden"></div>
+            <p id="answerResult" class="result"></p>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
