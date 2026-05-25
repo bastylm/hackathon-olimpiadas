@@ -4,6 +4,7 @@ const path = require("path");
 const crypto = require("crypto");
 const os = require("os");
 const childProcess = require("child_process");
+const zlib = require("zlib");
 const QRCode = require("qrcode");
 
 const ROOT = __dirname;
@@ -227,6 +228,116 @@ function normalizeRut(value) {
   return String(value || "").trim().toLowerCase().replace(/[^0-9k]/g, "");
 }
 
+function decodeXml(value) {
+  return String(value || "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)));
+}
+
+function textFromWordXml(xml) {
+  const normalized = String(xml || "").replace(/<w:tab\/?>/g, " ").replace(/<w:br\/?>/g, "\n");
+  return [...normalized.matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)]
+    .map((match) => decodeXml(match[1]))
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function readZipEntry(buffer, targetName) {
+  let eocd = -1;
+  const min = Math.max(0, buffer.length - 65558);
+  for (let index = buffer.length - 22; index >= min; index -= 1) {
+    if (buffer.readUInt32LE(index) === 0x06054b50) {
+      eocd = index;
+      break;
+    }
+  }
+  if (eocd < 0) throw new Error("No se reconocio el archivo .docx");
+  const entries = buffer.readUInt16LE(eocd + 10);
+  let pos = buffer.readUInt32LE(eocd + 16);
+  for (let entry = 0; entry < entries; entry += 1) {
+    if (buffer.readUInt32LE(pos) !== 0x02014b50) throw new Error("Estructura .docx no valida");
+    const method = buffer.readUInt16LE(pos + 10);
+    const compressedSize = buffer.readUInt32LE(pos + 20);
+    const nameLength = buffer.readUInt16LE(pos + 28);
+    const extraLength = buffer.readUInt16LE(pos + 30);
+    const commentLength = buffer.readUInt16LE(pos + 32);
+    const localOffset = buffer.readUInt32LE(pos + 42);
+    const name = buffer.slice(pos + 46, pos + 46 + nameLength).toString("utf8");
+    if (name === targetName) {
+      if (buffer.readUInt32LE(localOffset) !== 0x04034b50) throw new Error("Entrada .docx no valida");
+      const localNameLength = buffer.readUInt16LE(localOffset + 26);
+      const localExtraLength = buffer.readUInt16LE(localOffset + 28);
+      const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+      const compressed = buffer.slice(dataStart, dataStart + compressedSize);
+      if (method === 0) return compressed;
+      if (method === 8) return zlib.inflateRawSync(compressed);
+      throw new Error("Compresion .docx no soportada");
+    }
+    pos += 46 + nameLength + extraLength + commentLength;
+  }
+  throw new Error("No se encontro el contenido principal del Word");
+}
+
+function parseQuestionRows(rows) {
+  const questions = [];
+  let index = 0;
+  while (index < rows.length) {
+    const first = String(rows[index]?.[0] || "").trim();
+    if (!/^\d+\./.test(first)) {
+      index += 1;
+      continue;
+    }
+    const question = first;
+    index += 1;
+    if (String(rows[index]?.[0] || "").trim().toLowerCase() === "respuesta") index += 1;
+    const answers = [];
+    while (index < rows.length) {
+      const current = String(rows[index]?.[0] || "").trim();
+      if (/^\d+\./.test(current)) break;
+      if (current) {
+        const points = Number.parseInt(String(rows[index]?.[1] || "0").replace(",", "."), 10);
+        answers.push({
+          text: current,
+          points: Number.isFinite(points) ? points : 0,
+          justification: String(rows[index]?.[2] || "").trim(),
+        });
+      }
+      index += 1;
+    }
+    if (answers.length) questions.push({ text: question, answers });
+  }
+  return questions;
+}
+
+function parseDocxBanks(buffer, filename) {
+  const xml = readZipEntry(buffer, "word/document.xml").toString("utf8");
+  const tableMatches = [...xml.matchAll(/<w:tbl[\s\S]*?<\/w:tbl>/g)].map((match) => match[0]);
+  const baseName = path.basename(String(filename || "Cuestionario Word"), path.extname(String(filename || ""))).replace(/[_-]+/g, " ").trim() || "Cuestionario Word";
+  const banks = [];
+  tableMatches.forEach((tableXml, tableIndex) => {
+    const rows = [...tableXml.matchAll(/<w:tr[\s\S]*?<\/w:tr>/g)].map((rowMatch) =>
+      [...rowMatch[0].matchAll(/<w:tc[\s\S]*?<\/w:tc>/g)].map((cellMatch) => textFromWordXml(cellMatch[0]))
+    );
+    const questions = parseQuestionRows(rows);
+    if (questions.length) {
+      banks.push({
+        id: "",
+        name: tableMatches.length > 1 ? `${baseName} ${tableIndex + 1}` : baseName,
+        area: "Importado desde Word",
+        questions,
+      });
+    }
+  });
+  if (!banks.length) throw new Error("El Word no tiene preguntas con el formato esperado");
+  return banks;
+}
+
 function findStoredStudentByIdentity(session, id, rut, name) {
   const stored = storeFor(session).students;
   if (stored[id]) return stored[id];
@@ -404,6 +515,26 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 400, { error: "Archivo Word vacio" });
       return;
     }
+    const importBanks = (imported) => {
+      if (!Array.isArray(imported) || !imported.length) {
+        throw new Error("El Word no tiene preguntas con el formato esperado");
+      }
+      imported.forEach((bank) => {
+        bank.id = `word-${Date.now()}-${crypto.randomInt(10000)}`;
+        data.banks.push(bank);
+      });
+      saveData();
+      sendJson(res, 200, { banks: imported, allBanks: data.banks });
+    };
+    try {
+      importBanks(parseDocxBanks(raw, body.filename));
+      return;
+    } catch (jsError) {
+      if (process.env.WORD_IMPORT_FALLBACK_PYTHON !== "1") {
+        sendJson(res, 400, { error: jsError.message || "El Word no tiene el formato esperado de preguntas" });
+        return;
+      }
+    }
     const safeName = String(body.filename || "cuestionario.docx").replace(/[^\w.-]+/g, "_");
     const tmpPath = path.join(os.tmpdir(), `upload-${Date.now()}-${safeName}`);
     fs.writeFileSync(tmpPath, raw);
@@ -419,14 +550,9 @@ const server = http.createServer(async (req, res) => {
         }
         try {
           const imported = JSON.parse(stdout);
-          imported.forEach((bank) => {
-            bank.id = `word-${Date.now()}-${crypto.randomInt(10000)}`;
-            data.banks.push(bank);
-          });
-          saveData();
-          sendJson(res, 200, { banks: imported, allBanks: data.banks });
-        } catch {
-          sendJson(res, 500, { error: "El Word no tiene el formato esperado de preguntas" });
+          importBanks(imported);
+        } catch (parseError) {
+          sendJson(res, 400, { error: parseError.message || "El Word no tiene el formato esperado de preguntas" });
         }
       }
     );

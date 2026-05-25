@@ -37,6 +37,7 @@ Variables recomendadas:
 - `DATA_PATH`: ruta persistente para secciones y bancos de preguntas, por ejemplo `/data/data.json`.
 - `RESPONSES_DB_PATH`: ruta de la base de respuestas en un disco persistente, por ejemplo `/data/responses-db.json`.
 - `PYTHON_BIN`: comando o ruta de Python, por ejemplo `python3`.
+- `WORD_IMPORT_FALLBACK_PYTHON`: usa `1` solo si quieres activar el importador Python antiguo como respaldo.
 - `ADMIN_USERNAME`: usuario administrador. Por defecto: `administrador`.
 - `ADMIN_PASSWORD`: clave administradora.
 - `PROJECTION_USERNAME`: usuario de proyección, solo si vuelves a proteger ese perfil.
@@ -51,7 +52,7 @@ npm install
 npm start
 ```
 
-Si la plataforma no tiene Python o no permite instalar `python-docx`, la carga de cuestionarios Word no funcionará. En ese caso conviene migrar el importador Word a JavaScript o usar una plataforma con Python disponible.
+La carga de cuestionarios Word se realiza primero con el importador JavaScript incluido en el servidor. Python queda solo como respaldo opcional.
 
 Para habilitar la importación Word en un servidor con Python:
 
