@@ -266,6 +266,11 @@ input {
   background: #fbf8ff;
 }
 
+#uploadWordButton {
+  width: 100%;
+  margin: -4px 0 14px;
+}
+
 .upload-manager > strong {
   color: var(--accent-dark);
   font-size: 14px;

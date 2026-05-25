@@ -13,9 +13,21 @@ const data = loadData();
 const sessions = new Map();
 const RESPONSES_DB = process.env.RESPONSES_DB_PATH || path.join(ROOT, "responses-db.json");
 const responseStore = loadResponseStore();
+const ADMIN_USERNAME = String(process.env.ADMIN_USERNAME || "administrador").trim().toLowerCase();
+const PROJECTION_USERNAME = String(process.env.PROJECTION_USERNAME || "proyeccion").trim().toLowerCase();
+const generatedAdminPassword = process.env.ADMIN_PASSWORD ? "" : crypto.randomBytes(9).toString("base64url");
+const generatedProjectionPassword = process.env.PROJECTION_PASSWORD ? "" : crypto.randomBytes(9).toString("base64url");
 const accounts = {
-  administrador: { password: "admin123", role: "admin", name: "Administrador" },
-  proyeccion: { password: "curso123", role: "projection", name: "Proyeccion" },
+  [ADMIN_USERNAME]: {
+    password: String(process.env.ADMIN_PASSWORD || generatedAdminPassword),
+    role: "admin",
+    name: "Administrador",
+  },
+  [PROJECTION_USERNAME]: {
+    password: String(process.env.PROJECTION_PASSWORD || generatedProjectionPassword),
+    role: "projection",
+    name: "Proyeccion",
+  },
 };
 
 function sendJson(res, status, payload) {
@@ -659,4 +671,10 @@ const server = http.createServer(async (req, res) => {
 const port = Number(process.env.PORT || 8787);
 server.listen(port, "0.0.0.0", () => {
   console.log(`Olimpiadas listo en http://localhost:${port}`);
+  if (generatedAdminPassword) {
+    console.log(`Admin temporal: usuario ${ADMIN_USERNAME} | clave ${generatedAdminPassword}`);
+  }
+  if (generatedProjectionPassword) {
+    console.log(`Proyeccion temporal: usuario ${PROJECTION_USERNAME} | clave ${generatedProjectionPassword}`);
+  }
 });

@@ -12,10 +12,10 @@ Aplicación tipo Kahoot para gestionar una sección, lanzar preguntas, recibir r
 
 1. Ejecutar `iniciar_olimpiadas.bat`.
 2. Abrir `http://127.0.0.1:8788/admin` en el computador del evaluador.
-3. Ingresar con la cuenta administradora: usuario `administrador`, clave `admin123`.
+3. Ingresar con la cuenta administradora configurada para el evaluador.
 4. Elegir sección y banco de preguntas.
 5. Crear código QR y abrir la pantalla de proyección.
-6. En la pantalla de proyección ingresar con usuario `proyeccion`, clave `curso123`.
+6. Ingresar a proyección con la cuenta configurada para sala.
 7. Mostrar el QR a estudiantes, abrir respuestas desde administrador y publicar ganadores al final.
 
 ## Instalación manual
@@ -38,6 +38,12 @@ Variables recomendadas:
 - `DATA_PATH`: ruta persistente para secciones y bancos de preguntas, por ejemplo `/data/data.json`.
 - `RESPONSES_DB_PATH`: ruta de la base de respuestas en un disco persistente, por ejemplo `/data/responses-db.json`.
 - `PYTHON_BIN`: comando o ruta de Python, por ejemplo `python3`.
+- `ADMIN_USERNAME`: usuario administrador.
+- `ADMIN_PASSWORD`: clave administradora.
+- `PROJECTION_USERNAME`: usuario de proyección.
+- `PROJECTION_PASSWORD`: clave de proyección.
+
+Si no defines las claves, el servidor genera claves temporales al iniciar y las muestra solo en la consola/log del servidor. Para uso real en web, define siempre `ADMIN_PASSWORD` y `PROJECTION_PASSWORD`.
 
 Comandos de despliegue:
 

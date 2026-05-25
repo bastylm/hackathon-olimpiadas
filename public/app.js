@@ -72,10 +72,10 @@ function requireFreshAdminLogin(error) {
   activeSession = null;
   setView("loginView");
   setRoleLabel("Administrador");
-  $("loginUser").value = "administrador";
+  $("loginUser").value = "";
   $("loginPass").value = "";
   $("loginTitle").textContent = "Cuenta administradora";
-  $("loginHint").textContent = "La sesión guardada no era válida. Ingresa nuevamente con clave admin123.";
+  $("loginHint").textContent = "La sesión guardada no era válida. Ingresa nuevamente con tu cuenta autorizada.";
   return true;
 }
 
@@ -88,9 +88,8 @@ function setView(view) {
 
 function setRoleLabel(text) {
   document.querySelectorAll(".role-nav a").forEach((link) => link.classList.remove("active"));
-  if (text === "Administrador") $("navAdmin").classList.add("active");
-  if (text === "Proyección") $("navProjection").classList.add("active");
-  if (text === "Estudiante") $("navStudent").classList.add("active");
+  if (text === "Administrador") $("navAdmin")?.classList.add("active");
+  if (text === "Proyección") $("navProjection")?.classList.add("active");
 }
 
 function fmt(seconds) {
@@ -282,13 +281,10 @@ function requireLogin(expectedRole) {
   const current = currentAuth(expectedRole);
   if (current?.role === expectedRole) return true;
   setView("loginView");
-  $("loginUser").value = expectedRole === "admin" ? "administrador" : "proyeccion";
+  $("loginUser").value = "";
   $("loginPass").value = "";
   $("loginTitle").textContent = expectedRole === "admin" ? "Cuenta administradora" : "Cuenta de proyección";
-  $("loginHint").textContent =
-    expectedRole === "admin"
-      ? "Usuario: administrador | Clave: admin123"
-      : "Usuario: proyeccion | Clave: curso123";
+  $("loginHint").textContent = "Ingresa con la cuenta autorizada para este perfil.";
   setRoleLabel(expectedRole === "admin" ? "Administrador" : "Proyección");
   return false;
 }
@@ -977,7 +973,12 @@ function renderStudentSession(session) {
 async function importWordQuestionnaire() {
   try {
     const file = $("wordUpload").files[0];
-    if (!file) return;
+    if (!file) {
+      $("selectionStatus").textContent = "Selecciona un archivo Word antes de cargar el banco.";
+      return;
+    }
+    $("uploadWordButton").disabled = true;
+    $("uploadWordButton").textContent = "Cargando...";
     const buffer = await file.arrayBuffer();
     const bytes = new Uint8Array(buffer);
     let binary = "";
@@ -993,11 +994,22 @@ async function importWordQuestionnaire() {
     renderQuestions();
     renderUploadManager();
     $("wordUpload").value = "";
+    $("uploadWordButton").textContent = "Cargar banco de preguntas";
+    $("uploadWordButton").disabled = true;
     $("selectionStatus").textContent = `Word importado: ${result.banks[0].questions.length} preguntas.`;
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
+    $("uploadWordButton").textContent = "Cargar banco de preguntas";
+    $("uploadWordButton").disabled = false;
     $("selectionStatus").textContent = `No se pudo importar Word: ${error.message}`;
   }
+}
+
+function handleWordFileSelection() {
+  const file = $("wordUpload").files[0];
+  $("uploadWordButton").disabled = !file;
+  $("uploadWordButton").textContent = file ? "Cargar banco de preguntas" : "Cargar banco de preguntas";
+  if (file) $("selectionStatus").textContent = `Archivo seleccionado: ${file.name}. Presiona cargar banco de preguntas.`;
 }
 
 async function answerQuestion(questionIndex, answerIndex) {
@@ -1167,7 +1179,8 @@ async function init() {
     });
     $("downloadRecord").addEventListener("click", downloadInterventionRecord);
     $("deleteBank").addEventListener("click", deleteCurrentBank);
-    $("wordUpload").addEventListener("change", importWordQuestionnaire);
+    $("wordUpload").addEventListener("change", handleWordFileSelection);
+    $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("createSession").addEventListener("click", createSession);
     $("publishQuiz").addEventListener("click", publishQuiz);
     $("toggleAnswers").addEventListener("click", toggleAnswers);
