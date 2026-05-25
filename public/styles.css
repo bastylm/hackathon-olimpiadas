@@ -349,6 +349,50 @@ input {
   align-items: center;
 }
 
+.section-editor {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbf8ff;
+}
+
+.section-editor > strong {
+  color: var(--accent-dark);
+  font-size: 14px;
+}
+
+.section-editor input {
+  min-height: 36px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.section-actions {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr 0.7fr;
+  gap: 6px;
+}
+
+.section-actions button {
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.challenge-text {
+  width: 100%;
+  min-height: 76px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+  font: inherit;
+  color: var(--ink);
+}
+
 .upload-manager {
   display: grid;
   gap: 8px;
@@ -629,6 +673,33 @@ input {
   font-style: normal;
   font-weight: 800;
   font-size: 13px;
+}
+
+.challenge-card,
+.student-challenge {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f5f0ff;
+  color: var(--ink);
+}
+
+.challenge-card {
+  display: grid;
+  gap: 4px;
+}
+
+.challenge-card strong {
+  color: var(--accent-dark);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.challenge-card span,
+.student-challenge {
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .mystery {

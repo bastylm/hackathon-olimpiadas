@@ -49,6 +49,26 @@
               <select id="sectionSelect"></select>
             </label>
             <label>
+              Buscar seccion
+              <input id="sectionSearch" autocomplete="off" placeholder="Filtrar por codigo, seccion, docente o asignatura" />
+            </label>
+            <div class="section-editor">
+              <strong>Gestion de seccion</strong>
+              <input id="sectionCode" placeholder="Codigo" />
+              <input id="sectionName" placeholder="Seccion" />
+              <input id="sectionSubject" placeholder="Asignatura" />
+              <input id="sectionTeacher" placeholder="Docente" />
+              <input id="sectionCareer" placeholder="Carrera" />
+              <input id="sectionArea" placeholder="Area" />
+              <input id="sectionDate" type="date" />
+              <div class="section-actions">
+                <button id="saveSection" type="button">Guardar seccion</button>
+                <button id="newSection" type="button">Nueva</button>
+                <button id="deleteSection" type="button">Eliminar</button>
+              </div>
+              <p id="sectionStatus" class="hint"></p>
+            </div>
+            <label>
               Banco de preguntas
               <select id="bankSelect"></select>
             </label>
@@ -66,6 +86,10 @@
             <label>
               Cantidad esperada de participantes
               <input id="expectedParticipants" type="number" min="0" max="500" value="0" />
+            </label>
+            <label>
+              Descripcion breve o pregunta esencial
+              <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: Cual es el desafio principal que debe resolver esta seccion?"></textarea>
             </label>
             <button id="createSession" class="primary" type="button">Crear código QR</button>
             <div id="sessionCard" class="session-card hidden">
@@ -129,6 +153,7 @@
               <strong id="projectionElapsed">00:00</strong>
             </div>
             <div id="projectionStats" class="participation-stats"></div>
+            <div id="projectionChallenge" class="challenge-card hidden"></div>
             <div id="projectionParticipationRank" class="participation-rank"></div>
             <div id="projectionQuestion" class="current-question">Esperando al administrador.</div>
             <ol id="projectionRanking" class="leaderboard hidden"></ol>
@@ -161,6 +186,7 @@
               <p id="studentStatus" class="status"></p>
               <strong id="studentElapsed">00:00</strong>
             </div>
+            <p id="studentChallenge" class="student-challenge hidden"></p>
             <h2 id="studentQuestion"></h2>
             <p class="student-warning">Lee bien cada pregunta antes de seleccionar. Una vez marcada una alternativa, no se puede cambiar.</p>
             <div id="answerOptions" class="answers"></div>

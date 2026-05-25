@@ -4,6 +4,7 @@ let refreshTimer = null;
 let mode = "admin";
 let responseContext = null;
 let managedSessions = [];
+let editingSectionId = "";
 
 function safeJson(value, fallback) {
   try {
@@ -116,19 +117,62 @@ function fmt(seconds) {
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
 }
 
-function fillSelectors() {
-  $("sectionSelect").innerHTML = appData.sections
+function sectionLabel(item) {
+  return `${item.section} | ${item.subject} | ${item.teacher || "Sin docente"}`;
+}
+
+function selectedSection() {
+  return appData.sections.find((item) => item.id === $("sectionSelect")?.value);
+}
+
+function fillSectionSelector() {
+  const current = $("sectionSelect")?.value || "";
+  const search = normalizeText($("sectionSearch")?.value || "");
+  const sections = appData.sections.filter((item) => {
+    if (!search) return true;
+    return normalizeText(`${item.code} ${item.section} ${item.subject} ${item.teacher} ${item.career} ${item.area}`).includes(search);
+  });
+  $("sectionSelect").innerHTML = sections
     .map((item) => {
-      const label = `${item.section} | ${item.subject} | ${item.teacher || "Sin docente"}`;
-      return `<option value="${item.id}">${escapeHtml(label)}</option>`;
+      return `<option value="${item.id}">${escapeHtml(sectionLabel(item))}</option>`;
     })
     .join("");
+  if (sections.some((item) => item.id === current)) $("sectionSelect").value = current;
+  updateSectionEditor();
+}
 
+function fillSelectors() {
+  fillSectionSelector();
   $("bankSelect").innerHTML = appData.banks
     .map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`)
     .join("");
   renderQuestions();
   renderUploadManager();
+}
+
+function updateSectionEditor(clear = false) {
+  const section = clear ? null : selectedSection();
+  editingSectionId = section?.id || "";
+  $("sectionCode").value = section?.code || "";
+  $("sectionName").value = section?.section || "";
+  $("sectionSubject").value = section?.subject || "";
+  $("sectionTeacher").value = section?.teacher || "";
+  $("sectionCareer").value = section?.career || "";
+  $("sectionArea").value = section?.area || "";
+  $("sectionDate").value = section?.date || "";
+}
+
+function sectionFormPayload() {
+  return {
+    id: editingSectionId,
+    code: $("sectionCode").value,
+    section: $("sectionName").value,
+    subject: $("sectionSubject").value,
+    teacher: $("sectionTeacher").value,
+    career: $("sectionCareer").value,
+    area: $("sectionArea").value,
+    date: $("sectionDate").value,
+  };
 }
 
 function selectedBank() {
@@ -190,6 +234,44 @@ async function loadResponsesForSelected() {
   }
 }
 
+async function saveSection() {
+  try {
+    const payload = sectionFormPayload();
+    if (!payload.section || !payload.subject) throw new Error("Ingresa seccion y asignatura.");
+    const result = await api("/api/sections", { method: "POST", body: payload });
+    appData.sections = result.sections;
+    $("sectionSearch").value = "";
+    fillSectionSelector();
+    const saved = appData.sections.find((item) =>
+      item.section === payload.section && item.subject === payload.subject && item.teacher === payload.teacher
+    ) || appData.sections[appData.sections.length - 1];
+    if (saved) $("sectionSelect").value = saved.id;
+    updateSectionEditor();
+    $("sectionStatus").textContent = "Seccion guardada.";
+    await loadManagedSessions();
+    await loadResponsesForSelected();
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("sectionStatus").textContent = `No se pudo guardar: ${error.message}`;
+  }
+}
+
+async function deleteCurrentSection() {
+  try {
+    const section = selectedSection();
+    if (!section) return;
+    if (!confirm(`Eliminar seccion ${section.section}? Solo se permite si no tiene formularios ni respuestas.`)) return;
+    const result = await api(`/api/sections/${encodeURIComponent(section.id)}`, { method: "DELETE" });
+    appData.sections = result.sections;
+    fillSectionSelector();
+    $("sectionStatus").textContent = "Seccion eliminada.";
+    await loadResponsesForSelected();
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("sectionStatus").textContent = `No se pudo eliminar: ${error.message}`;
+  }
+}
+
 async function loadManagedSessions() {
   if (!appData || mode !== "admin") return;
   try {
@@ -228,6 +310,7 @@ function renderSessionManager() {
               <div>
                 <strong>${escapeHtml(session.code)}</strong>
                 <span>${escapeHtml(session.section?.section || "Sin sección")} - ${escapeHtml(session.bank?.name || "Sin banco")}</span>
+                ${session.challengeText ? `<span>${escapeHtml(session.challengeText)}</span>` : ""}
                 <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
               </div>
               <div class="session-actions">
@@ -385,6 +468,7 @@ function currentDraft() {
     bankId: $("bankSelect").value,
     durationSeconds: Number($("durationMinutes").value || 10) * 60,
     expectedParticipants: Number($("expectedParticipants").value || 0),
+    challengeText: $("challengeText").value.trim(),
     selectedQuestions: selectedQuestionValues(),
   };
 }
@@ -519,6 +603,7 @@ function restoreSessionSelectors() {
   if (activeSession?.section?.id) $("sectionSelect").value = activeSession.section.id;
   if (activeSession?.bank?.id) $("bankSelect").value = activeSession.bank.id;
   if (activeSession?.expectedParticipants !== undefined) $("expectedParticipants").value = activeSession.expectedParticipants || 0;
+  $("challengeText").value = activeSession?.challengeText || "";
   renderQuestions();
 }
 
@@ -537,13 +622,14 @@ async function createSession() {
         bankId: draft.bankId,
         durationSeconds: draft.durationSeconds,
         expectedParticipants: draft.expectedParticipants,
+        challengeText: draft.challengeText,
       },
     });
     localStorage.setItem("olimpiadasEvaluatorCode", activeSession.code);
     showSessionInvite(activeSession);
     activeSession = await api(`/api/session/${activeSession.code}/publish`, {
       method: "POST",
-      body: { selectedQuestions: draft.selectedQuestions, durationSeconds: draft.durationSeconds },
+      body: { selectedQuestions: draft.selectedQuestions, durationSeconds: draft.durationSeconds, expectedParticipants: draft.expectedParticipants, challengeText: draft.challengeText },
     });
     $("selectionStatus").textContent = `Código ${activeSession.code} generado. QR listo para proyectar.`;
     renderAdmin(activeSession);
@@ -689,7 +775,7 @@ async function updateExpectedParticipants() {
   try {
     activeSession = await api(`/api/session/${activeSession.code}/settings`, {
       method: "POST",
-      body: { expectedParticipants: Number($("expectedParticipants").value || 0) },
+      body: { expectedParticipants: Number($("expectedParticipants").value || 0), challengeText: $("challengeText").value.trim() },
     });
     renderAdmin(activeSession);
     syncManagedSession(activeSession);
@@ -734,6 +820,7 @@ async function toggleAnswers() {
       body: {
         acceptingAnswers: opening,
         expectedParticipants: Number($("expectedParticipants").value || 0),
+        challengeText: $("challengeText").value.trim(),
         ...(opening ? { durationSeconds: Number($("durationMinutes").value || 10) * 60 } : {}),
       },
     });
@@ -822,6 +909,7 @@ function renderAdmin(session) {
   $("rankingStatus").textContent = session.winnersPublished ? "Ganadores publicados" : session.showRanking ? "Ranking visible" : "Ranking oculto";
   $("adminElapsed").textContent = fmt(session.remainingSeconds ?? session.durationSeconds);
   if (document.activeElement !== $("expectedParticipants")) $("expectedParticipants").value = session.expectedParticipants || 0;
+  if (document.activeElement !== $("challengeText")) $("challengeText").value = session.challengeText || "";
   if (session.showRanking && !session.winnersPublished) renderLeaderboard("leaderboard", session.participants);
   else $("leaderboard").innerHTML = "";
   $("podium").classList.toggle("hidden", !session.winnersPublished);
@@ -899,6 +987,10 @@ function renderProjection(session) {
       : `Código listo. El cuestionario se mostrará cuando el administrador abra respuestas.`
     : "Esperando que el administrador publique el cuestionario.";
   renderParticipationStats("projectionStats", session);
+  $("projectionChallenge").classList.toggle("hidden", !session.challengeText);
+  $("projectionChallenge").innerHTML = session.challengeText
+    ? `<strong>Desafio</strong><span>${escapeHtml(session.challengeText)}</span>`
+    : "";
   renderParticipationRank("projectionParticipationRank", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
   $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished));
@@ -1093,6 +1185,8 @@ function renderStudentSession(session) {
   const me = session.participants.find((p) => p.id === student.id);
   $("studentStatus").textContent = `${session.section?.section || "Sección"} | ${session.bank?.name || ""}`;
   $("studentElapsed").textContent = session.timerStartedAt ? fmt(session.remainingSeconds) : fmt(session.durationSeconds);
+  $("studentChallenge").classList.toggle("hidden", !session.challengeText);
+  $("studentChallenge").textContent = session.challengeText || "";
 
   if (session.winnersPublished) {
     $("studentQuestion").textContent = "Resultados publicados";
@@ -1371,10 +1465,22 @@ async function init() {
     $("loginPass").addEventListener("keydown", (event) => {
       if (event.key === "Enter") login();
     });
-    $("sectionSelect").addEventListener("change", () => {
+    $("sectionSearch").addEventListener("input", () => {
+      fillSectionSelector();
       loadResponsesForSelected();
       renderSessionManager();
     });
+    $("sectionSelect").addEventListener("change", () => {
+      updateSectionEditor();
+      loadResponsesForSelected();
+      renderSessionManager();
+    });
+    $("saveSection").addEventListener("click", saveSection);
+    $("newSection").addEventListener("click", () => {
+      updateSectionEditor(true);
+      $("sectionStatus").textContent = "Completa los datos y guarda una nueva seccion.";
+    });
+    $("deleteSection").addEventListener("click", deleteCurrentSection);
     $("bankSelect").addEventListener("change", handleBankChange);
     $("expectedParticipants").addEventListener("change", updateExpectedParticipants);
     $("responsesSearch").addEventListener("input", () => {

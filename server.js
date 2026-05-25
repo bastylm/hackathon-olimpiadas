@@ -88,6 +88,7 @@ function hydrateSession(raw) {
     selectedQuestions: Array.isArray(raw?.selectedQuestions) ? raw.selectedQuestions.map(Number) : [],
     durationSeconds: Math.max(0, Number(raw?.durationSeconds || 600)),
     expectedParticipants: Math.max(0, Number(raw?.expectedParticipants || 0)),
+    challengeText: String(raw?.challengeText || "").slice(0, 600),
     showRanking: Boolean(raw?.showRanking),
     revealPodium: Boolean(raw?.revealPodium),
     winnersPublished: Boolean(raw?.winnersPublished),
@@ -331,6 +332,36 @@ function normalizeText(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function makeSectionId(section) {
+  const base = [
+    section.code,
+    section.section,
+    section.subject,
+    crypto.randomInt(10000),
+  ]
+    .join("-")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 90) || `section-${Date.now()}`;
+  return data.sections.some((item) => item.id === base) ? `${base}-${crypto.randomInt(10000)}` : base;
+}
+
+function sectionPayload(body) {
+  return {
+    sectorial: String(body.sectorial || "").trim(),
+    area: String(body.area || "").trim(),
+    career: String(body.career || "").trim(),
+    code: String(body.code || "").trim(),
+    subject: String(body.subject || "").trim(),
+    section: String(body.section || "").trim(),
+    teacher: String(body.teacher || "").trim(),
+    date: String(body.date || "").trim(),
+  };
+}
+
 function normalizeRut(value) {
   return String(value || "").trim().toLowerCase().replace(/[^0-9k]/g, "");
 }
@@ -501,6 +532,7 @@ function publicSession(session, req) {
     questionStartedAt: session.questionStartedAt,
     durationSeconds: session.durationSeconds,
     expectedParticipants: Number(session.expectedParticipants || 0),
+    challengeText: session.challengeText || "",
     elapsedSeconds: elapsedSeconds(session.timerStartedAt),
     remainingSeconds: remainingSeconds(session),
     questionElapsedSeconds: elapsedSeconds(session.questionStartedAt),
@@ -575,6 +607,47 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/data") {
     sendJson(res, 200, data);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/sections") {
+    if (!requireAdmin(req, res)) return;
+    const body = await readBody(req);
+    const payload = sectionPayload(body);
+    if (!payload.section || !payload.subject) {
+      sendJson(res, 400, { error: "Ingresa al menos seccion y asignatura" });
+      return;
+    }
+    const id = String(body.id || "").trim();
+    const existingIndex = id ? data.sections.findIndex((item) => item.id === id) : -1;
+    if (existingIndex >= 0) {
+      data.sections[existingIndex] = { ...data.sections[existingIndex], ...payload, id };
+    } else {
+      data.sections.push({ id: makeSectionId(payload), ...payload });
+    }
+    saveData();
+    sendJson(res, 200, { sections: data.sections });
+    return;
+  }
+
+  const sectionDeleteMatch = url.pathname.match(/^\/api\/sections\/([^/]+)$/);
+  if (req.method === "DELETE" && sectionDeleteMatch) {
+    if (!requireAdmin(req, res)) return;
+    const id = decodeURIComponent(sectionDeleteMatch[1]);
+    const index = data.sections.findIndex((section) => section.id === id);
+    if (index < 0) {
+      sendJson(res, 404, { error: "Seccion no encontrada" });
+      return;
+    }
+    const inSessions = [...sessions.values()].some((session) => session.sectionId === id);
+    const inResponses = Object.keys(responseStore).some((key) => key.startsWith(`${id}::`));
+    if (inSessions || inResponses) {
+      sendJson(res, 409, { error: "No se puede eliminar una seccion con formularios o respuestas registradas" });
+      return;
+    }
+    data.sections.splice(index, 1);
+    saveData();
+    sendJson(res, 200, { sections: data.sections });
     return;
   }
 
@@ -775,6 +848,7 @@ const server = http.createServer(async (req, res) => {
       selectedQuestions: [],
       durationSeconds: Math.max(60, Number(body.durationSeconds || 600)),
       expectedParticipants: Math.max(0, Number(body.expectedParticipants || 0)),
+      challengeText: String(body.challengeText || "").trim().slice(0, 600),
       showRanking: false,
       revealPodium: false,
       winnersPublished: false,
@@ -852,6 +926,7 @@ const server = http.createServer(async (req, res) => {
       session.showRanking = false;
       if (Number(body.durationSeconds) >= 60) session.durationSeconds = Number(body.durationSeconds);
       if (Number(body.expectedParticipants) >= 0) session.expectedParticipants = Number(body.expectedParticipants);
+      if (typeof body.challengeText === "string") session.challengeText = body.challengeText.trim().slice(0, 600);
       session.timerStartedAt = null;
       session.currentQuestionIndex = null;
       session.questionStartedAt = null;
@@ -927,6 +1002,7 @@ const server = http.createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       if (typeof body.showRanking === "boolean") session.showRanking = body.showRanking;
       if (Number(body.expectedParticipants) >= 0) session.expectedParticipants = Number(body.expectedParticipants);
+      if (typeof body.challengeText === "string") session.challengeText = body.challengeText.trim().slice(0, 600);
       const isClosingAnswers = body.acceptingAnswers === false;
       if (Number(body.durationSeconds) >= 60 && !isClosingAnswers) {
         session.durationSeconds = Number(body.durationSeconds);
