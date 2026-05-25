@@ -1,6 +1,6 @@
 # Olimpiadas - levantamiento de respuestas
 
-Aplicación local tipo Kahoot para gestionar una sección, lanzar preguntas, recibir respuestas de estudiantes y ver ranking inmediato con podio publicable.
+Aplicación tipo Kahoot para gestionar una sección, lanzar preguntas, recibir respuestas de estudiantes y ver ranking inmediato con podio publicable.
 
 ## Perfiles
 
@@ -8,7 +8,7 @@ Aplicación local tipo Kahoot para gestionar una sección, lanzar preguntas, rec
 - Proyección: muestra código, QR, temporizador, estadísticas y resultados.
 - Estudiante: ingresa por QR/código, registra nombre y RUT, responde una sola vez por pregunta y ve sus resultados cuando se publican.
 
-## Uso rápido
+## Uso rápido local
 
 1. Ejecutar `iniciar_olimpiadas.bat`.
 2. Abrir `http://127.0.0.1:8788/admin` en el computador del evaluador.
@@ -22,14 +22,41 @@ Aplicación local tipo Kahoot para gestionar una sección, lanzar preguntas, rec
 
 ```bash
 npm install
-node server.js
+npm start
 ```
 
-Luego abrir `http://127.0.0.1:8788/admin`.
+Luego abrir `http://127.0.0.1:8787/admin`, o el puerto indicado por la variable `PORT`.
+
+## Despliegue web
+
+Esta plataforma necesita un servidor Node persistente. Para que funcione bien en web, usa una plataforma que permita proceso Node, escritura persistente o base de datos, y Python si vas a importar cuestionarios Word.
+
+Variables recomendadas:
+
+- `PUBLIC_BASE_URL`: URL pública del sitio, por ejemplo `https://hackathon-olimpiadas.onrender.com`. Esto permite que el QR funcione desde cualquier red.
+- `PORT`: puerto entregado por la plataforma.
+- `DATA_PATH`: ruta persistente para secciones y bancos de preguntas, por ejemplo `/data/data.json`.
+- `RESPONSES_DB_PATH`: ruta de la base de respuestas en un disco persistente, por ejemplo `/data/responses-db.json`.
+- `PYTHON_BIN`: comando o ruta de Python, por ejemplo `python3`.
+
+Comandos de despliegue:
+
+```bash
+npm install
+npm start
+```
+
+Si la plataforma no tiene Python o no permite instalar `python-docx`, la carga de cuestionarios Word no funcionará. En ese caso conviene migrar el importador Word a JavaScript o usar una plataforma con Python disponible.
+
+Para habilitar la importación Word en un servidor con Python:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Archivos importantes
 
-- `server.js`: servidor local y API.
+- `server.js`: servidor local/web y API.
 - `public/`: frontend de administrador, proyección y estudiantes.
 - `data.json`: secciones y bancos de preguntas base.
 - `responses-db.example.json`: ejemplo de la base de respuestas persistente.
@@ -38,4 +65,4 @@ Luego abrir `http://127.0.0.1:8788/admin`.
 
 ## Privacidad
 
-El archivo real `responses-db.json` queda fuera del repositorio porque puede contener nombres, RUT y respuestas de estudiantes. Al ejecutar la plataforma, el sistema lo crea automaticamente cuando recibe respuestas. Si necesitas partir con una estructura visible, copia `responses-db.example.json` como `responses-db.json`.
+El archivo real `responses-db.json` queda fuera del repositorio porque puede contener nombres, RUT y respuestas de estudiantes. Al ejecutar la plataforma, el sistema lo crea automáticamente cuando recibe respuestas. Si necesitas partir con una estructura visible, copia `responses-db.example.json` como `responses-db.json`.

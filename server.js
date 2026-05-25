@@ -8,9 +8,10 @@ const QRCode = require("qrcode");
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, "public");
-const data = JSON.parse(fs.readFileSync(path.join(ROOT, "data.json"), "utf8"));
+const DATA_PATH = process.env.DATA_PATH || path.join(ROOT, "data.json");
+const data = loadData();
 const sessions = new Map();
-const RESPONSES_DB = path.join(ROOT, "responses-db.json");
+const RESPONSES_DB = process.env.RESPONSES_DB_PATH || path.join(ROOT, "responses-db.json");
 const responseStore = loadResponseStore();
 const accounts = {
   administrador: { password: "admin123", role: "admin", name: "Administrador" },
@@ -23,6 +24,18 @@ function sendJson(res, status, payload) {
     "Cache-Control": "no-store",
   });
   res.end(JSON.stringify(payload));
+}
+
+function loadData() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+  } catch {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, "data.json"), "utf8"));
+  }
+}
+
+function saveData() {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), "utf8");
 }
 
 function loadResponseStore() {
@@ -116,6 +129,26 @@ function localInviteBase() {
   return `http://127.0.0.1:${port}`;
 }
 
+function normalizeBaseUrl(value) {
+  const raw = String(value || "").trim().replace(/\/+$/, "");
+  if (!raw) return "";
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
+function inviteBase(req) {
+  const configured = normalizeBaseUrl(
+    process.env.PUBLIC_BASE_URL ||
+      process.env.APP_URL ||
+      process.env.RENDER_EXTERNAL_URL ||
+      process.env.RAILWAY_PUBLIC_DOMAIN
+  );
+  if (configured) return configured;
+  const forwardedProto = String(req?.headers?.["x-forwarded-proto"] || "").split(",")[0].trim();
+  const proto = forwardedProto || (req?.socket?.encrypted ? "https" : "http");
+  const host = String(req?.headers?.["x-forwarded-host"] || req?.headers?.host || "").split(",")[0].trim();
+  return host ? `${proto}://${host}` : localInviteBase();
+}
+
 function rankParticipants(session) {
   const selected = selectedQuestionIndexes(session);
   return rankStoredParticipants(session.sectionId, session.bankId, selected);
@@ -202,7 +235,7 @@ function remainingSeconds(session) {
   return Math.max(0, Number(session.durationSeconds || 0) - elapsedSeconds(session.timerStartedAt));
 }
 
-function publicSession(session) {
+function publicSession(session, req) {
   const bank = data.banks.find((item) => item.id === session.bankId);
   const section = data.sections.find((item) => item.id === session.sectionId);
   const currentQuestion = currentQuestionFor(session);
@@ -230,8 +263,8 @@ function publicSession(session) {
     elapsedSeconds: elapsedSeconds(session.timerStartedAt),
     remainingSeconds: remainingSeconds(session),
     questionElapsedSeconds: elapsedSeconds(session.questionStartedAt),
-    joinUrl: `${localInviteBase()}/estudiante?code=${session.code}`,
-    projectionUrl: `${localInviteBase()}/proyeccion?code=${session.code}`,
+    joinUrl: `${inviteBase(req)}/estudiante?code=${session.code}`,
+    projectionUrl: `${inviteBase(req)}/proyeccion?code=${session.code}`,
     qrUrl: `/api/session/${session.code}/qr`,
     participants,
     createdAt: session.createdAt,
@@ -346,6 +379,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     data.banks.splice(index, 1);
+    saveData();
     sendJson(res, 200, { banks: data.banks });
     return;
   }
@@ -359,10 +393,10 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     const safeName = String(body.filename || "cuestionario.docx").replace(/[^\w.-]+/g, "_");
-    const tmpPath = path.join(ROOT, `upload-${Date.now()}-${safeName}`);
+    const tmpPath = path.join(os.tmpdir(), `upload-${Date.now()}-${safeName}`);
     fs.writeFileSync(tmpPath, raw);
     childProcess.execFile(
-      "C:\\Users\\Miguel A.C.O\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+      process.env.PYTHON_BIN || process.env.PYTHON_PATH || "python",
       [path.join(ROOT, "parse_word.py"), tmpPath],
       { cwd: ROOT, timeout: 30000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } },
       (error, stdout) => {
@@ -377,6 +411,7 @@ const server = http.createServer(async (req, res) => {
             bank.id = `word-${Date.now()}-${crypto.randomInt(10000)}`;
             data.banks.push(bank);
           });
+          saveData();
           sendJson(res, 200, { banks: imported, allBanks: data.banks });
         } catch {
           sendJson(res, 500, { error: "El Word no tiene el formato esperado de preguntas" });
@@ -410,7 +445,7 @@ const server = http.createServer(async (req, res) => {
       createdAt: now,
     };
     sessions.set(code, session);
-    sendJson(res, 201, publicSession(session));
+    sendJson(res, 201, publicSession(session, req));
     return;
   }
 
@@ -425,7 +460,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && action === "qr") {
-      const qr = await QRCode.toBuffer(`${localInviteBase()}/estudiante?code=${session.code}`, {
+      const qr = await QRCode.toBuffer(`${inviteBase(req)}/estudiante?code=${session.code}`, {
         type: "png",
         errorCorrectionLevel: "M",
         margin: 2,
@@ -437,7 +472,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && !action) {
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -451,7 +486,7 @@ const server = http.createServer(async (req, res) => {
       session.revealPodium = false;
       session.winnersPublished = false;
       session.questionStartedAt = new Date().toISOString();
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -473,7 +508,7 @@ const server = http.createServer(async (req, res) => {
       session.questionStartedAt = null;
       session.revealPodium = false;
       session.winnersPublished = false;
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -573,7 +608,7 @@ const server = http.createServer(async (req, res) => {
           session.acceptingAnswers = false;
         }
       }
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -585,7 +620,7 @@ const server = http.createServer(async (req, res) => {
         delete storeFor(session).students[studentId];
         saveResponseStore();
       }
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -593,7 +628,7 @@ const server = http.createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       if (body.start === true) session.timerStartedAt = new Date().toISOString();
       if (body.reset === true) session.timerStartedAt = null;
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -601,7 +636,7 @@ const server = http.createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       session.revealPodium = Boolean(body.reveal);
       if (session.revealPodium) session.winnersPublished = true;
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
 
@@ -613,7 +648,7 @@ const server = http.createServer(async (req, res) => {
       session.questionStartedAt = null;
       session.revealPodium = false;
       session.winnersPublished = false;
-      sendJson(res, 200, publicSession(session));
+      sendJson(res, 200, publicSession(session, req));
       return;
     }
   }
