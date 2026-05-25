@@ -32,9 +32,10 @@ Luego abrir `http://127.0.0.1:8788/admin`.
 - `server.js`: servidor local y API.
 - `public/`: frontend de administrador, proyección y estudiantes.
 - `data.json`: secciones y bancos de preguntas base.
+- `responses-db.example.json`: ejemplo de la base de respuestas persistente.
 - `Formato_carga_preguntas.docx`: plantilla para cargar preguntas desde Word.
 - `Formato_reporte_intervencion_diaria.docx`: plantilla del registro diario.
 
 ## Privacidad
 
-El archivo `responses-db.json` queda fuera del repositorio porque puede contener nombres, RUT y respuestas de estudiantes.
+El archivo real `responses-db.json` queda fuera del repositorio porque puede contener nombres, RUT y respuestas de estudiantes. Al ejecutar la plataforma, el sistema lo crea automaticamente cuando recibe respuestas. Si necesitas partir con una estructura visible, copia `responses-db.example.json` como `responses-db.json`.
