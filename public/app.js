@@ -3,6 +3,7 @@ let activeSession = null;
 let refreshTimer = null;
 let mode = "admin";
 let responseContext = null;
+let managedSessions = [];
 
 function safeJson(value, fallback) {
   try {
@@ -189,9 +190,121 @@ async function loadResponsesForSelected() {
   }
 }
 
+async function loadManagedSessions() {
+  if (!appData || mode !== "admin") return;
+  try {
+    const result = await api("/api/sessions");
+    managedSessions = result.sessions || [];
+    renderSessionManager();
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("sessionManager").innerHTML = `<p class="hint">No se pudieron cargar formularios: ${escapeHtml(error.message)}</p>`;
+  }
+}
+
+function sessionStateLabel(session) {
+  if (session.winnersPublished) return "Ganadores publicados";
+  if (session.acceptingAnswers) return "Abierto";
+  if (session.quizPublished) return "Cerrado / listo";
+  return "Borrador";
+}
+
+function renderSessionManager() {
+  const currentSectionId = $("sectionSelect")?.value || "";
+  const currentBankId = $("bankSelect")?.value || "";
+  const selected = managedSessions.filter((session) => {
+    const sectionMatch = !currentSectionId || session.section?.id === currentSectionId;
+    const bankMatch = !currentBankId || session.bank?.id === currentBankId;
+    return sectionMatch && bankMatch;
+  });
+  const visible = selected.length ? selected : managedSessions;
+  $("sessionManager").innerHTML = visible.length
+    ? visible
+        .map((session) => {
+          const isActive = activeSession?.code === session.code;
+          const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
+          return `
+            <div class="session-row ${isActive ? "active" : ""}">
+              <div>
+                <strong>${escapeHtml(session.code)}</strong>
+                <span>${escapeHtml(session.section?.section || "Sin sección")} - ${escapeHtml(session.bank?.name || "Sin banco")}</span>
+                <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
+              </div>
+              <div class="session-actions">
+                <button type="button" data-load-session="${session.code}">Usar</button>
+                <a class="button-link small" href="/proyeccion?code=${session.code}" target="_blank">Proyectar</a>
+                <button type="button" data-delete-session="${session.code}">Eliminar</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("")
+    : "<p class='hint'>Aún no hay formularios creados.</p>";
+  document.querySelectorAll("[data-load-session]").forEach((button) => {
+    button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
+  });
+  document.querySelectorAll("[data-delete-session]").forEach((button) => {
+    button.addEventListener("click", () => deleteSessionByCode(button.dataset.deleteSession));
+  });
+}
+
+function syncManagedSession(session) {
+  if (!session?.code || mode !== "admin") return;
+  const index = managedSessions.findIndex((item) => item.code === session.code);
+  if (index >= 0) managedSessions[index] = session;
+  else managedSessions.unshift(session);
+  renderSessionManager();
+}
+
+async function loadSessionByCode(code) {
+  try {
+    activeSession = await api(`/api/session/${code}`);
+    localStorage.setItem("olimpiadasEvaluatorCode", activeSession.code);
+    restoreSessionSelectors();
+    showSessionInvite(activeSession);
+    renderAdmin(activeSession);
+    await loadManagedSessions();
+    startRefresh();
+    await loadResponsesForSelected();
+    renderSessionManager();
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("selectionStatus").textContent = `No se pudo abrir el formulario: ${error.message}`;
+  }
+}
+
+async function deleteSessionByCode(code) {
+  try {
+    if (!confirm(`Eliminar formulario/código ${code}? Las respuestas guardadas por sección y banco se conservan.`)) return;
+    await api(`/api/session/${code}`, { method: "DELETE" });
+    if (activeSession?.code === code) {
+      activeSession = null;
+      localStorage.removeItem("olimpiadasEvaluatorCode");
+      $("sessionCard").classList.add("hidden");
+      clearInterval(refreshTimer);
+      renderAdmin({
+        quizPublished: false,
+        quizQuestions: [],
+        acceptingAnswers: false,
+        winnersPublished: false,
+        participants: [],
+        elapsedSeconds: 0,
+        durationSeconds: Number($("durationMinutes").value || 10) * 60,
+      });
+    }
+    $("selectionStatus").textContent = `Formulario ${code} eliminado.`;
+    await loadManagedSessions();
+    await loadResponsesForSelected();
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("selectionStatus").textContent = `No se pudo eliminar el formulario: ${error.message}`;
+  }
+}
+
 function handleBankChange() {
   renderQuestions();
   loadResponsesForSelected();
+  renderSessionManager();
 }
 
 async function deleteCurrentBank() {
@@ -214,6 +327,7 @@ async function deleteBankById(bankId) {
     }
     appData.banks = result.banks;
     fillSelectors();
+    await loadManagedSessions();
     if (activeSession?.bank?.id === bank.id || result.removedSessions) {
       activeSession = null;
       localStorage.removeItem("olimpiadasEvaluatorCode");
@@ -353,6 +467,7 @@ async function showAdmin() {
       localStorage.removeItem("olimpiadasEvaluatorCode");
     }
   }
+  await loadManagedSessions();
   loadResponsesForSelected();
 }
 
@@ -367,7 +482,13 @@ async function showProjection() {
     renderProjection(activeSession);
     startRefresh();
   } else {
-    $("projectionQuestion").textContent = "Abre esta pantalla desde el enlace que entrega el administrador.";
+    try {
+      activeSession = await api("/api/session/latest");
+      renderProjection(activeSession);
+      startRefresh();
+    } catch {
+      $("projectionQuestion").textContent = "Abre esta pantalla desde el enlace que entrega el administrador.";
+    }
   }
 }
 
@@ -426,6 +547,7 @@ async function createSession() {
     });
     $("selectionStatus").textContent = `Código ${activeSession.code} generado. QR listo para proyectar.`;
     renderAdmin(activeSession);
+    await loadManagedSessions();
     startRefresh();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
@@ -460,7 +582,10 @@ async function refreshSession() {
   if (!activeSession?.code) return;
   try {
     activeSession = await api(`/api/session/${activeSession.code}`);
-    if (mode === "admin") renderAdmin(activeSession);
+    if (mode === "admin") {
+      renderAdmin(activeSession);
+      syncManagedSession(activeSession);
+    }
     if (mode === "projection") renderProjection(activeSession);
     if (mode === "student") renderStudentSession(activeSession);
   } catch (error) {
@@ -506,6 +631,7 @@ async function launchQuestion(questionIndex) {
       body: { questionIndex },
     });
     renderAdmin(activeSession);
+    syncManagedSession(activeSession);
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("currentQuestion").textContent = `No se pudo publicar la pregunta: ${error.message}`;
@@ -531,6 +657,7 @@ async function publishQuiz() {
       body: currentDraft(),
     });
     renderAdmin(activeSession);
+    syncManagedSession(activeSession);
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("selectionStatus").textContent = `No se pudo guardar la selección: ${error.message}`;
@@ -544,6 +671,7 @@ async function closeQuestion() {
     body: { acceptingAnswers: false },
   });
   renderAdmin(activeSession);
+  syncManagedSession(activeSession);
 }
 
 async function startTimer() {
@@ -553,6 +681,7 @@ async function startTimer() {
     body: { start: true },
   });
   renderAdmin(activeSession);
+  syncManagedSession(activeSession);
 }
 
 async function updateExpectedParticipants() {
@@ -563,6 +692,7 @@ async function updateExpectedParticipants() {
       body: { expectedParticipants: Number($("expectedParticipants").value || 0) },
     });
     renderAdmin(activeSession);
+    syncManagedSession(activeSession);
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("selectionStatus").textContent = `No se pudo guardar la cantidad esperada: ${error.message}`;
@@ -578,6 +708,7 @@ async function toggleRanking() {
       body: { showRanking: !activeSession.showRanking },
     });
     renderAdmin(activeSession);
+    syncManagedSession(activeSession);
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("currentQuestion").textContent = `No se pudo cambiar el ranking: ${error.message}`;
@@ -607,6 +738,7 @@ async function toggleAnswers() {
       },
     });
     renderAdmin(activeSession);
+    syncManagedSession(activeSession);
     startRefresh();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
@@ -625,6 +757,7 @@ async function publishWinners() {
       body: { winnersPublished: true, showRanking: true },
     });
     renderAdmin(activeSession);
+    syncManagedSession(activeSession);
     startRefresh();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
@@ -731,6 +864,30 @@ function renderParticipationStats(id, session) {
   `;
 }
 
+function renderParticipationRank(id, session) {
+  const participants = [...(session.participants || [])]
+    .sort((a, b) => (b.answers || 0) - (a.answers || 0) || String(a.name || "").localeCompare(String(b.name || "")))
+    .slice(0, 8);
+  $(id).innerHTML = `
+    <h3>Participación en vivo</h3>
+    ${
+      participants.length
+        ? participants
+            .map(
+              (p, index) => `
+                <div class="participation-rank-row">
+                  <strong>${index + 1}</strong>
+                  <span>${escapeHtml(p.name || "Participante")}</span>
+                  <em>${p.answers || 0} respuestas</em>
+                </div>
+              `
+            )
+            .join("")
+        : "<p>Esperando participantes...</p>"
+    }
+  `;
+}
+
 function renderProjection(session) {
   $("projectionCode").textContent = `Código ${session.code}`;
   $("projectionJoin").textContent = session.joinUrl;
@@ -742,6 +899,7 @@ function renderProjection(session) {
       : `Código listo. El cuestionario se mostrará cuando el administrador abra respuestas.`
     : "Esperando que el administrador publique el cuestionario.";
   renderParticipationStats("projectionStats", session);
+  renderParticipationRank("projectionParticipationRank", session);
   $("projectionQuestion").classList.toggle("hidden", !session.acceptingAnswers);
   $("projectionQuestion").textContent = session.acceptingAnswers
     ? `Cuestionario abierto: ${session.quizQuestions.length} preguntas`
@@ -1211,7 +1369,10 @@ async function init() {
     $("loginPass").addEventListener("keydown", (event) => {
       if (event.key === "Enter") login();
     });
-    $("sectionSelect").addEventListener("change", loadResponsesForSelected);
+    $("sectionSelect").addEventListener("change", () => {
+      loadResponsesForSelected();
+      renderSessionManager();
+    });
     $("bankSelect").addEventListener("change", handleBankChange);
     $("expectedParticipants").addEventListener("change", updateExpectedParticipants);
     $("responsesSearch").addEventListener("input", () => {

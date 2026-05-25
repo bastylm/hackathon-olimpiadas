@@ -13,7 +13,8 @@ const PUBLIC = path.join(ROOT, "public");
 const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(PUBLIC, "uploads");
 const DATA_PATH = process.env.DATA_PATH || path.join(ROOT, "data.json");
 const data = loadData();
-const sessions = new Map();
+const SESSIONS_DB = process.env.SESSIONS_DB_PATH || path.join(ROOT, "sessions-db.json");
+const sessions = loadSessionStore();
 const RESPONSES_DB = process.env.RESPONSES_DB_PATH || path.join(ROOT, "responses-db.json");
 const responseStore = loadResponseStore();
 const ADMIN_USERNAME = String(process.env.ADMIN_USERNAME || "administrador").trim().toLowerCase();
@@ -71,6 +72,60 @@ function loadData() {
 
 function saveData() {
   fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), "utf8");
+}
+
+function hydrateSession(raw) {
+  const students = raw?.students instanceof Map
+    ? raw.students
+    : new Map(Object.entries(raw?.students || {}));
+  return {
+    code: String(raw?.code || ""),
+    sectionId: raw?.sectionId || "",
+    bankId: raw?.bankId || "",
+    currentQuestionIndex: Number.isInteger(raw?.currentQuestionIndex) ? raw.currentQuestionIndex : null,
+    acceptingAnswers: Boolean(raw?.acceptingAnswers),
+    quizPublished: Boolean(raw?.quizPublished),
+    selectedQuestions: Array.isArray(raw?.selectedQuestions) ? raw.selectedQuestions.map(Number) : [],
+    durationSeconds: Math.max(0, Number(raw?.durationSeconds || 600)),
+    expectedParticipants: Math.max(0, Number(raw?.expectedParticipants || 0)),
+    showRanking: Boolean(raw?.showRanking),
+    revealPodium: Boolean(raw?.revealPodium),
+    winnersPublished: Boolean(raw?.winnersPublished),
+    timerStartedAt: raw?.timerStartedAt || null,
+    questionStartedAt: raw?.questionStartedAt || null,
+    students,
+    createdAt: raw?.createdAt || new Date().toISOString(),
+    updatedAt: raw?.updatedAt || raw?.createdAt || new Date().toISOString(),
+  };
+}
+
+function serializeSession(session) {
+  return {
+    ...session,
+    students: Object.fromEntries(session.students || new Map()),
+  };
+}
+
+function loadSessionStore() {
+  try {
+    const raw = JSON.parse(fs.readFileSync(SESSIONS_DB, "utf8"));
+    const items = Array.isArray(raw) ? raw : raw.sessions || [];
+    return new Map(items.filter((item) => item?.code).map((item) => [item.code, hydrateSession(item)]));
+  } catch {
+    return new Map();
+  }
+}
+
+function saveSessionStore() {
+  const payload = {
+    sessions: [...sessions.values()].map(serializeSession),
+  };
+  fs.writeFileSync(SESSIONS_DB, JSON.stringify(payload, null, 2), "utf8");
+}
+
+function touchSession(session) {
+  session.updatedAt = new Date().toISOString();
+  saveSessionStore();
 }
 
 function uploadPathForBank(bank) {
@@ -410,7 +465,18 @@ function remainingSeconds(session) {
   return Math.max(0, Number(session.durationSeconds || 0) - elapsedSeconds(session.timerStartedAt));
 }
 
+function closeExpiredTimer(session) {
+  if (!session.acceptingAnswers || !session.timerStartedAt || remainingSeconds(session) > 0) return false;
+  session.durationSeconds = 0;
+  session.timerStartedAt = null;
+  session.acceptingAnswers = false;
+  session.updatedAt = new Date().toISOString();
+  saveSessionStore();
+  return true;
+}
+
 function publicSession(session, req) {
+  closeExpiredTimer(session);
   const bank = data.banks.find((item) => item.id === session.bankId);
   const section = data.sections.find((item) => item.id === session.sectionId);
   const currentQuestion = currentQuestionFor(session);
@@ -443,6 +509,7 @@ function publicSession(session, req) {
     qrUrl: `/api/session/${session.code}/qr`,
     participants,
     createdAt: session.createdAt,
+    updatedAt: session.updatedAt,
   };
 }
 
@@ -534,6 +601,30 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/api/sessions") {
+    if (!requireAdmin(req, res)) return;
+    const sectionId = url.searchParams.get("sectionId") || "";
+    const bankId = url.searchParams.get("bankId") || "";
+    const items = [...sessions.values()]
+      .filter((session) => !sectionId || session.sectionId === sectionId)
+      .filter((session) => !bankId || session.bankId === bankId)
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+      .map((session) => publicSession(session, req));
+    sendJson(res, 200, { sessions: items });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/session/latest") {
+    const latest = [...sessions.values()]
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))[0];
+    if (!latest) {
+      sendJson(res, 404, { error: "No hay formularios creados" });
+      return;
+    }
+    sendJson(res, 200, publicSession(latest, req));
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/responses/student-delete") {
     if (!requireAdmin(req, res)) return;
     const body = await readBody(req);
@@ -577,6 +668,7 @@ const server = http.createServer(async (req, res) => {
           removedSessions += 1;
         }
       }
+      saveSessionStore();
     }
     data.banks.splice(index, 1);
     const uploadDeleted = removeUploadForBank(bank, data.banks);
@@ -692,6 +784,7 @@ const server = http.createServer(async (req, res) => {
       createdAt: now,
     };
     sessions.set(code, session);
+    touchSession(session);
     sendJson(res, 201, publicSession(session, req));
     return;
   }
@@ -723,6 +816,14 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (req.method === "DELETE" && !action) {
+      if (!requireAdmin(req, res)) return;
+      sessions.delete(code);
+      saveSessionStore();
+      sendJson(res, 200, { deleted: true, code });
+      return;
+    }
+
     const body = await readBody(req);
     if (req.method === "POST" && action === "question") {
       if (!requireAdmin(req, res)) return;
@@ -733,6 +834,7 @@ const server = http.createServer(async (req, res) => {
       session.revealPodium = false;
       session.winnersPublished = false;
       session.questionStartedAt = new Date().toISOString();
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }
@@ -755,6 +857,7 @@ const server = http.createServer(async (req, res) => {
       session.questionStartedAt = null;
       session.revealPodium = false;
       session.winnersPublished = false;
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }
@@ -766,6 +869,7 @@ const server = http.createServer(async (req, res) => {
       }
       if (session.timerStartedAt && remainingSeconds(session) <= 0) {
         session.acceptingAnswers = false;
+        touchSession(session);
         sendJson(res, 409, { error: "El tiempo se termino" });
         return;
       }
@@ -812,6 +916,7 @@ const server = http.createServer(async (req, res) => {
         updatedAt: new Date().toISOString(),
       };
       saveResponseStore();
+      touchSession(session);
       const ranking = rankParticipants(session);
       const ranked = ranking.find((item) => item.id === id);
       sendJson(res, 200, { studentId: id, points: answer.points, total: student.score, place: ranked?.place });
@@ -855,6 +960,7 @@ const server = http.createServer(async (req, res) => {
           session.acceptingAnswers = false;
         }
       }
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }
@@ -867,6 +973,7 @@ const server = http.createServer(async (req, res) => {
         delete storeFor(session).students[studentId];
         saveResponseStore();
       }
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }
@@ -875,6 +982,7 @@ const server = http.createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       if (body.start === true) session.timerStartedAt = new Date().toISOString();
       if (body.reset === true) session.timerStartedAt = null;
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }
@@ -883,6 +991,7 @@ const server = http.createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       session.revealPodium = Boolean(body.reveal);
       if (session.revealPodium) session.winnersPublished = true;
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }
@@ -895,6 +1004,7 @@ const server = http.createServer(async (req, res) => {
       session.questionStartedAt = null;
       session.revealPodium = false;
       session.winnersPublished = false;
+      touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
     }

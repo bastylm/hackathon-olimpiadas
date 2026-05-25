@@ -36,6 +36,7 @@ Variables recomendadas:
 - `PORT`: puerto entregado por la plataforma.
 - `DATA_PATH`: ruta persistente para secciones y bancos de preguntas, por ejemplo `/data/data.json`.
 - `RESPONSES_DB_PATH`: ruta de la base de respuestas en un disco persistente, por ejemplo `/data/responses-db.json`.
+- `SESSIONS_DB_PATH`: ruta persistente para formularios, cÃ³digos QR, temporizador y estado de publicaciÃ³n, por ejemplo `/data/sessions-db.json`.
 - `UPLOADS_DIR`: ruta donde se guardan los Word cargados, por defecto `public/uploads`.
 - `PYTHON_BIN`: comando o ruta de Python, por ejemplo `python3`.
 - `WORD_IMPORT_FALLBACK_PYTHON`: usa `1` solo si quieres activar el importador Python antiguo como respaldo.
@@ -69,6 +70,7 @@ pip install -r requirements.txt
 - `public/`: frontend de administrador, proyección y estudiantes.
 - `data.json`: secciones y bancos de preguntas base.
 - `responses-db.example.json`: ejemplo de la base de respuestas persistente.
+- `sessions-db.json`: base local de formularios/cÃ³digos creados. No se sube al repositorio.
 - `Formato_carga_preguntas.docx`: plantilla para cargar preguntas desde Word.
 - `Formato_reporte_intervencion_diaria.docx`: plantilla del registro diario.
 

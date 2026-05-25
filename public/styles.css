@@ -274,6 +274,60 @@ input {
   font-weight: 800;
 }
 
+.button-link.small {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.session-manager {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.session-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbf8ff;
+}
+
+.session-row.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.12);
+}
+
+.session-row strong {
+  display: block;
+  color: var(--accent-dark);
+  font-size: 22px;
+}
+
+.session-row span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.session-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.session-actions button {
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
 .upload-manager {
   display: grid;
   gap: 8px;
@@ -498,6 +552,62 @@ input {
   color: var(--accent-dark);
   font-size: clamp(26px, 3vw, 44px);
   line-height: 1;
+}
+
+.participation-rank {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.participation-rank h3 {
+  margin: 0;
+  color: var(--accent-dark);
+  font-size: 17px;
+}
+
+.participation-rank p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.participation-rank-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fbf8ff;
+}
+
+.participation-rank-row strong {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+}
+
+.participation-rank-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 900;
+}
+
+.participation-rank-row em {
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 13px;
 }
 
 .mystery {
