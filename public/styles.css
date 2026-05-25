@@ -259,6 +259,11 @@ input {
   line-height: 1;
 }
 
+.qr-panel {
+  display: grid;
+  place-items: center;
+}
+
 .session-card img {
   width: 190px;
   height: 190px;

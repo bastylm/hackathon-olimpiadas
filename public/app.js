@@ -5,6 +5,7 @@ let mode = "admin";
 let responseContext = null;
 let managedSessions = [];
 let editingSectionId = "";
+let adminQrVisible = false;
 
 function safeJson(value, fallback) {
   try {
@@ -344,7 +345,7 @@ async function loadSessionByCode(code) {
     activeSession = await api(`/api/session/${code}`);
     localStorage.setItem("olimpiadasEvaluatorCode", activeSession.code);
     restoreSessionSelectors();
-    showSessionInvite(activeSession);
+    showSessionInvite(activeSession, { resetQr: true });
     renderAdmin(activeSession);
     await loadManagedSessions();
     startRefresh();
@@ -631,7 +632,7 @@ async function createSession() {
       method: "POST",
       body: { selectedQuestions: draft.selectedQuestions, durationSeconds: draft.durationSeconds, expectedParticipants: draft.expectedParticipants, challengeText: draft.challengeText },
     });
-    $("selectionStatus").textContent = `Código ${activeSession.code} generado. QR listo para proyectar.`;
+    $("selectionStatus").textContent = `Código ${activeSession.code} generado. Puedes mostrar u ocultar el QR cuando lo necesites.`;
     renderAdmin(activeSession);
     await loadManagedSessions();
     startRefresh();
@@ -643,11 +644,25 @@ async function createSession() {
   }
 }
 
-function showSessionInvite(session) {
+function setAdminQrVisibility(visible, session = activeSession) {
+  adminQrVisible = Boolean(visible);
+  $("qrPanel").classList.toggle("hidden", !adminQrVisible);
+  $("toggleQrVisibility").textContent = adminQrVisible ? "Ocultar QR" : "Mostrar QR";
+  $("toggleQrVisibility").setAttribute("aria-expanded", String(adminQrVisible));
+  if (adminQrVisible && session?.qrUrl) $("qrImage").src = `${session.qrUrl}?t=${Date.now()}`;
+}
+
+function showSessionInvite(session, options = {}) {
   $("sessionCard").classList.remove("hidden");
   $("sessionCode").textContent = session.code;
   $("joinUrl").textContent = session.joinUrl;
   $("projectionLink").href = `/proyeccion?code=${session.code}`;
+  const codeChanged = $("qrImage").dataset.code !== session.code;
+  $("qrImage").dataset.code = session.code;
+  if (options.resetQr || codeChanged) {
+    adminQrVisible = false;
+    $("qrImage").removeAttribute("src");
+  }
   $("qrImage").alt = "Generando QR para estudiantes";
   $("qrImage").onload = () => {
     $("qrImage").alt = `QR listo para el código ${session.code}`;
@@ -656,7 +671,7 @@ function showSessionInvite(session) {
     $("qrImage").alt = "No se pudo cargar el QR. Usa el código o el enlace mostrado.";
     $("selectionStatus").textContent = `Código ${session.code} generado. Si el QR no aparece, usa el enlace: ${session.joinUrl}`;
   };
-  $("qrImage").src = `${session.qrUrl}?t=${Date.now()}`;
+  setAdminQrVisibility(adminQrVisible, session);
 }
 
 function startRefresh() {
@@ -726,7 +741,10 @@ async function launchQuestion(questionIndex) {
 
 async function publishQuiz() {
   try {
-    saveDraftSelection();
+    const selectedQuestions = selectedQuestionValues();
+    draftSelection = { ...(draftSelection || currentDraft()), selectedQuestions };
+    localStorage.setItem("olimpiadasDraftSelection", JSON.stringify(draftSelection));
+    $("selectionStatus").textContent = `Selección guardada: ${selectedQuestions.length} preguntas. No se modificó la configuración del formulario.`;
     if (!activeSession) {
       renderAdmin({
         quizPublished: false,
@@ -740,7 +758,7 @@ async function publishQuiz() {
     }
     activeSession = await api(`/api/session/${activeSession.code}/publish`, {
       method: "POST",
-      body: currentDraft(),
+      body: { selectedQuestions },
     });
     renderAdmin(activeSession);
     syncManagedSession(activeSession);
@@ -1492,6 +1510,7 @@ async function init() {
     $("wordUpload").addEventListener("change", handleWordFileSelection);
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("createSession").addEventListener("click", createSession);
+    $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
     $("publishQuiz").addEventListener("click", publishQuiz);
     $("toggleAnswers").addEventListener("click", toggleAnswers);
     $("toggleRanking").addEventListener("click", toggleRanking);

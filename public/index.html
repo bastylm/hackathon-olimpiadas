@@ -74,6 +74,10 @@
             </label>
             <button id="deleteBank" type="button">Eliminar banco de preguntas</button>
             <label>
+              Descripcion breve o pregunta esencial
+              <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: Cual es el desafio principal que debe resolver esta seccion?"></textarea>
+            </label>
+            <label>
               Seleccionar cuestionario Word
               <input id="wordUpload" type="file" accept=".docx" />
             </label>
@@ -87,15 +91,14 @@
               Cantidad esperada de participantes
               <input id="expectedParticipants" type="number" min="0" max="500" value="0" />
             </label>
-            <label>
-              Descripcion breve o pregunta esencial
-              <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: Cual es el desafio principal que debe resolver esta seccion?"></textarea>
-            </label>
-            <button id="createSession" class="primary" type="button">Crear código QR</button>
+            <button id="createSession" class="primary" type="button">Crear código</button>
             <div id="sessionCard" class="session-card hidden">
               <span>Código estudiantes</span>
               <strong id="sessionCode">-----</strong>
-              <img id="qrImage" alt="QR para estudiantes" />
+              <button id="toggleQrVisibility" type="button" aria-expanded="false">Mostrar QR</button>
+              <div id="qrPanel" class="qr-panel hidden">
+                <img id="qrImage" alt="QR para estudiantes" />
+              </div>
               <p id="joinUrl"></p>
               <a id="projectionLink" class="button-link" href="/proyeccion" target="_blank">Abrir proyección</a>
             </div>

@@ -62,11 +62,15 @@ function sendJson(res, status, payload) {
   res.end(JSON.stringify(payload));
 }
 
+function readJsonFile(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
+}
+
 function loadData() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+    return readJsonFile(DATA_PATH);
   } catch {
-    return JSON.parse(fs.readFileSync(path.join(ROOT, "data.json"), "utf8"));
+    return readJsonFile(path.join(ROOT, "data.json"));
   }
 }
 
