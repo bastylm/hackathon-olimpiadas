@@ -55,6 +55,8 @@ npm start
 
 La carga de cuestionarios Word se guarda como archivo físico en el backend y luego se procesa con el importador JavaScript incluido en el servidor. En cada banco importado queda registrada la URL del archivo en `/uploads/...`. Python queda solo como respaldo opcional.
 
+Al eliminar un banco importado desde Word, el sistema también elimina el archivo físico asociado cuando ningún otro banco lo está usando. Si el banco está en una sesión activa, el administrador debe confirmar la eliminación forzada y esa sesión se cierra.
+
 Para habilitar la importación Word en un servidor con Python:
 
 ```bash

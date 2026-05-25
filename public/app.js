@@ -203,10 +203,26 @@ async function deleteBankById(bankId) {
     const bank = appData.banks.find((item) => item.id === bankId);
     if (!bank) return;
     if (!confirm(`Eliminar banco de preguntas: ${bank.name}?`)) return;
-    const result = await api(`/api/banks/${encodeURIComponent(bank.id)}`, { method: "DELETE" });
+    let result;
+    try {
+      result = await api(`/api/banks/${encodeURIComponent(bank.id)}`, { method: "DELETE" });
+    } catch (error) {
+      if (error.status !== 409) throw error;
+      const force = confirm("Este banco esta usado por una sesion activa. Si lo eliminas, esa sesion se cerrara. Deseas continuar?");
+      if (!force) return;
+      result = await api(`/api/banks/${encodeURIComponent(bank.id)}?force=1`, { method: "DELETE" });
+    }
     appData.banks = result.banks;
     fillSelectors();
-    $("selectionStatus").textContent = "Banco de preguntas eliminado.";
+    if (activeSession?.bank?.id === bank.id || result.removedSessions) {
+      activeSession = null;
+      localStorage.removeItem("olimpiadasEvaluatorCode");
+      $("sessionCard").classList.add("hidden");
+      clearInterval(refreshTimer);
+    }
+    $("selectionStatus").textContent = result.uploadDeleted
+      ? "Banco de preguntas y archivo Word eliminados."
+      : "Banco de preguntas eliminado.";
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("selectionStatus").textContent = `No se pudo eliminar el banco: ${error.message}`;

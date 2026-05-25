@@ -73,6 +73,27 @@ function saveData() {
   fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), "utf8");
 }
 
+function uploadPathForBank(bank) {
+  const filename = bank?.upload?.filename;
+  if (!filename) return null;
+  const full = path.resolve(UPLOADS_DIR, filename);
+  return full.startsWith(path.resolve(UPLOADS_DIR)) ? full : null;
+}
+
+function removeUploadForBank(bank, remainingBanks) {
+  const filename = bank?.upload?.filename;
+  const full = uploadPathForBank(bank);
+  if (!filename || !full) return false;
+  const stillUsed = remainingBanks.some((item) => item.upload?.filename === filename);
+  if (stillUsed) return false;
+  try {
+    if (fs.existsSync(full)) fs.unlinkSync(full);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function loadResponseStore() {
   try {
     return JSON.parse(fs.readFileSync(RESPONSES_DB, "utf8"));
@@ -541,14 +562,26 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 404, { error: "Banco no encontrado" });
       return;
     }
+    const bank = data.banks[index];
+    const force = url.searchParams.get("force") === "1";
     const inUse = [...sessions.values()].some((session) => session.bankId === id);
-    if (inUse) {
+    if (inUse && !force) {
       sendJson(res, 409, { error: "No se puede eliminar un banco usado por una sesion activa" });
       return;
     }
+    let removedSessions = 0;
+    if (inUse && force) {
+      for (const [code, session] of sessions.entries()) {
+        if (session.bankId === id) {
+          sessions.delete(code);
+          removedSessions += 1;
+        }
+      }
+    }
     data.banks.splice(index, 1);
+    const uploadDeleted = removeUploadForBank(bank, data.banks);
     saveData();
-    sendJson(res, 200, { banks: data.banks });
+    sendJson(res, 200, { banks: data.banks, uploadDeleted, removedSessions });
     return;
   }
 
@@ -604,6 +637,7 @@ const server = http.createServer(async (req, res) => {
       return;
     } catch (jsError) {
       if (process.env.WORD_IMPORT_FALLBACK_PYTHON !== "1") {
+        if (savedUpload?.filename) removeUploadForBank({ upload: savedUpload }, data.banks);
         sendJson(res, 400, { error: jsError.message || "El Word no tiene el formato esperado de preguntas" });
         return;
       }
@@ -618,6 +652,7 @@ const server = http.createServer(async (req, res) => {
       (error, stdout) => {
         try { fs.unlinkSync(tmpPath); } catch {}
         if (error) {
+          if (savedUpload?.filename) removeUploadForBank({ upload: savedUpload }, data.banks);
           sendJson(res, 500, { error: "No se pudo leer el Word" });
           return;
         }
@@ -625,6 +660,7 @@ const server = http.createServer(async (req, res) => {
           const imported = JSON.parse(stdout);
           importBanks(imported);
         } catch (parseError) {
+          if (savedUpload?.filename) removeUploadForBank({ upload: savedUpload }, data.banks);
           sendJson(res, 400, { error: parseError.message || "El Word no tiene el formato esperado de preguntas" });
         }
       }
