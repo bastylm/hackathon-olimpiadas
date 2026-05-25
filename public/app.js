@@ -900,6 +900,8 @@ function renderProjection(session) {
     : "Esperando que el administrador publique el cuestionario.";
   renderParticipationStats("projectionStats", session);
   renderParticipationRank("projectionParticipationRank", session);
+  document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
+  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished));
   $("projectionQuestion").classList.toggle("hidden", !session.acceptingAnswers);
   $("projectionQuestion").textContent = session.acceptingAnswers
     ? `Cuestionario abierto: ${session.quizQuestions.length} preguntas`
@@ -1047,9 +1049,9 @@ function renderPodium(id, participants) {
     .map(
       (p, idx) => `
         <div class="podium-card">
-          <span>${labels[idx]}</span>
-          <strong>${p ? escapeHtml(p.name) : "Sin lugar"}</strong>
-          <span>${p ? `${p.score} pts` : ""}</span>
+          <span class="podium-place">${labels[idx]}</span>
+          <strong class="podium-name">${p ? escapeHtml(p.name) : "Sin lugar"}</strong>
+          <span class="podium-score">${p ? `${p.score} pts` : ""}</span>
         </div>
       `
     )

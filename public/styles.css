@@ -618,22 +618,42 @@ input {
 
 .podium {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
   gap: 10px;
   min-height: 210px;
+  overflow: visible;
 }
 
 .podium-card {
+  position: relative;
+  min-width: 0;
   display: grid;
-  align-content: center;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
   justify-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 12px;
   border-radius: 8px 8px 0 0;
   color: #17202a;
   text-align: center;
   font-weight: 800;
+  overflow: hidden;
+}
+
+.podium-place,
+.podium-score {
+  line-height: 1.1;
+}
+
+.podium-name {
+  min-width: 0;
+  max-width: 100%;
+  align-self: center;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.08;
 }
 
 .podium-card:nth-child(1) {
@@ -724,7 +744,10 @@ input {
 }
 
 .projection-side .podium {
-  min-height: 420px;
+  align-items: end;
+  gap: 12px;
+  min-height: 300px;
+  padding: 44px 6px 4px;
 }
 
 .projection-side .leaderboard {
@@ -756,18 +779,34 @@ input {
 }
 
 .projection-side .podium-card {
-  position: relative;
-  font-size: 24px;
+  font-size: 18px;
+  padding: 30px 10px 10px;
   border: 1px solid rgba(36, 17, 57, 0.12);
   box-shadow: 0 18px 42px rgba(91, 33, 182, 0.16);
+  overflow: visible;
 }
 
-.projection-side .podium-card strong {
-  font-size: clamp(28px, 4vw, 54px);
+.projection-side .podium-place {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.projection-side .podium-name {
+  font-size: clamp(18px, 2.1vw, 28px);
+  max-height: 3.3em;
+}
+
+.projection-side .podium-score {
+  font-size: clamp(15px, 1.7vw, 22px);
+  font-weight: 900;
 }
 
 .projection-side .podium-card::before {
   content: "";
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
   display: grid;
   place-items: center;
   width: 68px;
@@ -802,6 +841,19 @@ input {
 
 .projection-side .podium-card:nth-child(3) {
   height: 180px;
+}
+
+.projection-side.winners-mode {
+  align-content: start;
+}
+
+.projection-side.winners-mode .participation-rank,
+.projection-side.winners-mode .current-question {
+  display: none;
+}
+
+.projection-side.winners-mode .podium {
+  margin-top: 10px;
 }
 
 body[data-view="projectionView"] .shell {
@@ -899,19 +951,20 @@ body[data-view="projectionView"] .projection-side .leaderboard li {
 }
 
 body[data-view="projectionView"] .projection-side .podium {
-  min-height: 280px;
+  min-height: 260px;
+  padding-top: 38px;
 }
 
 body[data-view="projectionView"] .projection-side .podium-card:nth-child(1) {
-  height: 160px;
+  height: 180px;
 }
 
 body[data-view="projectionView"] .projection-side .podium-card:nth-child(2) {
-  height: 240px;
+  height: 220px;
 }
 
 body[data-view="projectionView"] .projection-side .podium-card:nth-child(3) {
-  height: 130px;
+  height: 175px;
 }
 
 .student-card {
