@@ -281,6 +281,20 @@ async function login() {
   }
 }
 
+function logoutAdmin() {
+  localStorage.removeItem(authKey("admin"));
+  localStorage.removeItem("olimpiadasAuth");
+  clearInterval(refreshTimer);
+  activeSession = null;
+  responseContext = null;
+  $("loginUser").value = "";
+  $("loginPass").value = "";
+  $("loginTitle").textContent = "Cuenta administradora";
+  $("loginHint").textContent = "Sesión cerrada.";
+  setRoleLabel("Administrador");
+  setView("loginView");
+}
+
 function currentAuth(expectedRole) {
   const current = currentAuthForRole(expectedRole);
   if (!current?.token) return null;
@@ -1177,6 +1191,7 @@ async function init() {
     else await showAdmin();
 
     $("loginButton").addEventListener("click", login);
+    $("logoutAdmin").addEventListener("click", logoutAdmin);
     $("loginPass").addEventListener("keydown", (event) => {
       if (event.key === "Enter") login();
     });

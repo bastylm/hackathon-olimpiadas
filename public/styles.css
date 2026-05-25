@@ -187,6 +187,24 @@ h2 {
   top: 18px;
 }
 
+.admin-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.admin-title-row h2 {
+  margin-bottom: 0;
+}
+
+.admin-title-row button {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
 label {
   display: grid;
   gap: 7px;
