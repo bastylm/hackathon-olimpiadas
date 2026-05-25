@@ -90,6 +90,7 @@ function setRoleLabel(text) {
   document.querySelectorAll(".role-nav a").forEach((link) => link.classList.remove("active"));
   if (text === "Administrador") $("navAdmin")?.classList.add("active");
   if (text === "Proyección") $("navProjection")?.classList.add("active");
+  if (text === "Estudiante") $("navStudent")?.classList.add("active");
 }
 
 function fmt(seconds) {
@@ -312,7 +313,6 @@ async function showAdmin() {
 
 async function showProjection() {
   mode = "projection";
-  if (!requireLogin("projection")) return;
   $("pageTitle").textContent = "Pantalla de proyección";
   setRoleLabel("Proyección");
   setView("projectionView");
