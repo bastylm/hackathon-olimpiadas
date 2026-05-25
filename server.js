@@ -5,10 +5,12 @@ const crypto = require("crypto");
 const os = require("os");
 const childProcess = require("child_process");
 const zlib = require("zlib");
+const multer = require("multer");
 const QRCode = require("qrcode");
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, "public");
+const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(PUBLIC, "uploads");
 const DATA_PATH = process.env.DATA_PATH || path.join(ROOT, "data.json");
 const data = loadData();
 const sessions = new Map();
@@ -30,6 +32,26 @@ const accounts = {
     name: "Proyeccion",
   },
 };
+
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+const wordUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, callback) => callback(null, UPLOADS_DIR),
+    filename: (_req, file, callback) => {
+      const ext = path.extname(file.originalname || ".docx").toLowerCase() || ".docx";
+      const base = path.basename(file.originalname || "cuestionario", ext).replace(/[^\w.-]+/g, "_").slice(0, 70) || "cuestionario";
+      callback(null, `${Date.now()}-${crypto.randomInt(10000)}-${base}${ext}`);
+    },
+  }),
+  limits: { fileSize: 15 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, callback) => {
+    if (!String(file.originalname || "").toLowerCase().endsWith(".docx")) {
+      callback(new Error("Solo se permiten archivos .docx"));
+      return;
+    }
+    callback(null, true);
+  },
+});
 
 function sendJson(res, status, payload) {
   res.writeHead(status, {
@@ -92,6 +114,15 @@ function readBody(req) {
       } catch {
         resolve({});
       }
+    });
+  });
+}
+
+function receiveWordUpload(req, res) {
+  return new Promise((resolve, reject) => {
+    wordUpload.single("questionnaire")(req, res, (error) => {
+      if (error) reject(error);
+      else resolve(req.file);
     });
   });
 }
@@ -396,6 +427,20 @@ function publicSession(session, req) {
 
 function serveStatic(req, res) {
   const url = new URL(req.url, "http://localhost");
+  if (url.pathname === "/uploads" || url.pathname.startsWith("/uploads/")) {
+    const relative = path.normalize(decodeURIComponent(url.pathname.replace(/^\/uploads\/?/, ""))).replace(/^(\.\.[/\\])+/, "");
+    const full = path.join(UPLOADS_DIR, relative);
+    if (!full.startsWith(UPLOADS_DIR) || !fs.existsSync(full) || fs.statSync(full).isDirectory()) {
+      res.writeHead(404);
+      res.end("Not found");
+      return;
+    }
+    const ext = path.extname(full).toLowerCase();
+    const type = ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "application/octet-stream";
+    res.writeHead(200, { "Content-Type": type, "Cache-Control": "public, max-age=31536000, immutable" });
+    fs.createReadStream(full).pipe(res);
+    return;
+  }
   let file =
     url.pathname === "/" ||
     url.pathname === "/admin" ||
@@ -509,8 +554,35 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/banks/import-word") {
     if (!requireAdmin(req, res)) return;
-    const body = await readBody(req);
-    const raw = Buffer.from(String(body.content || ""), "base64");
+    let raw;
+    let filename = "cuestionario.docx";
+    let savedUpload = null;
+    const contentType = String(req.headers["content-type"] || "");
+    if (contentType.includes("multipart/form-data")) {
+      try {
+        const file = await receiveWordUpload(req, res);
+        if (!file) {
+          sendJson(res, 400, { error: "Selecciona un archivo Word" });
+          return;
+        }
+        raw = fs.readFileSync(file.path);
+        filename = file.originalname || file.filename;
+        savedUpload = {
+          originalName: file.originalname,
+          filename: file.filename,
+          url: `/uploads/${encodeURIComponent(file.filename)}`,
+          size: file.size,
+          uploadedAt: new Date().toISOString(),
+        };
+      } catch (error) {
+        sendJson(res, 400, { error: error.message || "No se pudo recibir el archivo Word" });
+        return;
+      }
+    } else {
+      const body = await readBody(req);
+      raw = Buffer.from(String(body.content || ""), "base64");
+      filename = String(body.filename || filename);
+    }
     if (!raw.length) {
       sendJson(res, 400, { error: "Archivo Word vacio" });
       return;
@@ -521,13 +593,14 @@ const server = http.createServer(async (req, res) => {
       }
       imported.forEach((bank) => {
         bank.id = `word-${Date.now()}-${crypto.randomInt(10000)}`;
+        if (savedUpload) bank.upload = savedUpload;
         data.banks.push(bank);
       });
       saveData();
       sendJson(res, 200, { banks: imported, allBanks: data.banks });
     };
     try {
-      importBanks(parseDocxBanks(raw, body.filename));
+      importBanks(parseDocxBanks(raw, filename));
       return;
     } catch (jsError) {
       if (process.env.WORD_IMPORT_FALLBACK_PYTHON !== "1") {
@@ -535,7 +608,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
     }
-    const safeName = String(body.filename || "cuestionario.docx").replace(/[^\w.-]+/g, "_");
+    const safeName = String(filename || "cuestionario.docx").replace(/[^\w.-]+/g, "_");
     const tmpPath = path.join(os.tmpdir(), `upload-${Date.now()}-${safeName}`);
     fs.writeFileSync(tmpPath, raw);
     childProcess.execFile(

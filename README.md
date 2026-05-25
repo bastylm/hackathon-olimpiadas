@@ -36,6 +36,7 @@ Variables recomendadas:
 - `PORT`: puerto entregado por la plataforma.
 - `DATA_PATH`: ruta persistente para secciones y bancos de preguntas, por ejemplo `/data/data.json`.
 - `RESPONSES_DB_PATH`: ruta de la base de respuestas en un disco persistente, por ejemplo `/data/responses-db.json`.
+- `UPLOADS_DIR`: ruta donde se guardan los Word cargados, por defecto `public/uploads`.
 - `PYTHON_BIN`: comando o ruta de Python, por ejemplo `python3`.
 - `WORD_IMPORT_FALLBACK_PYTHON`: usa `1` solo si quieres activar el importador Python antiguo como respaldo.
 - `ADMIN_USERNAME`: usuario administrador. Por defecto: `administrador`.
@@ -52,7 +53,7 @@ npm install
 npm start
 ```
 
-La carga de cuestionarios Word se realiza primero con el importador JavaScript incluido en el servidor. Python queda solo como respaldo opcional.
+La carga de cuestionarios Word se guarda como archivo físico en el backend y luego se procesa con el importador JavaScript incluido en el servidor. En cada banco importado queda registrada la URL del archivo en `/uploads/...`. Python queda solo como respaldo opcional.
 
 Para habilitar la importación Word en un servidor con Python:
 

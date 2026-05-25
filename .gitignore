@@ -1,6 +1,8 @@
 node_modules/
 responses-db.json
 upload-*.docx
+public/uploads/*
+!public/uploads/.gitkeep
 *.log
 .env
 .DS_Store

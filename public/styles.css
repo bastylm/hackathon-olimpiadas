@@ -296,6 +296,11 @@ input {
   overflow-wrap: anywhere;
 }
 
+.upload-row a {
+  color: var(--accent-dark);
+  font-weight: 900;
+}
+
 .upload-row button {
   min-height: 34px;
   padding: 0 10px;

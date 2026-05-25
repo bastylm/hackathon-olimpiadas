@@ -60,6 +60,21 @@ async function api(path, options = {}) {
   return data;
 }
 
+async function apiForm(path, formData) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: authHeaders(),
+    body: formData,
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data.error || "Error de conexion");
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
 function adminAuthExpired(error) {
   return error?.status === 403 && String(error.message || "").includes("administradora");
 }
@@ -209,7 +224,7 @@ function renderUploadManager() {
         .map(
           (bank) => `
             <div class="upload-row">
-              <span>${escapeHtml(bank.name)} · ${bank.questions.length} preguntas</span>
+              <span>${escapeHtml(bank.name)} · ${bank.questions.length} preguntas${bank.upload?.url ? ` · <a href="${escapeHtml(bank.upload.url)}" target="_blank" rel="noopener">archivo</a>` : ""}</span>
               <button type="button" data-use-upload="${bank.id}">Usar</button>
               <button type="button" data-delete-upload="${bank.id}">Eliminar</button>
             </div>
@@ -979,15 +994,10 @@ async function importWordQuestionnaire() {
     }
     $("uploadWordButton").disabled = true;
     $("uploadWordButton").textContent = "Cargando...";
-    const buffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    let binary = "";
-    bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
     $("selectionStatus").textContent = "Importando cuestionario Word...";
-    const result = await api("/api/banks/import-word", {
-      method: "POST",
-      body: { filename: file.name, content: btoa(binary) },
-    });
+    const formData = new FormData();
+    formData.append("questionnaire", file);
+    const result = await apiForm("/api/banks/import-word", formData);
     appData.banks = result.allBanks;
     fillSelectors();
     $("bankSelect").value = result.banks[0].id;
