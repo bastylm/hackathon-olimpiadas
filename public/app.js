@@ -247,7 +247,7 @@ async function loadResponsesForSelected() {
 async function saveSection() {
   try {
     const payload = sectionFormPayload();
-    if (!payload.section || !payload.subject) throw new Error("Ingresa secci?n y asignatura.");
+    if (!payload.section || !payload.subject) throw new Error("Ingresa sección y asignatura.");
     const result = await api("/api/sections", { method: "POST", body: payload });
     appData.sections = result.sections;
     $("sectionSearch").value = "";
@@ -257,7 +257,7 @@ async function saveSection() {
     ) || appData.sections[appData.sections.length - 1];
     if (saved) $("sectionSelect").value = saved.id;
     updateSectionEditor();
-    $("sectionStatus").textContent = "Secci?n guardada.";
+    $("sectionStatus").textContent = "Sección guardada.";
     await loadManagedSessions();
     await loadResponsesForSelected();
   } catch (error) {
@@ -270,11 +270,11 @@ async function deleteCurrentSection() {
   try {
     const section = selectedSection();
     if (!section) return;
-    if (!confirm(`Eliminar secci?n ${section.section}? Solo se permite si no tiene formularios ni respuestas.`)) return;
+    if (!confirm(`Eliminar sección ${section.section}? Solo se permite si no tiene formularios ni respuestas.`)) return;
     const result = await api(`/api/sections/${encodeURIComponent(section.id)}`, { method: "DELETE" });
     appData.sections = result.sections;
     fillSectionSelector();
-    $("sectionStatus").textContent = "Secci?n eliminada.";
+    $("sectionStatus").textContent = "Sección eliminada.";
     await loadResponsesForSelected();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
@@ -415,7 +415,7 @@ async function deleteBankById(bankId) {
       result = await api(`/api/banks/${encodeURIComponent(bank.id)}`, { method: "DELETE" });
     } catch (error) {
       if (error.status !== 409) throw error;
-      const force = confirm("Este banco esta usado por una sesi?n activa. Si lo eliminas, esa sesi?n se cerrar?. ?Deseas continuar?");
+      const force = confirm("Este banco esta usado por una sesión activa. Si lo eliminas, esa sesión se cerrar?. ?Deseas continuar?");
       if (!force) return;
       result = await api(`/api/banks/${encodeURIComponent(bank.id)}?force=1`, { method: "DELETE" });
     }
@@ -663,6 +663,11 @@ function setAdminQrVisibility(visible, session = activeSession) {
 }
 
 function showSessionInvite(session, options = {}) {
+  if (session && session.inviteVisible === false) {
+    $("sessionCard").classList.add("hidden");
+    adminQrVisible = false;
+    return;
+  }
   $("sessionCard").classList.remove("hidden");
   $("sessionCode").textContent = session.code;
   $("joinUrl").textContent = session.joinUrl;
@@ -1005,12 +1010,18 @@ function renderParticipationRank(id, session) {
 }
 
 function renderAllParticipants(id, session) {
-  const participants = [...(session.globalParticipants || [])].slice(0, 14);
+  const participants = [...(session.globalParticipants || [])];
+  const visible = session.inviteVisible === false ? [] : participants.slice(0, 8);
   $(id).innerHTML = `
-    <h3>Participantes de todas las secci?nes</h3>
+    <h3>Participación total</h3>
+    <div class="participation-rank-row total-row">
+      <strong>${participants.length}</strong>
+      <span>participantes registrados</span>
+      <em>todas las secciones</em>
+    </div>
     ${
-      participants.length
-        ? participants
+      visible.length
+        ? visible
             .map(
               (p) => `
                 <div class="participation-rank-row">
@@ -1021,36 +1032,61 @@ function renderAllParticipants(id, session) {
               `
             )
             .join("")
-        : "<p>Esperando participantes registrados...</p>"
+        : ""
+    }
+  `;
+}
+
+function renderAreaWinners(id, session) {
+  const winners = [...(session.areaWinners || [])];
+  $(id).innerHTML = `
+    <h3>Ganadores por área</h3>
+    ${
+      winners.length
+        ? winners
+            .map(
+              (p) => `
+                <div class="participation-rank-row">
+                  <strong>1</strong>
+                  <span>${escapeHtml(p.area)}: ${escapeHtml(p.name || "Sin ganador")}</span>
+                  <em>${p.score || 0} pts</em>
+                </div>
+              `
+            )
+            .join("")
+        : "<p>Sin ganadores por área todavía.</p>"
     }
   `;
 }
 
 function renderProjection(session) {
-  $("projectionCode").textContent = `Código ${session.code}`;
-  $("projectionJoin").textContent = session.joinUrl;
-  $("projectionQr").src = `${session.qrUrl}?t=${Math.floor(Date.now() / 30000)}`;
-  $("projectionElapsed").textContent = session.winnersPublished ? "Finalizado" : session.timerStartedAt ? fmt(session.remainingSeconds) : fmt(session.durationSeconds);
+  const inviteVisible = session.inviteVisible !== false;
+  const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
+  $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Sin código activo";
+  $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "La competencia anterior ya fue cerrada.";
+  $("projectionQr").classList.toggle("hidden", !inviteVisible);
+  if (inviteVisible) $("projectionQr").src = `${session.qrUrl}?t=${Math.floor(Date.now() / 30000)}`;
+  $("projectionElapsed").textContent = !inviteVisible ? "Sin actividad" : finished ? "Finalizado" : session.timerStartedAt ? fmt(session.remainingSeconds) : fmt(session.durationSeconds);
   $("projectionQuestion").textContent = session.quizPublished
     ? session.acceptingAnswers
       ? `Cuestionario abierto con ${session.quizQuestions.length} preguntas. Escanea el QR para responder.`
       : "Esperando apertura de respuestas."
-    : "Esperando que el administrador publique el cuestionario.";
+    : inviteVisible
+      ? "Esperando que el administrador publique el cuestionario."
+      : "No hay competencia activa en este momento.";
   renderParticipationStats("projectionStats", session);
-  $("projectionChallenge").classList.toggle("hidden", !session.challengeText);
-  $("projectionChallenge").innerHTML = session.challengeText
+  $("projectionChallenge").classList.toggle("hidden", !session.challengeText || !inviteVisible);
+  $("projectionChallenge").innerHTML = session.challengeText && inviteVisible
     ? `<strong>Desafío</strong><span>${escapeHtml(session.challengeText)}</span>`
     : "";
   renderParticipationRank("projectionParticipationRank", session);
   renderAllParticipants("projectionAllParticipants", session);
+  renderAreaWinners("projectionAreaWinners", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
-  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished));
-  $("projectionQuestion").classList.toggle("hidden", !session.acceptingAnswers);
-  $("projectionQuestion").textContent = session.acceptingAnswers
-    ? `Cuestionario abierto: ${session.quizQuestions.length} preguntas`
-    : "";
-  $("projectionRanking").classList.toggle("hidden", !session.showRanking || session.winnersPublished);
-  if (session.showRanking && !session.winnersPublished) renderLeaderboard("projectionRanking", session.participants);
+  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !inviteVisible);
+  $("projectionQuestion").classList.toggle("hidden", false);
+  $("projectionRanking").classList.toggle("hidden", !session.showRanking || session.winnersPublished || !inviteVisible);
+  if (session.showRanking && !session.winnersPublished && inviteVisible) renderLeaderboard("projectionRanking", session.participants);
   $("projectionPodium").classList.toggle("hidden", !session.winnersPublished);
   if (session.winnersPublished) renderPodium("projectionPodium", session.participants);
 }
@@ -1104,7 +1140,7 @@ function renderResponses(participants, context = activeSession) {
         .join("")
     : "<p class='hint'>Aún no hay respuestas registradas en esta sección.</p>";
   if (!filtered.length) {
-    $("responsesList").innerHTML = "<p class='hint'>No hay participantes para esa b?squeda en esta secci?n y banco.</p>";
+    $("responsesList").innerHTML = "<p class='hint'>No hay participantes para esa b?squeda en esta sección y banco.</p>";
   }
   document.querySelectorAll("[data-delete-student]").forEach((button) => {
     button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
@@ -1126,7 +1162,7 @@ async function deleteStudent(studentId) {
 }
 
 function renderResponses(participants, context = activeSession) {
-  const sectionLabel = context?.section?.section || "Sin secci?n";
+  const sectionLabel = context?.section?.section || "Sin sección";
   const bankLabel = context?.bank?.name || "Sin banco";
   const search = normalizeText($("responsesSearch")?.value || "");
   const stats = participationStats({ ...(context || {}), participants });
@@ -1157,7 +1193,7 @@ function renderResponses(participants, context = activeSession) {
           `
         )
         .join("")
-    : "<p class='hint'>No hay participantes para esa b?squeda en esta secci?n y banco.</p>";
+    : "<p class='hint'>No hay participantes para esa b?squeda en esta sección y banco.</p>";
   document.querySelectorAll("[data-delete-student]").forEach((button) => {
     button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
   });
@@ -1278,7 +1314,7 @@ function renderStudentSession(session) {
 
   const visibleQuestions = session.studentQuestions.length ? session.studentQuestions : session.quizQuestions;
   if (!visibleQuestions.length) {
-    $("studentQuestion").textContent = "Las respuestas estan abiertas, pero no hay preguntas publicadas para este c?digo.";
+    $("studentQuestion").textContent = "Las respuestas estan abiertas, pero no hay preguntas publicadas para este código.";
     $("quizQuestions").innerHTML = "";
     $("finishQuiz").classList.add("hidden");
     $("answerResult").textContent = "Pide al administrador que guarde o publique la selecci?n de preguntas.";
@@ -1530,7 +1566,7 @@ async function init() {
     $("saveSection").addEventListener("click", saveSection);
     $("newSection").addEventListener("click", () => {
       updateSectionEditor(true);
-      $("sectionStatus").textContent = "Completa los datos y guarda una nueva secci?n.";
+      $("sectionStatus").textContent = "Completa los datos y guarda una nueva sección.";
     });
     $("deleteSection").addEventListener("click", deleteCurrentSection);
     $("bankSelect").addEventListener("change", handleBankChange);

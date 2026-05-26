@@ -99,6 +99,10 @@ function hydrateSession(raw) {
     revealPodium: Boolean(raw?.revealPodium),
     winnersPublished: Boolean(raw?.winnersPublished),
     winnersPublishedAt: raw?.winnersPublishedAt || (raw?.winnersPublished ? raw?.updatedAt || raw?.createdAt || null : null),
+    inviteVisible:
+      raw?.inviteVisible === undefined
+        ? Boolean(raw?.quizPublished || raw?.acceptingAnswers || raw?.winnersPublished)
+        : Boolean(raw?.inviteVisible),
     timerStartedAt: raw?.timerStartedAt || null,
     questionStartedAt: raw?.questionStartedAt || null,
     students,
@@ -227,7 +231,7 @@ function auth(req) {
 function requireAdmin(req, res) {
   const user = auth(req);
   if (!user || user.role !== "admin") {
-    sendJson(res, 403, { error: "Solo la cuenta administradora puede realizar esta acci?n" });
+    sendJson(res, 403, { error: "Solo la cuenta administradora puede realizar esta acción" });
     return false;
   }
   return true;
@@ -321,6 +325,30 @@ function rankAllParticipants() {
   }
   entries.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   return entries.map((student, index) => ({ ...student, place: index + 1 }));
+}
+
+function areaWinners() {
+  const bestByArea = new Map();
+  for (const record of Object.values(responseStore)) {
+    const section = data.sections.find((item) => item.id === record.sectionId);
+    const bank = data.banks.find((item) => item.id === record.bankId);
+    const area = section?.area || bank?.area || "Sin área";
+    for (const student of Object.values(record.students || {})) {
+      const candidate = {
+        area,
+        name: student.name,
+        rut: student.rut || "",
+        score: Number(student.score || 0),
+        section: section?.section || "Sin sección",
+        bank: bank?.name || "Sin banco",
+      };
+      const current = bestByArea.get(area);
+      if (!current || candidate.score > current.score || (candidate.score === current.score && candidate.name.localeCompare(current.name) < 0)) {
+        bestByArea.set(area, candidate);
+      }
+    }
+  }
+  return [...bestByArea.values()].sort((a, b) => a.area.localeCompare(b.area));
 }
 
 function currentQuestionFor(session) {
@@ -548,6 +576,7 @@ function resetSessionToInitial(session) {
   session.revealPodium = false;
   session.winnersPublished = false;
   session.winnersPublishedAt = null;
+  session.inviteVisible = false;
 }
 
 function autoResetCompletedSession(session) {
@@ -595,6 +624,8 @@ function publicSession(session, req) {
     qrUrl: `/api/session/${session.code}/qr`,
     participants,
     globalParticipants: rankAllParticipants(),
+    areaWinners: areaWinners(),
+    inviteVisible: Boolean(session.inviteVisible),
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
   };
@@ -670,7 +701,7 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const payload = sectionPayload(body);
     if (!payload.section || !payload.subject) {
-      sendJson(res, 400, { error: "Ingresa al menos secci?n y asignatura" });
+      sendJson(res, 400, { error: "Ingresa al menos sección y asignatura" });
       return;
     }
     const id = String(body.id || "").trim();
@@ -697,7 +728,7 @@ const server = http.createServer(async (req, res) => {
     const inSessions = [...sessions.values()].some((session) => session.sectionId === id);
     const inResponses = Object.keys(responseStore).some((key) => key.startsWith(`${id}::`));
     if (inSessions || inResponses) {
-      sendJson(res, 409, { error: "No se puede eliminar una secci?n con formularios o respuestas registradas" });
+      sendJson(res, 409, { error: "No se puede eliminar una sección con formularios o respuestas registradas" });
       return;
     }
     data.sections.splice(index, 1);
@@ -713,7 +744,7 @@ const server = http.createServer(async (req, res) => {
     const section = data.sections.find((item) => item.id === sectionId) || null;
     const bank = data.banks.find((item) => item.id === bankId) || null;
     if (!section || !bank) {
-      sendJson(res, 400, { error: "Selecciona una secci?n y un banco v?lido" });
+      sendJson(res, 400, { error: "Selecciona una sección y un banco v?lido" });
       return;
     }
     const matchingSession = [...sessions.values()]
@@ -785,7 +816,7 @@ const server = http.createServer(async (req, res) => {
     const force = url.searchParams.get("force") === "1";
     const inUse = [...sessions.values()].some((session) => session.bankId === id);
     if (inUse && !force) {
-      sendJson(res, 409, { error: "No se puede eliminar un banco usado por una sesi?n activa" });
+      sendJson(res, 409, { error: "No se puede eliminar un banco usado por una sesión activa" });
       return;
     }
     let removedSessions = 0;
@@ -910,6 +941,7 @@ const server = http.createServer(async (req, res) => {
       revealPodium: false,
       winnersPublished: false,
       winnersPublishedAt: null,
+      inviteVisible: true,
       timerStartedAt: null,
       questionStartedAt: null,
       students: new Map(),
@@ -961,6 +993,7 @@ const server = http.createServer(async (req, res) => {
       if (!requireAdmin(req, res)) return;
       session.currentQuestionIndex = Number(body.questionIndex);
       session.acceptingAnswers = true;
+      session.inviteVisible = true;
       session.quizPublished = true;
       session.selectedQuestions = [Number(body.questionIndex)];
       session.revealPodium = false;
@@ -982,6 +1015,7 @@ const server = http.createServer(async (req, res) => {
       session.selectedQuestions = selected.filter((index) => allIndexes.includes(index));
       session.quizPublished = true;
       session.acceptingAnswers = false;
+      session.inviteVisible = true;
       session.showRanking = false;
       if (Number(body.durationSeconds) >= 60) {
         session.durationSeconds = Number(body.durationSeconds);
@@ -1075,6 +1109,7 @@ const server = http.createServer(async (req, res) => {
       if (typeof body.acceptingAnswers === "boolean") {
         if (body.acceptingAnswers) {
           session.acceptingAnswers = true;
+          session.inviteVisible = true;
           if (remainingSeconds(session) <= 0) {
             session.durationSeconds = Math.max(60, Number(body.durationSeconds || session.durationSeconds || 600));
             session.initialDurationSeconds = session.durationSeconds;
@@ -1095,6 +1130,7 @@ const server = http.createServer(async (req, res) => {
         session.winnersPublished = body.winnersPublished;
         session.revealPodium = body.winnersPublished ? true : session.revealPodium;
         if (body.winnersPublished) {
+          session.inviteVisible = false;
           if (session.timerStartedAt) {
             session.durationSeconds = remainingSeconds(session);
             session.timerStartedAt = null;
@@ -1126,6 +1162,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && action === "timer") {
       if (!requireAdmin(req, res)) return;
       if (body.start === true) session.timerStartedAt = new Date().toISOString();
+      if (body.start === true) session.inviteVisible = true;
       if (body.reset === true) session.timerStartedAt = null;
       touchSession(session);
       sendJson(res, 200, publicSession(session, req));
