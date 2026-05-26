@@ -1052,7 +1052,9 @@ function renderProjection(session) {
     : inviteVisible
       ? "Esperando que el administrador publique el cuestionario."
       : "No hay competencia activa en este momento.";
-  renderParticipationStats("projectionStats", session);
+  $("projectionStats").classList.toggle("hidden", !inviteVisible || finished);
+  if (inviteVisible && !finished) renderParticipationStats("projectionStats", session);
+  else $("projectionStats").innerHTML = "";
   $("projectionChallenge").classList.toggle("hidden", !session.challengeText || !inviteVisible);
   $("projectionChallenge").innerHTML = session.challengeText && inviteVisible
     ? `<strong>Desafío</strong><span>${escapeHtml(session.challengeText)}</span>`
