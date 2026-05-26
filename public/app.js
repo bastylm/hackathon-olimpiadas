@@ -1037,28 +1037,6 @@ function renderAllParticipants(id, session) {
   `;
 }
 
-function renderAreaWinners(id, session) {
-  const winners = [...(session.areaWinners || [])];
-  $(id).innerHTML = `
-    <h3>Ganadores por área</h3>
-    ${
-      winners.length
-        ? winners
-            .map(
-              (p) => `
-                <div class="participation-rank-row">
-                  <strong>1</strong>
-                  <span>${escapeHtml(p.area)}: ${escapeHtml(p.name || "Sin ganador")}</span>
-                  <em>${p.score || 0} pts</em>
-                </div>
-              `
-            )
-            .join("")
-        : "<p>Sin ganadores por área todavía.</p>"
-    }
-  `;
-}
-
 function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
@@ -1081,7 +1059,6 @@ function renderProjection(session) {
     : "";
   renderParticipationRank("projectionParticipationRank", session);
   renderAllParticipants("projectionAllParticipants", session);
-  renderAreaWinners("projectionAreaWinners", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
   $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !inviteVisible);
   $("projectionQuestion").classList.toggle("hidden", false);

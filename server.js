@@ -327,30 +327,6 @@ function rankAllParticipants() {
   return entries.map((student, index) => ({ ...student, place: index + 1 }));
 }
 
-function areaWinners() {
-  const bestByArea = new Map();
-  for (const record of Object.values(responseStore)) {
-    const section = data.sections.find((item) => item.id === record.sectionId);
-    const bank = data.banks.find((item) => item.id === record.bankId);
-    const area = section?.area || bank?.area || "Sin área";
-    for (const student of Object.values(record.students || {})) {
-      const candidate = {
-        area,
-        name: student.name,
-        rut: student.rut || "",
-        score: Number(student.score || 0),
-        section: section?.section || "Sin sección",
-        bank: bank?.name || "Sin banco",
-      };
-      const current = bestByArea.get(area);
-      if (!current || candidate.score > current.score || (candidate.score === current.score && candidate.name.localeCompare(current.name) < 0)) {
-        bestByArea.set(area, candidate);
-      }
-    }
-  }
-  return [...bestByArea.values()].sort((a, b) => a.area.localeCompare(b.area));
-}
-
 function currentQuestionFor(session) {
   const bank = data.banks.find((item) => item.id === session.bankId);
   return bank && Number.isInteger(session.currentQuestionIndex)
@@ -624,7 +600,6 @@ function publicSession(session, req) {
     qrUrl: `/api/session/${session.code}/qr`,
     participants,
     globalParticipants: rankAllParticipants(),
-    areaWinners: areaWinners(),
     inviteVisible: Boolean(session.inviteVisible),
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
