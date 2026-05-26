@@ -719,7 +719,7 @@ const server = http.createServer(async (req, res) => {
     const section = data.sections.find((item) => item.id === sectionId) || null;
     const bank = data.banks.find((item) => item.id === bankId) || null;
     if (!section || !bank) {
-      sendJson(res, 400, { error: "Selecciona una sección y un banco v?lido" });
+      sendJson(res, 400, { error: "Selecciona una sección y un banco válido" });
       return;
     }
     const matchingSession = [...sessions.values()]
@@ -1012,7 +1012,7 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && action === "answer") {
       if (!session.quizPublished || !session.acceptingAnswers) {
-        sendJson(res, 409, { error: "El cuestionario no esta abierto" });
+        sendJson(res, 409, { error: "El cuestionario no está abierto" });
         return;
       }
       if (session.timerStartedAt && remainingSeconds(session) <= 0) {
@@ -1031,7 +1031,7 @@ const server = http.createServer(async (req, res) => {
       const answerIndex = Number(body.answerIndex);
       const answer = question?.answers[answerIndex];
       if (!answer) {
-        sendJson(res, 400, { error: "Respuesta invalida" });
+        sendJson(res, 400, { error: "Respuesta inválida" });
         return;
       }
       let id = String(body.studentId || crypto.randomUUID());

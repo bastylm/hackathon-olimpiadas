@@ -415,7 +415,7 @@ async function deleteBankById(bankId) {
       result = await api(`/api/banks/${encodeURIComponent(bank.id)}`, { method: "DELETE" });
     } catch (error) {
       if (error.status !== 409) throw error;
-      const force = confirm("Este banco esta usado por una sesión activa. Si lo eliminas, esa sesión se cerrar?. ?Deseas continuar?");
+      const force = confirm("Este banco está usado por una sesión activa. Si lo eliminas, esa sesión se cerrará. ¿Deseas continuar?");
       if (!force) return;
       result = await api(`/api/banks/${encodeURIComponent(bank.id)}?force=1`, { method: "DELETE" });
     }
@@ -456,12 +456,12 @@ function renderUploadManager() {
         )
         .join("")}
     `
-    : "<p class='hint'>A?n no hay cuestionarios Word cargados.</p>";
+    : "<p class='hint'>Aún no hay cuestionarios Word cargados.</p>";
   document.querySelectorAll("[data-use-upload]").forEach((button) => {
     button.addEventListener("click", () => {
       $("bankSelect").value = button.dataset.useUpload;
       renderQuestions();
-      $("selectionStatus").textContent = "Banco cargado selecci?nado.";
+      $("selectionStatus").textContent = "Banco cargado seleccionado.";
     });
   });
   document.querySelectorAll("[data-delete-upload]").forEach((button) => {
@@ -761,16 +761,9 @@ async function publishQuiz() {
     localStorage.setItem("olimpiadasDraftSelection", JSON.stringify(draftSelection));
     $("selectionStatus").textContent = `Selección guardada: ${selectedQuestions.length} preguntas. No se modificó la configuración del formulario.`;
     if (!activeSession) {
-      renderAdmin({
-        quizPublished: false,
-        quizQuestions: [],
-        acceptingAnswers: false,
-        winnersPublished: false,
-        participants: [],
-        elapsedSeconds: 0,
-      });
       return;
     }
+    await updateExpectedParticipants({ silent: true });
     activeSession = await api(`/api/session/${activeSession.code}/publish`, {
       method: "POST",
       body: { selectedQuestions },
@@ -803,15 +796,17 @@ async function startTimer() {
   syncManagedSession(activeSession);
 }
 
-async function updateExpectedParticipants() {
+async function updateExpectedParticipants(options = {}) {
   if (!activeSession?.code) return;
   try {
     activeSession = await api(`/api/session/${activeSession.code}/settings`, {
       method: "POST",
       body: { expectedParticipants: Number($("expectedParticipants").value || 0), challengeText: $("challengeText").value.trim() },
     });
-    renderAdmin(activeSession);
-    syncManagedSession(activeSession);
+    if (!options.silent) {
+      renderAdmin(activeSession);
+      syncManagedSession(activeSession);
+    }
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("selectionStatus").textContent = `No se pudo guardar la cantidad esperada: ${error.message}`;
@@ -941,7 +936,7 @@ function renderAdmin(session) {
   $("toggleRanking").textContent = session.showRanking ? "Ocultar ranking" : "Mostrar ranking";
   $("rankingStatus").textContent = session.winnersPublished ? "Ganadores publicados" : session.showRanking ? "Ranking visible" : "Ranking oculto";
   $("adminElapsed").textContent = fmt(session.remainingSeconds ?? session.durationSeconds);
-  if (document.activeElement !== $("expectedParticipants")) $("expectedParticipants").value = session.expectedParticipants || 0;
+  if (session.expectedParticipants !== undefined && document.activeElement !== $("expectedParticipants")) $("expectedParticipants").value = session.expectedParticipants || 0;
   if (document.activeElement !== $("challengeText")) $("challengeText").value = session.challengeText || "";
   if (session.showRanking && !session.winnersPublished) renderLeaderboard("leaderboard", session.participants);
   else $("leaderboard").innerHTML = "";
@@ -1119,7 +1114,7 @@ function renderResponses(participants, context = activeSession) {
         .join("")
     : "<p class='hint'>Aún no hay respuestas registradas en esta sección.</p>";
   if (!filtered.length) {
-    $("responsesList").innerHTML = "<p class='hint'>No hay participantes para esa b?squeda en esta sección y banco.</p>";
+    $("responsesList").innerHTML = "<p class='hint'>No hay participantes para esa búsqueda en esta sección y banco.</p>";
   }
   document.querySelectorAll("[data-delete-student]").forEach((button) => {
     button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
@@ -1172,7 +1167,7 @@ function renderResponses(participants, context = activeSession) {
           `
         )
         .join("")
-    : "<p class='hint'>No hay participantes para esa b?squeda en esta sección y banco.</p>";
+    : "<p class='hint'>No hay participantes para esa búsqueda en esta sección y banco.</p>";
   document.querySelectorAll("[data-delete-student]").forEach((button) => {
     button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
   });
@@ -1293,10 +1288,10 @@ function renderStudentSession(session) {
 
   const visibleQuestions = session.studentQuestions.length ? session.studentQuestions : session.quizQuestions;
   if (!visibleQuestions.length) {
-    $("studentQuestion").textContent = "Las respuestas estan abiertas, pero no hay preguntas publicadas para este código.";
+    $("studentQuestion").textContent = "Las respuestas están abiertas, pero no hay preguntas publicadas para este código.";
     $("quizQuestions").innerHTML = "";
     $("finishQuiz").classList.add("hidden");
-    $("answerResult").textContent = "Pide al administrador que guarde o publique la selecci?n de preguntas.";
+    $("answerResult").textContent = "Pide al administrador que guarde o publique la selección de preguntas.";
     return;
   }
 
@@ -1369,7 +1364,7 @@ function handleWordFileSelection() {
   const file = $("wordUpload").files[0];
   $("uploadWordButton").disabled = !file;
   $("uploadWordButton").textContent = file ? "Cargar banco de preguntas" : "Cargar banco de preguntas";
-  if (file) $("selectionStatus").textContent = `Archivo selecci?nado: ${file.name}. Presiona cargar banco de preguntas.`;
+  if (file) $("selectionStatus").textContent = `Archivo seleccionado: ${file.name}. Presiona cargar banco de preguntas.`;
 }
 
 async function answerQuestion(questionIndex, answerIndex) {
