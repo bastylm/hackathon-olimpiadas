@@ -1004,34 +1004,6 @@ function renderParticipationRank(id, session) {
   `;
 }
 
-function renderAllParticipants(id, session) {
-  const participants = [...(session.globalParticipants || [])];
-  const visible = session.inviteVisible === false ? [] : participants.slice(0, 8);
-  $(id).innerHTML = `
-    <h3>Participación total</h3>
-    <div class="participation-rank-row total-row">
-      <strong>${participants.length}</strong>
-      <span>participantes registrados</span>
-      <em>todas las secciones</em>
-    </div>
-    ${
-      visible.length
-        ? visible
-            .map(
-              (p) => `
-                <div class="participation-rank-row">
-                  <strong>${p.place}</strong>
-                  <span>${escapeHtml(p.name || "Participante")}</span>
-                  <em>${p.score || 0} pts · ${escapeHtml(p.section || "Sin sección")}</em>
-                </div>
-              `
-            )
-            .join("")
-        : ""
-    }
-  `;
-}
-
 function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
@@ -1039,6 +1011,7 @@ function renderProjection(session) {
   $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "La competencia anterior ya fue cerrada.";
   $("projectionQr").classList.toggle("hidden", !inviteVisible);
   if (inviteVisible) $("projectionQr").src = `${session.qrUrl}?t=${Math.floor(Date.now() / 30000)}`;
+  $("projectionTotalParticipants").textContent = String((session.globalParticipants || []).length);
   $("projectionElapsed").textContent = !inviteVisible ? "Sin actividad" : finished ? "Finalizado" : session.timerStartedAt ? fmt(session.remainingSeconds) : fmt(session.durationSeconds);
   $("projectionQuestion").textContent = session.quizPublished
     ? session.acceptingAnswers
@@ -1055,7 +1028,6 @@ function renderProjection(session) {
     ? `<strong>Desafío</strong><span>${escapeHtml(session.challengeText)}</span>`
     : "";
   renderParticipationRank("projectionParticipationRank", session);
-  renderAllParticipants("projectionAllParticipants", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
   $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !inviteVisible);
   $("projectionQuestion").classList.toggle("hidden", false);

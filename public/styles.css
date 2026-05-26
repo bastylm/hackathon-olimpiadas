@@ -821,17 +821,17 @@ input {
   min-height: calc(100vh - 150px);
 }
 
-.projection-side .timer-card strong {
+.projection-side .timer-card > strong {
   font-size: clamp(72px, 9vw, 140px);
   color: var(--accent-dark);
 }
 
 .projection-side .timer-card {
   display: grid;
-  grid-template-columns: minmax(160px, 0.9fr) minmax(220px, 1.1fr);
+  grid-template-columns: minmax(150px, 0.8fr) minmax(120px, 0.45fr) minmax(220px, 1fr);
   grid-template-areas:
-    "logo label"
-    "logo time";
+    "logo total label"
+    "logo total time";
   justify-items: center;
   align-items: center;
   text-align: center;
@@ -843,11 +843,38 @@ input {
   height: auto;
 }
 
-.projection-side .timer-card span {
+.projection-total-count {
+  grid-area: total;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  align-content: center;
+  min-width: 116px;
+  padding: 10px 14px;
+  border: 1px solid #d8c5f7;
+  border-radius: 8px;
+  background: #fbf8ff;
+}
+
+.projection-total-count span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.projection-total-count strong {
+  color: var(--accent-dark);
+  font-size: clamp(30px, 3.4vw, 52px);
+  line-height: 1;
+}
+
+.projection-side .timer-card > span {
   grid-area: label;
 }
 
-.projection-side .timer-card strong {
+.projection-side .timer-card > strong {
   grid-area: time;
 }
 
@@ -1020,15 +1047,24 @@ body[data-view="projectionView"] .projection-side {
 body[data-view="projectionView"] .projection-side .timer-card {
   padding: 10px;
   width: 100%;
-  grid-template-columns: minmax(120px, 0.8fr) minmax(180px, 1.2fr);
+  grid-template-columns: minmax(120px, 0.75fr) minmax(106px, 0.42fr) minmax(180px, 1fr);
 }
 
 body[data-view="projectionView"] .timer-logo {
   width: min(210px, 100%);
 }
 
-body[data-view="projectionView"] .projection-side .timer-card strong {
+body[data-view="projectionView"] .projection-side .timer-card > strong {
   font-size: clamp(54px, 6.2vw, 92px);
+}
+
+body[data-view="projectionView"] .projection-total-count {
+  min-width: 104px;
+  padding: 8px 12px;
+}
+
+body[data-view="projectionView"] .projection-total-count strong {
+  font-size: clamp(28px, 3vw, 44px);
 }
 
 body[data-view="projectionView"] .participation-stats {
@@ -1353,6 +1389,14 @@ body[data-view="projectionView"] .projection-side .podium-card:nth-child(3) {
   body[data-view="projectionView"] .projection-hero,
   body[data-view="projectionView"] .projection-side {
     min-height: auto;
+  }
+
+  body[data-view="projectionView"] .projection-side .timer-card {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "logo total"
+      "label label"
+      "time time";
   }
 
   .answer-key,
