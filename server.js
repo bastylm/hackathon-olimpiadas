@@ -98,7 +98,7 @@ function hydrateSession(raw) {
     showRanking: Boolean(raw?.showRanking),
     revealPodium: Boolean(raw?.revealPodium),
     winnersPublished: Boolean(raw?.winnersPublished),
-    winnersPublishedAt: raw?.winnersPublishedAt || null,
+    winnersPublishedAt: raw?.winnersPublishedAt || (raw?.winnersPublished ? raw?.updatedAt || raw?.createdAt || null : null),
     timerStartedAt: raw?.timerStartedAt || null,
     questionStartedAt: raw?.questionStartedAt || null,
     students,
@@ -227,7 +227,7 @@ function auth(req) {
 function requireAdmin(req, res) {
   const user = auth(req);
   if (!user || user.role !== "admin") {
-    sendJson(res, 403, { error: "Solo la cuenta administradora puede realizar esta accion" });
+    sendJson(res, 403, { error: "Solo la cuenta administradora puede realizar esta acci?n" });
     return false;
   }
   return true;
@@ -297,6 +297,30 @@ function rankStoredParticipants(sectionId, bankId, selected = []) {
   }));
   participants.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   return participants.map((student, index) => ({ ...student, place: index + 1 }));
+}
+
+function rankAllParticipants() {
+  const entries = [];
+  for (const record of Object.values(responseStore)) {
+    const section = data.sections.find((item) => item.id === record.sectionId);
+    const bank = data.banks.find((item) => item.id === record.bankId);
+    for (const student of Object.values(record.students || {})) {
+      entries.push({
+        id: `${record.sectionId}:${record.bankId}:${student.id}`,
+        studentId: student.id,
+        name: student.name,
+        rut: student.rut || "",
+        score: Number(student.score || 0),
+        answers: Object.keys(student.answers || {}).length,
+        sectionId: record.sectionId,
+        bankId: record.bankId,
+        section: section?.section || "Sin sección",
+        bank: bank?.name || "Sin banco",
+      });
+    }
+  }
+  entries.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  return entries.map((student, index) => ({ ...student, place: index + 1 }));
 }
 
 function currentQuestionFor(session) {
@@ -570,6 +594,7 @@ function publicSession(session, req) {
     projectionUrl: `${inviteBase(req)}/proyeccion?code=${session.code}`,
     qrUrl: `/api/session/${session.code}/qr`,
     participants,
+    globalParticipants: rankAllParticipants(),
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
   };
@@ -645,7 +670,7 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const payload = sectionPayload(body);
     if (!payload.section || !payload.subject) {
-      sendJson(res, 400, { error: "Ingresa al menos seccion y asignatura" });
+      sendJson(res, 400, { error: "Ingresa al menos secci?n y asignatura" });
       return;
     }
     const id = String(body.id || "").trim();
@@ -672,7 +697,7 @@ const server = http.createServer(async (req, res) => {
     const inSessions = [...sessions.values()].some((session) => session.sectionId === id);
     const inResponses = Object.keys(responseStore).some((key) => key.startsWith(`${id}::`));
     if (inSessions || inResponses) {
-      sendJson(res, 409, { error: "No se puede eliminar una seccion con formularios o respuestas registradas" });
+      sendJson(res, 409, { error: "No se puede eliminar una secci?n con formularios o respuestas registradas" });
       return;
     }
     data.sections.splice(index, 1);
@@ -688,7 +713,7 @@ const server = http.createServer(async (req, res) => {
     const section = data.sections.find((item) => item.id === sectionId) || null;
     const bank = data.banks.find((item) => item.id === bankId) || null;
     if (!section || !bank) {
-      sendJson(res, 400, { error: "Selecciona una seccion y un banco valido" });
+      sendJson(res, 400, { error: "Selecciona una secci?n y un banco v?lido" });
       return;
     }
     const matchingSession = [...sessions.values()]
@@ -760,7 +785,7 @@ const server = http.createServer(async (req, res) => {
     const force = url.searchParams.get("force") === "1";
     const inUse = [...sessions.values()].some((session) => session.bankId === id);
     if (inUse && !force) {
-      sendJson(res, 409, { error: "No se puede eliminar un banco usado por una sesion activa" });
+      sendJson(res, 409, { error: "No se puede eliminar un banco usado por una sesi?n activa" });
       return;
     }
     let removedSessions = 0;

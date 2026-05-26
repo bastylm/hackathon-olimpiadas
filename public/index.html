@@ -49,33 +49,35 @@
               <select id="sectionSelect"></select>
             </label>
             <label>
-              Buscar seccion
-              <input id="sectionSearch" autocomplete="off" placeholder="Filtrar por codigo, seccion, docente o asignatura" />
+              Buscar sección
+              <input id="sectionSearch" autocomplete="off" placeholder="Filtrar por código, sección, docente o asignatura" />
             </label>
-            <div class="section-editor">
-              <strong>Gestion de seccion</strong>
-              <input id="sectionCode" placeholder="Codigo" />
-              <input id="sectionName" placeholder="Seccion" />
+            <details class="section-editor">
+              <summary>Gestión de sección</summary>
+              <div class="section-editor-body">
+              <input id="sectionCode" placeholder="Código" />
+              <input id="sectionName" placeholder="Sección" />
               <input id="sectionSubject" placeholder="Asignatura" />
               <input id="sectionTeacher" placeholder="Docente" />
               <input id="sectionCareer" placeholder="Carrera" />
               <input id="sectionArea" placeholder="Area" />
               <input id="sectionDate" type="date" />
               <div class="section-actions">
-                <button id="saveSection" type="button">Guardar seccion</button>
+                <button id="saveSection" type="button">Guardar sección</button>
                 <button id="newSection" type="button">Nueva</button>
                 <button id="deleteSection" type="button">Eliminar</button>
               </div>
               <p id="sectionStatus" class="hint"></p>
-            </div>
+              </div>
+            </details>
             <label>
               Banco de preguntas
               <select id="bankSelect"></select>
             </label>
             <button id="deleteBank" type="button">Eliminar banco de preguntas</button>
             <label>
-              Descripcion breve o pregunta esencial
-              <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: Cual es el desafio principal que debe resolver esta seccion?"></textarea>
+              Descripción breve o pregunta esencial
+              <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: ¿Cuál es el desafío principal que debe resolver esta sección?"></textarea>
             </label>
             <label>
               Seleccionar cuestionario Word
@@ -158,6 +160,7 @@
             <div id="projectionStats" class="participation-stats"></div>
             <div id="projectionChallenge" class="challenge-card hidden"></div>
             <div id="projectionParticipationRank" class="participation-rank"></div>
+            <div id="projectionAllParticipants" class="participation-rank"></div>
             <div id="projectionQuestion" class="current-question">Esperando al administrador.</div>
             <ol id="projectionRanking" class="leaderboard hidden"></ol>
             <div id="projectionPodium" class="podium hidden"></div>

@@ -355,13 +355,24 @@ input {
 }
 
 .section-editor {
-  display: grid;
-  gap: 8px;
   margin: 0 0 14px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbf8ff;
+}
+
+.section-editor > summary {
+  cursor: pointer;
+  color: var(--accent-dark);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.section-editor-body {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .section-editor > strong {
@@ -884,8 +895,7 @@ input {
 }
 
 .projection-side .podium-place {
-  font-size: 16px;
-  font-weight: 900;
+  display: none;
 }
 
 .projection-side .podium-name {
@@ -942,7 +952,7 @@ input {
   align-content: start;
 }
 
-.projection-side.winners-mode .participation-rank,
+.projection-side.winners-mode #projectionParticipationRank,
 .projection-side.winners-mode .current-question {
   display: none;
 }
