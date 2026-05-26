@@ -19,6 +19,7 @@ const RESPONSES_DB = process.env.RESPONSES_DB_PATH || path.join(ROOT, "responses
 const responseStore = loadResponseStore();
 const ADMIN_USERNAME = String(process.env.ADMIN_USERNAME || "administrador").trim().toLowerCase();
 const PROJECTION_USERNAME = String(process.env.PROJECTION_USERNAME || "proyeccion").trim().toLowerCase();
+const AUTO_RESET_AFTER_SECONDS = 10 * 60;
 const generatedAdminPassword = process.env.ADMIN_PASSWORD ? "" : crypto.randomBytes(9).toString("base64url");
 const generatedProjectionPassword = process.env.PROJECTION_PASSWORD ? "" : crypto.randomBytes(9).toString("base64url");
 const accounts = {
@@ -91,11 +92,13 @@ function hydrateSession(raw) {
     quizPublished: Boolean(raw?.quizPublished),
     selectedQuestions: Array.isArray(raw?.selectedQuestions) ? raw.selectedQuestions.map(Number) : [],
     durationSeconds: Math.max(0, Number(raw?.durationSeconds || 600)),
+    initialDurationSeconds: Math.max(60, Number(raw?.initialDurationSeconds || raw?.durationSeconds || 600)),
     expectedParticipants: Math.max(0, Number(raw?.expectedParticipants || 0)),
     challengeText: String(raw?.challengeText || "").slice(0, 600),
     showRanking: Boolean(raw?.showRanking),
     revealPodium: Boolean(raw?.revealPodium),
     winnersPublished: Boolean(raw?.winnersPublished),
+    winnersPublishedAt: raw?.winnersPublishedAt || null,
     timerStartedAt: raw?.timerStartedAt || null,
     questionStartedAt: raw?.questionStartedAt || null,
     students,
@@ -510,8 +513,31 @@ function closeExpiredTimer(session) {
   return true;
 }
 
+function resetSessionToInitial(session) {
+  session.acceptingAnswers = false;
+  session.quizPublished = false;
+  session.currentQuestionIndex = null;
+  session.questionStartedAt = null;
+  session.timerStartedAt = null;
+  session.durationSeconds = Math.max(60, Number(session.initialDurationSeconds || session.durationSeconds || 600));
+  session.showRanking = false;
+  session.revealPodium = false;
+  session.winnersPublished = false;
+  session.winnersPublishedAt = null;
+}
+
+function autoResetCompletedSession(session) {
+  if (!session.winnersPublished || !session.winnersPublishedAt) return false;
+  if (elapsedSeconds(session.winnersPublishedAt) < AUTO_RESET_AFTER_SECONDS) return false;
+  resetSessionToInitial(session);
+  session.updatedAt = new Date().toISOString();
+  saveSessionStore();
+  return true;
+}
+
 function publicSession(session, req) {
   closeExpiredTimer(session);
+  autoResetCompletedSession(session);
   const bank = data.banks.find((item) => item.id === session.bankId);
   const section = data.sections.find((item) => item.id === session.sectionId);
   const currentQuestion = currentQuestionFor(session);
@@ -842,6 +868,7 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     const code = makeCode();
     const now = new Date().toISOString();
+    const bank = data.banks.find((item) => item.id === body.bankId);
     const session = {
       code,
       sectionId: body.sectionId,
@@ -851,11 +878,13 @@ const server = http.createServer(async (req, res) => {
       quizPublished: false,
       selectedQuestions: [],
       durationSeconds: Math.max(60, Number(body.durationSeconds || 600)),
+      initialDurationSeconds: Math.max(60, Number(body.durationSeconds || 600)),
       expectedParticipants: Math.max(0, Number(body.expectedParticipants || 0)),
-      challengeText: String(body.challengeText || "").trim().slice(0, 600),
+      challengeText: String(body.challengeText || bank?.challengeText || "").trim().slice(0, 600),
       showRanking: false,
       revealPodium: false,
       winnersPublished: false,
+      winnersPublishedAt: null,
       timerStartedAt: null,
       questionStartedAt: null,
       students: new Map(),
@@ -911,6 +940,7 @@ const server = http.createServer(async (req, res) => {
       session.selectedQuestions = [Number(body.questionIndex)];
       session.revealPodium = false;
       session.winnersPublished = false;
+      session.winnersPublishedAt = null;
       session.questionStartedAt = new Date().toISOString();
       touchSession(session);
       sendJson(res, 200, publicSession(session, req));
@@ -928,14 +958,19 @@ const server = http.createServer(async (req, res) => {
       session.quizPublished = true;
       session.acceptingAnswers = false;
       session.showRanking = false;
-      if (Number(body.durationSeconds) >= 60) session.durationSeconds = Number(body.durationSeconds);
+      if (Number(body.durationSeconds) >= 60) {
+        session.durationSeconds = Number(body.durationSeconds);
+        session.initialDurationSeconds = Number(body.durationSeconds);
+      }
       if (Number(body.expectedParticipants) >= 0) session.expectedParticipants = Number(body.expectedParticipants);
       if (typeof body.challengeText === "string") session.challengeText = body.challengeText.trim().slice(0, 600);
+      else if (!session.challengeText && bank?.challengeText) session.challengeText = String(bank.challengeText).slice(0, 600);
       session.timerStartedAt = null;
       session.currentQuestionIndex = null;
       session.questionStartedAt = null;
       session.revealPodium = false;
       session.winnersPublished = false;
+      session.winnersPublishedAt = null;
       touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;
@@ -1010,12 +1045,14 @@ const server = http.createServer(async (req, res) => {
       const isClosingAnswers = body.acceptingAnswers === false;
       if (Number(body.durationSeconds) >= 60 && !isClosingAnswers) {
         session.durationSeconds = Number(body.durationSeconds);
+        session.initialDurationSeconds = Number(body.durationSeconds);
       }
       if (typeof body.acceptingAnswers === "boolean") {
         if (body.acceptingAnswers) {
           session.acceptingAnswers = true;
           if (remainingSeconds(session) <= 0) {
             session.durationSeconds = Math.max(60, Number(body.durationSeconds || session.durationSeconds || 600));
+            session.initialDurationSeconds = session.durationSeconds;
           }
           if (!session.timerStartedAt && remainingSeconds(session) > 0) {
             session.timerStartedAt = new Date().toISOString();
@@ -1038,6 +1075,9 @@ const server = http.createServer(async (req, res) => {
             session.timerStartedAt = null;
           }
           session.acceptingAnswers = false;
+          session.winnersPublishedAt = new Date().toISOString();
+        } else {
+          session.winnersPublishedAt = null;
         }
       }
       touchSession(session);
@@ -1078,12 +1118,7 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && action === "reset") {
       if (!requireAdmin(req, res)) return;
-      session.acceptingAnswers = false;
-      session.quizPublished = false;
-      session.currentQuestionIndex = null;
-      session.questionStartedAt = null;
-      session.revealPodium = false;
-      session.winnersPublished = false;
+      resetSessionToInitial(session);
       touchSession(session);
       sendJson(res, 200, publicSession(session, req));
       return;

@@ -180,6 +180,15 @@ function selectedBank() {
   return appData.banks.find((item) => item.id === $("bankSelect").value);
 }
 
+function syncChallengeFromBank(force = false) {
+  const bank = selectedBank();
+  if (!bank?.challengeText) return;
+  const field = $("challengeText");
+  if (force || !field.value.trim()) {
+    field.value = bank.challengeText;
+  }
+}
+
 function renderQuestions() {
   const bank = selectedBank();
   if (!bank) return;
@@ -386,6 +395,7 @@ async function deleteSessionByCode(code) {
 }
 
 function handleBankChange() {
+  syncChallengeFromBank(true);
   renderQuestions();
   loadResponsesForSelected();
   renderSessionManager();
@@ -1473,6 +1483,7 @@ async function init() {
     }
     appData = await api("/api/data");
     fillSelectors();
+    syncChallengeFromBank(false);
     const path = location.pathname.toLowerCase();
     if (path.includes("estudiante")) showStudent();
     else if (path.includes("proyeccion")) await showProjection();
