@@ -3661,6 +3661,266 @@
       "code": "DVA302",
       "challengeText": "Desafío Modelado Digital: representar en 3D el sistema, su recorrido y componentes funcionales para validar la operación del prototipo.",
       "source": "C:\\Users\\Miguel A.C.O\\OneDrive\\Desktop\\DesafiaT TP 2026 LA\\Ponderación según pertinencia de la respuesta.docx"
+    },
+    {
+      "id": "bank-cccm05-estabilidad",
+      "code": "CCCM05",
+      "name": "Mecánica de suelos - Estabilidad del terreno (CCCM05)",
+      "area": "Área Construcción",
+      "challengeText": "Desafío Mecánica de suelos: evaluar la estabilidad y capacidad portante del terreno para asegurar una ruta segura para el camión autónomo.",
+      "questions": [
+        {
+          "text": "1. ¿Qué propiedad del suelo sería más importante para asegurar estabilidad del camión autónomo?",
+          "answers": [
+            {
+              "text": "Capacidad portante y resistencia del terreno",
+              "points": 100,
+              "justification": "La estabilidad estructural depende principalmente de la capacidad de soporte del suelo."
+            },
+            {
+              "text": "Color superficial del suelo",
+              "points": 75,
+              "justification": "La estabilidad estructural depende principalmente de la capacidad de soporte del suelo."
+            },
+            {
+              "text": "Cantidad de vegetación cercana",
+              "points": 50,
+              "justification": "La estabilidad estructural depende principalmente de la capacidad de soporte del suelo."
+            },
+            {
+              "text": "Facilidad de excavación únicamente",
+              "points": 25,
+              "justification": "La estabilidad estructural depende principalmente de la capacidad de soporte del suelo."
+            }
+          ]
+        },
+        {
+          "text": "2. ¿Qué riesgo podría presentarse en un terreno con baja compactación?",
+          "answers": [
+            {
+              "text": "Hundimientos y pérdida de estabilidad de la ruta",
+              "points": 100,
+              "justification": "La baja compactación genera deformaciones y fallas operacionales."
+            },
+            {
+              "text": "Mejor absorción visual del entorno",
+              "points": 75,
+              "justification": "La baja compactación genera deformaciones y fallas operacionales."
+            },
+            {
+              "text": "Reducción de costos administrativos",
+              "points": 50,
+              "justification": "La baja compactación genera deformaciones y fallas operacionales."
+            },
+            {
+              "text": "Mayor facilidad de monitoreo",
+              "points": 25,
+              "justification": "La baja compactación genera deformaciones y fallas operacionales."
+            }
+          ]
+        },
+        {
+          "text": "3. Antes de definir la ruta del sistema, ¿qué análisis sería más relevante?",
+          "answers": [
+            {
+              "text": "Evaluar comportamiento mecánico y estabilidad del suelo",
+              "points": 100,
+              "justification": "El diseño de la ruta requiere validación geotécnica previa."
+            },
+            {
+              "text": "Evaluar colores y acabados del terreno",
+              "points": 75,
+              "justification": "El diseño de la ruta requiere validación geotécnica previa."
+            },
+            {
+              "text": "Analizar únicamente distancia del recorrido",
+              "points": 50,
+              "justification": "El diseño de la ruta requiere validación geotécnica previa."
+            },
+            {
+              "text": "Considerar solo facilidad de acceso peatonal",
+              "points": 25,
+              "justification": "El diseño de la ruta requiere validación geotécnica previa."
+            }
+          ]
+        },
+        {
+          "text": "4. ¿Qué tipo de suelo sería generalmente más adecuado para el recorrido?",
+          "answers": [
+            {
+              "text": "Suelo firme y compactado con buena capacidad portante",
+              "points": 100,
+              "justification": "Los terrenos compactos entregan mayor estabilidad y seguridad."
+            },
+            {
+              "text": "Suelo blando y saturado",
+              "points": 75,
+              "justification": "Los terrenos compactos entregan mayor estabilidad y seguridad."
+            },
+            {
+              "text": "Terreno erosionado sin estabilización",
+              "points": 50,
+              "justification": "Los terrenos compactos entregan mayor estabilidad y seguridad."
+            },
+            {
+              "text": "Suelo irregular con desniveles pronunciados",
+              "points": 25,
+              "justification": "Los terrenos compactos entregan mayor estabilidad y seguridad."
+            }
+          ]
+        },
+        {
+          "text": "5. ¿Qué medida técnica podría mejorar el desempeño de la ruta?",
+          "answers": [
+            {
+              "text": "Compactación y estabilización del terreno",
+              "points": 100,
+              "justification": "El mejoramiento del terreno optimiza estabilidad y durabilidad."
+            },
+            {
+              "text": "Incrementar velocidad del sistema",
+              "points": 75,
+              "justification": "El mejoramiento del terreno optimiza estabilidad y durabilidad."
+            },
+            {
+              "text": "Eliminar drenajes del recorrido",
+              "points": 50,
+              "justification": "El mejoramiento del terreno optimiza estabilidad y durabilidad."
+            },
+            {
+              "text": "Reducir inspecciones del suelo",
+              "points": 25,
+              "justification": "El mejoramiento del terreno optimiza estabilidad y durabilidad."
+            }
+          ]
+        },
+        {
+          "text": "6. ¿Qué factor tendría mayor impacto sobre la seguridad operacional?",
+          "answers": [
+            {
+              "text": "Estabilidad y uniformidad del terreno",
+              "points": 100,
+              "justification": "El terreno condiciona directamente la operación del sistema autónomo."
+            },
+            {
+              "text": "Diseño visual de la pista",
+              "points": 75,
+              "justification": "El terreno condiciona directamente la operación del sistema autónomo."
+            },
+            {
+              "text": "Cantidad de señaléticas instaladas",
+              "points": 50,
+              "justification": "El terreno condiciona directamente la operación del sistema autónomo."
+            },
+            {
+              "text": "Número de reuniones del equipo",
+              "points": 25,
+              "justification": "El terreno condiciona directamente la operación del sistema autónomo."
+            }
+          ]
+        },
+        {
+          "text": "7. ¿Qué riesgo debería evaluarse prioritariamente durante el análisis geotécnico?",
+          "answers": [
+            {
+              "text": "Asentamientos y pérdida de capacidad de soporte",
+              "points": 100,
+              "justification": "Los asentamientos afectan funcionalidad y seguridad de la infraestructura."
+            },
+            {
+              "text": "Saturación visual del recorrido",
+              "points": 75,
+              "justification": "Los asentamientos afectan funcionalidad y seguridad de la infraestructura."
+            },
+            {
+              "text": "Cantidad de estaciones de monitoreo",
+              "points": 50,
+              "justification": "Los asentamientos afectan funcionalidad y seguridad de la infraestructura."
+            },
+            {
+              "text": "Complejidad del diseño gráfico",
+              "points": 25,
+              "justification": "Los asentamientos afectan funcionalidad y seguridad de la infraestructura."
+            }
+          ]
+        },
+        {
+          "text": "8. ¿Qué propuesta sería más viable para optimizar la ruta del sistema?",
+          "answers": [
+            {
+              "text": "Seleccionar sectores con mejor comportamiento del suelo",
+              "points": 100,
+              "justification": "La viabilidad depende de condiciones geotécnicas seguras."
+            },
+            {
+              "text": "Diseñar la ruta únicamente por menor distancia",
+              "points": 75,
+              "justification": "La viabilidad depende de condiciones geotécnicas seguras."
+            },
+            {
+              "text": "Ignorar pendientes y drenajes",
+              "points": 50,
+              "justification": "La viabilidad depende de condiciones geotécnicas seguras."
+            },
+            {
+              "text": "Priorizar rapidez de construcción sobre estabilidad",
+              "points": 25,
+              "justification": "La viabilidad depende de condiciones geotécnicas seguras."
+            }
+          ]
+        },
+        {
+          "text": "9. ¿Qué indicador reflejaría mejor la calidad del terreno para el proyecto?",
+          "answers": [
+            {
+              "text": "Resistencia y estabilidad frente a carga y tránsito",
+              "points": 100,
+              "justification": "El desempeño del suelo debe evaluarse funcionalmente."
+            },
+            {
+              "text": "Cantidad de documentos generados",
+              "points": 75,
+              "justification": "El desempeño del suelo debe evaluarse funcionalmente."
+            },
+            {
+              "text": "Número de operadores disponibles",
+              "points": 50,
+              "justification": "El desempeño del suelo debe evaluarse funcionalmente."
+            },
+            {
+              "text": "Nivel visual del acabado superficial",
+              "points": 25,
+              "justification": "El desempeño del suelo debe evaluarse funcionalmente."
+            }
+          ]
+        },
+        {
+          "text": "10. ¿Qué fortalece más la argumentación técnica de la propuesta?",
+          "answers": [
+            {
+              "text": "Relacionar condiciones del suelo con seguridad y desempeño del sistema",
+              "points": 100,
+              "justification": "La propuesta debe justificar técnicamente la viabilidad del recorrido."
+            },
+            {
+              "text": "Describir únicamente clasificación del terreno",
+              "points": 75,
+              "justification": "La propuesta debe justificar técnicamente la viabilidad del recorrido."
+            },
+            {
+              "text": "Basarse solo en observación visual",
+              "points": 50,
+              "justification": "La propuesta debe justificar técnicamente la viabilidad del recorrido."
+            },
+            {
+              "text": "Priorizar rapidez de implementación",
+              "points": 25,
+              "justification": "La propuesta debe justificar técnicamente la viabilidad del recorrido."
+            }
+          ]
+        }
+      ],
+      "source": "C:\\Users\\Miguel A.C.O\\OneDrive\\Desktop\\Ponderación según pertinencia de la respuesta.docx"
     }
   ]
 }

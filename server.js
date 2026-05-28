@@ -95,6 +95,7 @@ function hydrateSession(raw) {
     initialDurationSeconds: Math.max(60, Number(raw?.initialDurationSeconds || raw?.durationSeconds || 600)),
     expectedParticipants: Math.max(0, Number(raw?.expectedParticipants || 0)),
     challengeText: String(raw?.challengeText || "").slice(0, 600),
+    answerOrders: raw?.answerOrders && typeof raw.answerOrders === "object" ? raw.answerOrders : {},
     showRanking: Boolean(raw?.showRanking),
     revealPodium: Boolean(raw?.revealPodium),
     winnersPublished: Boolean(raw?.winnersPublished),
@@ -348,7 +349,28 @@ function selectedQuestionIndexes(session) {
 function publicQuestionsFor(session) {
   const bank = data.banks.find((item) => item.id === session.bankId);
   if (!bank || !session.quizPublished || !session.acceptingAnswers) return [];
-  return selectedQuestionIndexes(session).map((index) => ({ index, ...bank.questions[index] }));
+  return selectedQuestionIndexes(session).map((index) => {
+    const question = bank.questions[index];
+    const answers = Array.isArray(question?.answers) ? question.answers : [];
+    const order = shuffledAnswerOrder(session.code, index, answers.length);
+    return {
+      index,
+      text: question.text,
+      answers: order.map((answerIndex) => ({
+        ...answers[answerIndex],
+        originalIndex: answerIndex,
+      })),
+    };
+  });
+}
+
+function shuffledAnswerOrder(code, questionIndex, count) {
+  const order = Array.from({ length: count }, (_, index) => index);
+  return order.sort((a, b) => {
+    const left = crypto.createHash("sha256").update(`${code}:${questionIndex}:${a}`).digest("hex");
+    const right = crypto.createHash("sha256").update(`${code}:${questionIndex}:${b}`).digest("hex");
+    return left.localeCompare(right);
+  });
 }
 
 function recomputeStudentScore(session, student) {
@@ -382,6 +404,40 @@ function makeSectionId(section) {
     .replace(/^-|-$/g, "")
     .slice(0, 90) || `section-${Date.now()}`;
   return data.sections.some((item) => item.id === base) ? `${base}-${crypto.randomInt(10000)}` : base;
+}
+
+function makeBankId(name) {
+  const base = normalizeText(name)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48) || "banco";
+  return data.banks.some((item) => item.id === base) ? `${base}-${crypto.randomInt(10000)}` : base;
+}
+
+function bankPayload(body = {}) {
+  return {
+    name: String(body.name || "").trim().slice(0, 160),
+    area: String(body.area || "Sin área").trim().slice(0, 100) || "Sin área",
+    challengeText: String(body.challengeText || "").trim().slice(0, 600),
+  };
+}
+
+function questionPayload(body = {}) {
+  const answers = Array.isArray(body.answers)
+    ? body.answers
+        .map((answer) => ({
+          text: String(answer?.text || "").trim().slice(0, 240),
+          points: Math.max(0, Number(answer?.points || 0)),
+          justification: String(answer?.justification || "").trim().slice(0, 600),
+        }))
+        .filter((answer) => answer.text)
+    : [];
+  return {
+    text: String(body.text || "").trim().slice(0, 500),
+    answers,
+  };
 }
 
 function sectionPayload(body) {
@@ -488,23 +544,46 @@ function parseQuestionRows(rows) {
   return questions;
 }
 
+function tableRowsFromWordXml(tableXml) {
+  return [...tableXml.matchAll(/<w:tr[\s\S]*?<\/w:tr>/g)].map((rowMatch) =>
+    [...rowMatch[0].matchAll(/<w:tc[\s\S]*?<\/w:tc>/g)].map((cellMatch) => textFromWordXml(cellMatch[0]))
+  );
+}
+
 function parseDocxBanks(buffer, filename) {
   const xml = readZipEntry(buffer, "word/document.xml").toString("utf8");
-  const tableMatches = [...xml.matchAll(/<w:tbl[\s\S]*?<\/w:tbl>/g)].map((match) => match[0]);
+  const blocks = [...xml.matchAll(/<w:(p|tbl)[\s\S]*?<\/w:\1>/g)].map((match) => ({
+    type: match[1],
+    xml: match[0],
+  }));
   const baseName = path.basename(String(filename || "Cuestionario Word"), path.extname(String(filename || ""))).replace(/[_-]+/g, " ").trim() || "Cuestionario Word";
   const banks = [];
-  tableMatches.forEach((tableXml, tableIndex) => {
-    const rows = [...tableXml.matchAll(/<w:tr[\s\S]*?<\/w:tr>/g)].map((rowMatch) =>
-      [...rowMatch[0].matchAll(/<w:tc[\s\S]*?<\/w:tc>/g)].map((cellMatch) => textFromWordXml(cellMatch[0]))
-    );
-    const questions = parseQuestionRows(rows);
+  let currentArea = "Importado desde Word";
+  let lastTitle = "";
+
+  blocks.forEach((block) => {
+    if (block.type === "p") {
+      const text = textFromWordXml(block.xml);
+      if (!text) return;
+      if (/^Área\s+/i.test(text) || /^Diseño\s+E\s+Industria/i.test(text)) {
+        currentArea = text;
+        lastTitle = "";
+        return;
+      }
+      if (/Ponderación|Mejor respuesta|Buena respuesta|Parcialmente adecuada|Poco pertinente/i.test(text)) return;
+      lastTitle = text;
+      return;
+    }
+    const questions = parseQuestionRows(tableRowsFromWordXml(block.xml));
     if (questions.length) {
       banks.push({
         id: "",
-        name: tableMatches.length > 1 ? `${baseName} ${tableIndex + 1}` : baseName,
-        area: "Importado desde Word",
+        name: lastTitle || (banks.length ? `${baseName} ${banks.length + 1}` : baseName),
+        area: currentArea,
+        challengeText: lastTitle ? `Desafío ${lastTitle}: responder con pertinencia técnica según el área de trabajo.` : "",
         questions,
       });
+      lastTitle = "";
     }
   });
   if (!banks.length) throw new Error("El Word no tiene preguntas con el formato esperado");
@@ -778,6 +857,51 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/banks") {
+    if (!requireAdmin(req, res)) return;
+    const body = await readBody(req);
+    const payload = bankPayload(body);
+    if (!payload.name) {
+      sendJson(res, 400, { error: "Ingresa el nombre del banco de preguntas" });
+      return;
+    }
+    const id = String(body.id || "").trim();
+    const index = id ? data.banks.findIndex((bank) => bank.id === id) : -1;
+    if (index >= 0) {
+      data.banks[index] = { ...data.banks[index], ...payload, id };
+    } else {
+      data.banks.push({ id: makeBankId(payload.name), ...payload, questions: [] });
+    }
+    saveData();
+    sendJson(res, 200, { banks: data.banks });
+    return;
+  }
+
+  const bankQuestionMatch = url.pathname.match(/^\/api\/banks\/([^/]+)\/questions$/);
+  if (req.method === "POST" && bankQuestionMatch) {
+    if (!requireAdmin(req, res)) return;
+    const id = decodeURIComponent(bankQuestionMatch[1]);
+    const bank = data.banks.find((item) => item.id === id);
+    if (!bank) {
+      sendJson(res, 404, { error: "Banco no encontrado" });
+      return;
+    }
+    const payload = questionPayload(await readBody(req));
+    if (!payload.text) {
+      sendJson(res, 400, { error: "Ingresa el texto de la pregunta" });
+      return;
+    }
+    if (payload.answers.length < 2) {
+      sendJson(res, 400, { error: "Ingresa al menos dos alternativas" });
+      return;
+    }
+    bank.questions = Array.isArray(bank.questions) ? bank.questions : [];
+    bank.questions.push(payload);
+    saveData();
+    sendJson(res, 200, { bank, banks: data.banks });
+    return;
+  }
+
   const bankDeleteMatch = url.pathname.match(/^\/api\/banks\/([^/]+)$/);
   if (req.method === "DELETE" && bankDeleteMatch) {
     if (!requireAdmin(req, res)) return;
@@ -912,6 +1036,7 @@ const server = http.createServer(async (req, res) => {
       initialDurationSeconds: Math.max(60, Number(body.durationSeconds || 600)),
       expectedParticipants: Math.max(0, Number(body.expectedParticipants || 0)),
       challengeText: String(body.challengeText || bank?.challengeText || "").trim().slice(0, 600),
+      answerOrders: {},
       showRanking: false,
       revealPodium: false,
       winnersPublished: false,

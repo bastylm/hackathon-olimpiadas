@@ -70,21 +70,54 @@
               <p id="sectionStatus" class="hint"></p>
               </div>
             </details>
-            <label>
-              Banco de preguntas
-              <select id="bankSelect"></select>
-            </label>
-            <button id="deleteBank" type="button">Eliminar banco de preguntas</button>
-            <label>
-              Descripción breve o pregunta esencial
-              <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: ¿Cuál es el desafío principal que debe resolver esta sección?"></textarea>
-            </label>
-            <label>
-              Seleccionar cuestionario Word
-              <input id="wordUpload" type="file" accept=".docx" />
-            </label>
-            <button id="uploadWordButton" type="button" disabled>Cargar banco de preguntas</button>
-            <div id="uploadManager" class="upload-manager"></div>
+            <details class="section-editor bank-workspace" open>
+              <summary>Bancos de preguntas por área</summary>
+              <div class="section-editor-body">
+                <label>
+                  Banco de preguntas
+                  <select id="bankSelect"></select>
+                </label>
+                <button id="deleteBank" type="button">Eliminar banco de preguntas</button>
+                <div class="bank-editor-grid">
+                  <label>
+                    Nombre del banco
+                    <input id="bankNameInput" placeholder="Ej: Software ERP (ADMO05)" />
+                  </label>
+                  <label>
+                    Área de trabajo
+                    <input id="bankAreaInput" placeholder="Ej: Área Administración" />
+                  </label>
+                  <button id="newBank" type="button">Nuevo banco</button>
+                  <button id="saveBank" type="button">Guardar banco</button>
+                </div>
+                <label>
+                  Descripción breve o pregunta esencial
+                  <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: ¿Cuál es el desafío principal que debe resolver esta sección?"></textarea>
+                </label>
+                <details class="question-editor">
+                  <summary>Registrar pregunta nueva</summary>
+                  <div class="section-editor-body">
+                    <label>
+                      Pregunta
+                      <textarea id="newQuestionText" class="challenge-text" maxlength="500" placeholder="Escribe la pregunta para el banco seleccionado"></textarea>
+                    </label>
+                    <div class="answer-editor-grid">
+                      <label>Alternativa 100 pts <input id="answerText100" placeholder="Respuesta más pertinente" /></label>
+                      <label>Alternativa 75 pts <input id="answerText75" placeholder="Buena respuesta" /></label>
+                      <label>Alternativa 50 pts <input id="answerText50" placeholder="Parcialmente adecuada" /></label>
+                      <label>Alternativa 25 pts <input id="answerText25" placeholder="Poco pertinente pero válida" /></label>
+                    </div>
+                    <button id="addQuestion" type="button">Agregar pregunta al banco</button>
+                  </div>
+                </details>
+                <label>
+                  Seleccionar cuestionario Word
+                  <input id="wordUpload" type="file" accept=".docx" />
+                </label>
+                <button id="uploadWordButton" type="button" disabled>Cargar banco de preguntas</button>
+                <div id="uploadManager" class="upload-manager"></div>
+              </div>
+            </details>
             <label>
               Duración del cuestionario (minutos)
               <input id="durationMinutes" type="number" min="1" max="180" value="10" />

@@ -5,6 +5,7 @@ let mode = "admin";
 let responseContext = null;
 let managedSessions = [];
 let editingSectionId = "";
+let editingBankId = "";
 let adminQrVisible = false;
 
 function safeJson(value, fallback) {
@@ -126,6 +127,15 @@ function selectedSection() {
   return appData.sections.find((item) => item.id === $("sectionSelect")?.value);
 }
 
+function groupedByArea(items, areaGetter) {
+  return items.reduce((groups, item) => {
+    const area = areaGetter(item) || "Sin área";
+    if (!groups[area]) groups[area] = [];
+    groups[area].push(item);
+    return groups;
+  }, {});
+}
+
 function fillSectionSelector() {
   const current = $("sectionSelect")?.value || "";
   const search = normalizeText($("sectionSearch")?.value || "");
@@ -144,9 +154,19 @@ function fillSectionSelector() {
 
 function fillSelectors() {
   fillSectionSelector();
-  $("bankSelect").innerHTML = appData.banks
-    .map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`)
+  const bankGroups = groupedByArea(appData.banks, (item) => item.area);
+  $("bankSelect").innerHTML = Object.entries(bankGroups)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(
+      ([area, banks]) => `
+        <optgroup label="${escapeHtml(area)}">
+          ${banks
+            .map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`)
+            .join("")}
+        </optgroup>`
+    )
     .join("");
+  updateBankEditor();
   renderQuestions();
   renderUploadManager();
 }
@@ -189,9 +209,27 @@ function syncChallengeFromBank(force = false) {
   }
 }
 
+function updateBankEditor() {
+  const bank = selectedBank();
+  editingBankId = bank?.id || "";
+  $("bankNameInput").value = bank?.name || "";
+  $("bankAreaInput").value = bank?.area || "";
+}
+
+function clearBankEditor() {
+  editingBankId = "";
+  $("bankNameInput").value = "";
+  $("bankAreaInput").value = "";
+  $("challengeText").value = "";
+  $("selectionStatus").textContent = "Completa el nombre, área y descripción para crear un banco nuevo.";
+}
+
 function renderQuestions() {
   const bank = selectedBank();
-  if (!bank) return;
+  if (!bank) {
+    $("questionList").innerHTML = "<p class='hint'>Crea o selecciona un banco de preguntas.</p>";
+    return;
+  }
   $("questionList").innerHTML = bank.questions
     .map(
       (question, index) => `
@@ -309,30 +347,41 @@ function renderSessionManager() {
     const bankMatch = !currentBankId || session.bank?.id === currentBankId;
     return sectionMatch && bankMatch;
   });
-  const visible = selected.length ? selected : managedSessions;
-  $("sessionManager").innerHTML = visible.length
-    ? visible
-        .map((session) => {
-          const isActive = activeSession?.code === session.code;
-          const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
-          return `
-            <div class="session-row ${isActive ? "active" : ""}">
-              <div>
-                <strong>${escapeHtml(session.code)}</strong>
-                <span>${escapeHtml(session.section?.section || "Sin sección")} - ${escapeHtml(session.bank?.name || "Sin banco")}</span>
-                ${session.challengeText ? `<span>${escapeHtml(session.challengeText)}</span>` : ""}
-                <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
-              </div>
-              <div class="session-actions">
-                <button type="button" data-load-session="${session.code}">Usar</button>
-                <a class="button-link small" href="/proyeccion?code=${session.code}" target="_blank">Proyectar</a>
-                <button type="button" data-delete-session="${session.code}">Eliminar</button>
-              </div>
-            </div>
-          `;
-        })
-        .join("")
-    : "<p class='hint'>Aún no hay formularios creados.</p>";
+  const visible = selected;
+  const rowFor = (session) => {
+    const isActive = activeSession?.code === session.code;
+    const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
+    return `
+      <div class="session-row ${isActive ? "active" : ""}">
+        <div>
+          <strong>${escapeHtml(session.code)}</strong>
+          <span>${escapeHtml(session.section?.section || "Sin sección")} - ${escapeHtml(session.bank?.name || "Sin banco")}</span>
+          ${session.challengeText ? `<span>${escapeHtml(session.challengeText)}</span>` : ""}
+          <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
+        </div>
+        <div class="session-actions">
+          <button type="button" data-load-session="${session.code}">Usar</button>
+          <a class="button-link small" href="/proyeccion?code=${session.code}" target="_blank">Proyectar</a>
+          <button type="button" data-delete-session="${session.code}">Eliminar</button>
+        </div>
+      </div>
+    `;
+  };
+  if (!visible.length) {
+    $("sessionManager").innerHTML = "<p class='hint'>Aún no hay formularios creados.</p>";
+  } else {
+    const groups = groupedByArea(visible, (session) => session.bank?.area || session.section?.area);
+    $("sessionManager").innerHTML = Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(
+        ([area, sessions]) => `
+          <details class="area-group" open>
+            <summary>${escapeHtml(area)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
+            <div class="area-group-body">${sessions.map(rowFor).join("")}</div>
+          </details>`
+      )
+      .join("");
+  }
   document.querySelectorAll("[data-load-session]").forEach((button) => {
     button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
   });
@@ -395,6 +444,7 @@ async function deleteSessionByCode(code) {
 }
 
 function handleBankChange() {
+  updateBankEditor();
   syncChallengeFromBank(true);
   renderQuestions();
   loadResponsesForSelected();
@@ -434,6 +484,61 @@ async function deleteBankById(bankId) {
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     $("selectionStatus").textContent = `No se pudo eliminar el banco: ${error.message}`;
+  }
+}
+
+async function saveBank() {
+  try {
+    const result = await api("/api/banks", {
+      method: "POST",
+      body: {
+        id: editingBankId,
+        name: $("bankNameInput").value.trim(),
+        area: $("bankAreaInput").value.trim(),
+        challengeText: $("challengeText").value.trim(),
+      },
+    });
+    const previousId = editingBankId;
+    appData.banks = result.banks;
+    fillSelectors();
+    const saved = previousId
+      ? appData.banks.find((item) => item.id === previousId)
+      : appData.banks[appData.banks.length - 1];
+    if (saved) $("bankSelect").value = saved.id;
+    updateBankEditor();
+    syncChallengeFromBank(true);
+    renderQuestions();
+    $("selectionStatus").textContent = "Banco de preguntas guardado.";
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("selectionStatus").textContent = `No se pudo guardar el banco: ${error.message}`;
+  }
+}
+
+async function addQuestionToBank() {
+  try {
+    const bank = selectedBank();
+    if (!bank) throw new Error("Selecciona o crea un banco de preguntas.");
+    const answers = [
+      { points: 100, text: $("answerText100").value.trim() },
+      { points: 75, text: $("answerText75").value.trim() },
+      { points: 50, text: $("answerText50").value.trim() },
+      { points: 25, text: $("answerText25").value.trim() },
+    ].filter((answer) => answer.text);
+    const result = await api(`/api/banks/${encodeURIComponent(bank.id)}/questions`, {
+      method: "POST",
+      body: { text: $("newQuestionText").value.trim(), answers },
+    });
+    appData.banks = result.banks;
+    fillSelectors();
+    $("bankSelect").value = result.bank.id;
+    updateBankEditor();
+    renderQuestions();
+    ["newQuestionText", "answerText100", "answerText75", "answerText50", "answerText25"].forEach((id) => ($(id).value = ""));
+    $("selectionStatus").textContent = "Pregunta agregada al banco seleccionado.";
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("selectionStatus").textContent = `No se pudo agregar la pregunta: ${error.message}`;
   }
 }
 
@@ -1276,13 +1381,14 @@ function renderStudentSession(session) {
           <h3>${idx + 1}. ${escapeHtml(question.text.replace(/^\d+\.\s*/, ""))}</h3>
           <div class="answers">
             ${question.answers
-              .map(
-                (answer, answerIndex) => `
-                  <button type="button" data-question-index="${question.index}" data-answer="${answerIndex}" ${!session.acceptingAnswers || answered ? "disabled" : ""}>
+              .map((answer, answerIndex) => {
+                const originalIndex = Number.isInteger(answer.originalIndex) ? answer.originalIndex : answerIndex;
+                return `
+                  <button type="button" data-question-index="${question.index}" data-answer="${originalIndex}" ${!session.acceptingAnswers || answered ? "disabled" : ""}>
                     <span>${escapeHtml(answer.text)}</span>
-                    ${answered && Number(chosen) === answerIndex ? " ✓" : ""}
-                  </button>`
-              )
+                    ${answered && Number(chosen) === originalIndex ? " ✓" : ""}
+                  </button>`;
+              })
               .join("")}
           </div>
         </article>
@@ -1318,6 +1424,8 @@ async function importWordQuestionnaire() {
     appData.banks = result.allBanks;
     fillSelectors();
     $("bankSelect").value = result.banks[0].id;
+    updateBankEditor();
+    syncChallengeFromBank(true);
     renderQuestions();
     renderUploadManager();
     $("wordUpload").value = "";
@@ -1522,6 +1630,9 @@ async function init() {
       else if (activeSession) renderResponses(activeSession.participants || [], activeSession);
     });
     $("downloadRecord").addEventListener("click", downloadInterventionRecord);
+    $("newBank").addEventListener("click", clearBankEditor);
+    $("saveBank").addEventListener("click", saveBank);
+    $("addQuestion").addEventListener("click", addQuestionToBank);
     $("deleteBank").addEventListener("click", deleteCurrentBank);
     $("wordUpload").addEventListener("change", handleWordFileSelection);
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);

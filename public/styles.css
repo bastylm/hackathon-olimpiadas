@@ -386,6 +386,67 @@ input {
   font-size: 13px;
 }
 
+.bank-workspace {
+  background: #fff;
+}
+
+.bank-editor-grid,
+.answer-editor-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.bank-editor-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.bank-editor-grid button,
+.question-editor button {
+  grid-column: 1 / -1;
+}
+
+.question-editor {
+  padding: 10px;
+  border: 1px dashed #d8c5f7;
+  border-radius: 8px;
+  background: #fbf8ff;
+}
+
+.question-editor > summary {
+  cursor: pointer;
+  color: var(--accent-dark);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.area-group {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbf8ff;
+}
+
+.area-group > summary {
+  cursor: pointer;
+  color: var(--accent-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.area-group > summary span {
+  float: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.area-group-body {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .section-actions {
   display: grid;
   grid-template-columns: 1fr 0.7fr 0.7fr;
@@ -1400,6 +1461,7 @@ body[data-view="projectionView"] .projection-side .podium-card:nth-child(3) {
   }
 
   .answer-key,
+  .bank-editor-grid,
   .participation-stats,
   .podium {
     grid-template-columns: 1fr;
