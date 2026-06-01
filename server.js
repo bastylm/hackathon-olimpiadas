@@ -1289,6 +1289,7 @@ const server = http.createServer(async (req, res) => {
         }
       }
       if (typeof body.quizPublished === "boolean") session.quizPublished = body.quizPublished;
+          if (typeof body.inviteVisible === "boolean") session.inviteVisible = body.inviteVisible;
       if (typeof body.winnersPublished === "boolean") {
         session.winnersPublished = body.winnersPublished;
         session.revealPodium = body.winnersPublished ? true : session.revealPodium;
