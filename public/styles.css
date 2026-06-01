@@ -125,16 +125,27 @@ h2 {
 }
 
 .hamburger-menu {
-  width: 46px;
+  min-width: 108px;
   min-height: 46px;
-  display: inline-grid;
-  place-items: center;
-  gap: 4px;
-  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 14px;
   background: #fff;
 }
 
-.hamburger-menu span {
+.hamburger-menu strong {
+  color: var(--accent-dark);
+  font-size: 15px;
+}
+
+.hamburger-lines {
+  display: grid;
+  gap: 4px;
+}
+
+.hamburger-lines span {
   display: block;
   width: 22px;
   height: 2px;

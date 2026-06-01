@@ -1533,12 +1533,16 @@ function renderProjectionVideo(video) {
   player.classList.toggle("hidden", !url);
   placeholder.classList.toggle("hidden", Boolean(url));
   playButton?.classList.toggle("hidden", !url);
+  player.muted = true;
+  player.autoplay = true;
+  player.loop = true;
+  player.playsInline = true;
   if (url && player.dataset.src !== url) {
     player.dataset.src = url;
     player.src = url;
     player.load();
-    player.play().catch(() => {});
   }
+  if (url) requestAnimationFrame(() => player.play().catch(() => {}));
   ensureProjectionVideoAutoplay();
 }
 
@@ -1769,6 +1773,12 @@ async function init() {
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
     $("playProjectionVideo")?.addEventListener("click", playProjectionVideo);
+    $("projectionVideo")?.addEventListener("canplay", () => {
+      if (mode === "projection") {
+        $("projectionVideo").muted = true;
+        $("projectionVideo").play().catch(() => {});
+      }
+    });
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
     $("publishQuiz").addEventListener("click", publishQuiz);

@@ -1,0 +1,42 @@
+name: Auto merge PRs de bastylm
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Fusionar PR autorizada
+    if: >
+      github.event.pull_request.user.login == 'bastylm' &&
+      github.event.pull_request.base.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirmar autor autorizado
+        run: echo "PR autorizada de bastylm. Se intentara fusionar sin ejecutar codigo externo."
+
+      - name: Esperar estado de fusion
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            MERGEABLE="$(gh pr view "$PR_URL" --json mergeable --jq '.mergeable')"
+            echo "Estado mergeable: $MERGEABLE"
+            if [ "$MERGEABLE" != "UNKNOWN" ]; then
+              break
+            fi
+            sleep 10
+          done
+
+      - name: Fusionar automaticamente
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr merge "$PR_URL" --merge || gh pr merge "$PR_URL" --merge --auto
