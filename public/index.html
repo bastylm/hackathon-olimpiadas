@@ -205,7 +205,23 @@
       <section id="projectionView" class="view">
         <div class="projection-show">
           <section class="projection-window projection-brand-window">
-            <img class="projection-main-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+            <div style="position: relative; display: inline-block;">
+              <img class="projection-main-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+              <div class="menu-container projection-menu" style="position: absolute; top: 0; right: -4rem;">
+                <button id="projectionMenuButton" class="hamburger-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="projectionRoleNav">
+                  <span class="hamburger-lines" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </span>
+                </button>
+                <nav id="projectionRoleNav" class="role-nav hidden" aria-label="Perfiles">
+                  <a href="/admin">Admin</a>
+                  <a id="projNavProjection" class="active admin-only hidden" href="/proyeccion">Proyección</a>
+                  <a href="/estudiante">Estudiante</a>
+                </nav>
+              </div>
+            </div>
             <h2>Etapa 1 · Hackathon</h2>
           </section>
 
