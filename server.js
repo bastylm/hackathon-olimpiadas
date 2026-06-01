@@ -449,6 +449,8 @@ function bankPayload(body = {}) {
   return {
     name: String(body.name || "").trim().slice(0, 160),
     area: String(body.area || "Sin área").trim().slice(0, 100) || "Sin área",
+    subject: String(body.subject || "").trim().slice(0, 160),
+    career: String(body.career || "").trim().slice(0, 160),
     challengeText: String(body.challengeText || "").trim().slice(0, 600),
   };
 }
@@ -609,7 +611,9 @@ function parseDocxBanks(buffer, filename) {
         id: "",
         name: lastTitle || (banks.length ? `${baseName} ${banks.length + 1}` : baseName),
         area: currentArea,
-        challengeText: lastTitle ? `Desafío ${lastTitle}: responder con pertinencia técnica según el área de trabajo.` : "",
+        subject: lastTitle || "",
+        career: currentArea.replace(/^Área\s+/i, ""),
+        challengeText: lastTitle ? `Desafío ${lastTitle}: responder con pertinencia técnica según la asignatura y el área de trabajo.` : "",
         questions,
       });
       lastTitle = "";

@@ -215,12 +215,16 @@ function updateBankEditor() {
   editingBankId = bank?.id || "";
   $("bankNameInput").value = bank?.name || "";
   $("bankAreaInput").value = bank?.area || "";
+  $("bankSubjectInput").value = bank?.subject || "";
+  $("bankCareerInput").value = bank?.career || "";
 }
 
 function clearBankEditor() {
   editingBankId = "";
   $("bankNameInput").value = "";
   $("bankAreaInput").value = "";
+  $("bankSubjectInput").value = "";
+  $("bankCareerInput").value = "";
   $("challengeText").value = "";
   $("selectionStatus").textContent = "Completa el nombre, área y descripción para crear un banco nuevo.";
 }
@@ -496,6 +500,8 @@ async function saveBank() {
         id: editingBankId,
         name: $("bankNameInput").value.trim(),
         area: $("bankAreaInput").value.trim(),
+        subject: $("bankSubjectInput").value.trim(),
+        career: $("bankCareerInput").value.trim(),
         challengeText: $("challengeText").value.trim(),
       },
     });
