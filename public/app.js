@@ -7,6 +7,7 @@ let managedSessions = [];
 let editingSectionId = "";
 let editingBankId = "";
 let adminQrVisible = false;
+let projectionVideoObserver = null;
 
 function safeJson(value, fallback) {
   try {
@@ -1501,6 +1502,26 @@ function renderProjectionVideo(video) {
     player.load();
     player.play().catch(() => {});
   }
+  ensureProjectionVideoAutoplay();
+}
+
+function ensureProjectionVideoAutoplay() {
+  const player = $("projectionVideo");
+  if (!player || projectionVideoObserver || !("IntersectionObserver" in window)) return;
+  projectionVideoObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.45 && player.src) {
+          player.muted = true;
+          player.play().catch(() => {});
+        } else if (!entry.isIntersecting) {
+          player.pause();
+        }
+      });
+    },
+    { threshold: [0, 0.45, 0.75] }
+  );
+  projectionVideoObserver.observe(player);
 }
 
 async function answerQuestion(questionIndex, answerIndex) {
