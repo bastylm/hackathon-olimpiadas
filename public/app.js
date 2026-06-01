@@ -1138,25 +1138,26 @@ function renderParticipationStats(id, session) {
 
 function renderParticipationRank(id, session) {
   const participants = [...(session.participants || [])]
-    .sort((a, b) => (b.answers || 0) - (a.answers || 0) || String(a.name || "").localeCompare(String(b.name || "")))
-    .slice(0, 8);
+    .sort((a, b) => (b.answers || 0) - (a.answers || 0) || String(a.name || "").localeCompare(String(b.name || "")));
   $(id).innerHTML = `
     <h3>Participación en vivo</h3>
-    ${
-      participants.length
-        ? participants
-            .map(
-              (p, index) => `
-                <div class="participation-rank-row">
-                  <strong>${index + 1}</strong>
-                  <span>${escapeHtml(p.name || "Participante")}</span>
-                  <em>${p.answers || 0} respuestas</em>
-                </div>
-              `
-            )
-            .join("")
-        : "<p>Esperando participantes...</p>"
-    }
+    <div style="max-height: 45vh; overflow-y: auto; padding-right: 8px;">
+      ${
+        participants.length
+          ? participants
+              .map(
+                (p, index) => `
+                  <div class="participation-rank-row">
+                    <strong>${index + 1}</strong>
+                    <span>${escapeHtml(p.name || "Participante")}</span>
+                    <em>${p.answers || 0} respuestas</em>
+                  </div>
+                `
+              )
+              .join("")
+          : "<p>Esperando participantes...</p>"
+      }
+    </div>
   `;
 }
 
