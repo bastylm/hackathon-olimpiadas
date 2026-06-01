@@ -1174,6 +1174,134 @@ body[data-view="projectionView"] .projection-side .podium-card:nth-child(3) {
   height: 205px;
 }
 
+body[data-view="projectionView"] .topbar {
+  display: none;
+}
+
+body[data-view="projectionView"] .shell {
+  max-width: none;
+  padding: 0;
+}
+
+.projection-show {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  background: #f3ecff;
+}
+
+.projection-window {
+  width: min(1320px, calc(100vw - 32px));
+  min-height: calc(100vh - 32px);
+  margin: 16px auto;
+  padding: clamp(18px, 2.2vw, 34px);
+  border: 1px solid #d8c5f7;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 20px 48px rgba(91, 33, 182, 0.08);
+}
+
+.projection-brand-window {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.projection-main-logo {
+  width: min(780px, 78vw);
+  height: auto;
+}
+
+.projection-brand-window h2 {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-size: clamp(64px, 9vw, 144px);
+  line-height: 0.95;
+}
+
+.projection-video-window {
+  display: grid;
+  place-items: center;
+  background: #14051f;
+}
+
+.projection-video {
+  width: 100%;
+  max-height: calc(100vh - 96px);
+  border-radius: 8px;
+  background: #000;
+}
+
+.projection-video-placeholder {
+  display: grid;
+  place-items: center;
+  width: min(900px, 90%);
+  min-height: 420px;
+  border: 1px dashed #d8c5f7;
+  border-radius: 8px;
+  color: #ede3ff;
+  font-size: clamp(24px, 3vw, 42px);
+  font-weight: 900;
+  text-align: center;
+}
+
+.projection-live-window {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.8fr) minmax(520px, 1.2fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+body[data-view="projectionView"] .projection-live-window .projection-hero,
+body[data-view="projectionView"] .projection-live-window .projection-side {
+  min-height: auto;
+}
+
+.projection-winners-window {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+}
+
+.projection-winners-window h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(46px, 6vw, 96px);
+  text-align: center;
+}
+
+body[data-view="projectionView"] .projection-winners-window .leaderboard {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+body[data-view="projectionView"] .projection-winners-window .podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 14px;
+  width: min(1040px, 100%);
+  min-height: 380px;
+  margin: 0 auto;
+}
+
+body[data-view="projectionView"] .projection-winners-window .podium-card:nth-child(1) {
+  height: 270px;
+}
+
+body[data-view="projectionView"] .projection-winners-window .podium-card:nth-child(2) {
+  height: 340px;
+}
+
+body[data-view="projectionView"] .projection-winners-window .podium-card:nth-child(3) {
+  height: 240px;
+}
+
+#uploadProjectionVideo {
+  width: 100%;
+}
+
 .student-card {
   position: relative;
   width: min(720px, 100%);
@@ -1425,6 +1553,10 @@ body[data-view="projectionView"] .projection-side .podium-card:nth-child(3) {
 
   body[data-view="projectionView"] .projection-hero img {
     width: min(240px, 34vh, 30vw);
+  }
+
+  .projection-live-window {
+    grid-template-columns: 1fr;
   }
 
 }

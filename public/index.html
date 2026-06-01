@@ -116,6 +116,17 @@
                 </label>
                 <button id="uploadWordButton" type="button" disabled>Cargar banco de preguntas</button>
                 <div id="uploadManager" class="upload-manager"></div>
+                <details class="question-editor">
+                  <summary>Video para pantalla de proyección</summary>
+                  <div class="section-editor-body">
+                    <label>
+                      Seleccionar video
+                      <input id="projectionVideoUpload" type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" />
+                    </label>
+                    <button id="uploadProjectionVideo" type="button" disabled>Cargar video de proyección</button>
+                    <p id="projectionVideoStatus" class="hint">Aún no hay video cargado para proyección.</p>
+                  </div>
+                </details>
               </div>
             </details>
             <label>
@@ -177,27 +188,45 @@
       </section>
 
       <section id="projectionView" class="view">
-        <div class="projection-grid">
-          <section class="projection-hero">
-            <p class="eyebrow">Etapa Hackathon · Ingreso estudiantes</p>
-            <h2 id="projectionCode">Código -----</h2>
-            <img id="projectionQr" alt="QR para estudiantes" />
-            <p id="projectionJoin"></p>
+        <div class="projection-show">
+          <section class="projection-window projection-brand-window">
+            <img class="projection-main-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+            <p class="eyebrow">Olimpiadas Tecnológicas 2026</p>
+            <h2>Etapa Hackathon</h2>
           </section>
-          <section class="projection-side">
-            <div class="timer-card">
-              <img class="timer-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
-              <div class="projection-total-count">
-                <span>Participación total</span>
-                <strong id="projectionTotalParticipants">0</strong>
-              </div>
-              <span>Tiempo restante</span>
-              <strong id="projectionElapsed">00:00</strong>
+
+          <section class="projection-window projection-video-window">
+            <video id="projectionVideo" class="projection-video hidden" muted loop playsinline controls></video>
+            <div id="projectionVideoPlaceholder" class="projection-video-placeholder">Video de presentación pendiente.</div>
+          </section>
+
+          <section class="projection-window projection-live-window">
+            <div class="projection-hero">
+              <p class="eyebrow">Ingreso estudiantes</p>
+              <h2 id="projectionCode">Código -----</h2>
+              <img id="projectionQr" alt="QR para estudiantes" />
+              <p id="projectionJoin"></p>
             </div>
-            <div id="projectionStats" class="participation-stats"></div>
-            <div id="projectionChallenge" class="challenge-card hidden"></div>
-            <div id="projectionParticipationRank" class="participation-rank"></div>
-            <div id="projectionQuestion" class="current-question">Esperando al administrador.</div>
+            <div class="projection-side">
+              <div class="timer-card">
+                <img class="timer-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+                <div class="projection-total-count">
+                  <span>Participación total</span>
+                  <strong id="projectionTotalParticipants">0</strong>
+                </div>
+                <span>Tiempo restante</span>
+                <strong id="projectionElapsed">00:00</strong>
+              </div>
+              <div id="projectionStats" class="participation-stats"></div>
+              <div id="projectionChallenge" class="challenge-card hidden"></div>
+              <div id="projectionParticipationRank" class="participation-rank"></div>
+              <div id="projectionQuestion" class="current-question">Esperando al administrador.</div>
+            </div>
+          </section>
+
+          <section class="projection-window projection-winners-window">
+            <p class="eyebrow">Resultados</p>
+            <h2>Ranking de ganadores</h2>
             <ol id="projectionRanking" class="leaderboard hidden"></ol>
             <div id="projectionPodium" class="podium hidden"></div>
           </section>

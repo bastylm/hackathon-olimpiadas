@@ -55,6 +55,26 @@ const wordUpload = multer({
   },
 });
 
+const videoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, callback) => callback(null, UPLOADS_DIR),
+    filename: (_req, file, callback) => {
+      const ext = path.extname(file.originalname || ".mp4").toLowerCase() || ".mp4";
+      const base = path.basename(file.originalname || "video-proyeccion", ext).replace(/[^\w.-]+/g, "_").slice(0, 70) || "video-proyeccion";
+      callback(null, `${Date.now()}-${crypto.randomInt(10000)}-${base}${ext}`);
+    },
+  }),
+  limits: { fileSize: 250 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, callback) => {
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    if (![".mp4", ".webm", ".ogg", ".mov"].includes(ext)) {
+      callback(new Error("Solo se permiten videos .mp4, .webm, .ogg o .mov"));
+      return;
+    }
+    callback(null, true);
+  },
+});
+
 function sendJson(res, status, payload) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
@@ -361,6 +381,15 @@ function publicQuestionsFor(session) {
         originalIndex: answerIndex,
       })),
     };
+  });
+}
+
+function receiveVideoUpload(req, res) {
+  return new Promise((resolve, reject) => {
+    videoUpload.single("projectionVideo")(req, res, (error) => {
+      if (error) reject(error);
+      else resolve(req.file);
+    });
   });
 }
 
@@ -674,6 +703,7 @@ function publicSession(session, req) {
     elapsedSeconds: elapsedSeconds(session.timerStartedAt),
     remainingSeconds: remainingSeconds(session),
     questionElapsedSeconds: elapsedSeconds(session.questionStartedAt),
+    projectionVideo: data.projectionVideo || null,
     joinUrl: `${inviteBase(req)}/estudiante?code=${session.code}`,
     projectionUrl: `${inviteBase(req)}/proyeccion?code=${session.code}`,
     qrUrl: `/api/session/${session.code}/qr`,
@@ -696,7 +726,13 @@ function serveStatic(req, res) {
       return;
     }
     const ext = path.extname(full).toLowerCase();
-    const type = ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "application/octet-stream";
+    const type =
+      ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" :
+      ext === ".mp4" ? "video/mp4" :
+      ext === ".webm" ? "video/webm" :
+      ext === ".ogg" ? "video/ogg" :
+      ext === ".mov" ? "video/quicktime" :
+      "application/octet-stream";
     res.writeHead(200, { "Content-Type": type, "Cache-Control": "public, max-age=31536000, immutable" });
     fs.createReadStream(full).pipe(res);
     return;
@@ -747,6 +783,29 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/data") {
     sendJson(res, 200, data);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/projection-video") {
+    if (!requireAdmin(req, res)) return;
+    try {
+      const file = await receiveVideoUpload(req, res);
+      if (!file) {
+        sendJson(res, 400, { error: "Selecciona un video para la proyección" });
+        return;
+      }
+      data.projectionVideo = {
+        originalName: file.originalname,
+        filename: file.filename,
+        url: `/uploads/${encodeURIComponent(file.filename)}`,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+      };
+      saveData();
+      sendJson(res, 200, { projectionVideo: data.projectionVideo });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message || "No se pudo cargar el video" });
+    }
     return;
   }
 

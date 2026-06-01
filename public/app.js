@@ -655,6 +655,7 @@ async function showAdmin() {
   $("pageTitle").textContent = "Panel administrador";
   setRoleLabel("Administrador");
   setView("adminView");
+  updateProjectionVideoStatus();
   const savedCode = localStorage.getItem("olimpiadasEvaluatorCode");
   if (savedCode) {
     try {
@@ -673,7 +674,7 @@ async function showAdmin() {
 
 async function showProjection() {
   mode = "projection";
-  $("pageTitle").textContent = "Pantalla de proyección";
+  $("pageTitle").textContent = "Olimpiadas Tecnológicas 2026";
   setRoleLabel("Proyección");
   setView("projectionView");
   const code = new URLSearchParams(location.search).get("code") || localStorage.getItem("olimpiadasEvaluatorCode");
@@ -687,6 +688,7 @@ async function showProjection() {
       renderProjection(activeSession);
       startRefresh();
     } catch {
+      renderProjectionVideo(appData?.projectionVideo);
       $("projectionQuestion").textContent = "Abre esta pantalla desde el enlace que entrega el administrador.";
     }
   }
@@ -1112,6 +1114,7 @@ function renderParticipationRank(id, session) {
 function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
+  renderProjectionVideo(session.projectionVideo || appData?.projectionVideo);
   $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Sin código activo";
   $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "La competencia anterior ya fue cerrada.";
   $("projectionQr").classList.toggle("hidden", !inviteVisible);
@@ -1447,6 +1450,59 @@ function handleWordFileSelection() {
   if (file) $("selectionStatus").textContent = `Archivo seleccionado: ${file.name}. Presiona cargar banco de preguntas.`;
 }
 
+function updateProjectionVideoStatus(video = appData?.projectionVideo) {
+  const status = $("projectionVideoStatus");
+  if (!status) return;
+  status.textContent = video?.url
+    ? `Video cargado: ${video.originalName || video.filename || "video de proyección"}`
+    : "Aún no hay video cargado para proyección.";
+}
+
+function handleProjectionVideoSelection() {
+  const file = $("projectionVideoUpload")?.files?.[0];
+  $("uploadProjectionVideo").disabled = !file;
+  if (file) $("projectionVideoStatus").textContent = `Archivo seleccionado: ${file.name}. Presiona cargar video de proyección.`;
+}
+
+async function uploadProjectionVideo() {
+  try {
+    const file = $("projectionVideoUpload").files[0];
+    if (!file) {
+      updateProjectionVideoStatus();
+      return;
+    }
+    $("uploadProjectionVideo").disabled = true;
+    $("uploadProjectionVideo").textContent = "Cargando video...";
+    const formData = new FormData();
+    formData.append("projectionVideo", file);
+    const result = await apiForm("/api/projection-video", formData);
+    appData.projectionVideo = result.projectionVideo;
+    $("projectionVideoUpload").value = "";
+    $("uploadProjectionVideo").textContent = "Cargar video de proyección";
+    updateProjectionVideoStatus(appData.projectionVideo);
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("uploadProjectionVideo").textContent = "Cargar video de proyección";
+    $("uploadProjectionVideo").disabled = false;
+    $("projectionVideoStatus").textContent = `No se pudo cargar el video: ${error.message}`;
+  }
+}
+
+function renderProjectionVideo(video) {
+  const player = $("projectionVideo");
+  const placeholder = $("projectionVideoPlaceholder");
+  if (!player || !placeholder) return;
+  const url = video?.url || "";
+  player.classList.toggle("hidden", !url);
+  placeholder.classList.toggle("hidden", Boolean(url));
+  if (url && player.dataset.src !== url) {
+    player.dataset.src = url;
+    player.src = url;
+    player.load();
+    player.play().catch(() => {});
+  }
+}
+
 async function answerQuestion(questionIndex, answerIndex) {
   try {
     document.querySelectorAll(`[data-question-index="${questionIndex}"]`).forEach((button) => (button.disabled = true));
@@ -1636,6 +1692,8 @@ async function init() {
     $("deleteBank").addEventListener("click", deleteCurrentBank);
     $("wordUpload").addEventListener("change", handleWordFileSelection);
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
+    $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
+    $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
     $("publishQuiz").addEventListener("click", publishQuiz);
