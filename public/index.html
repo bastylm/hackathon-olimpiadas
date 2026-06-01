@@ -14,11 +14,18 @@
           <p class="eyebrow">Etapa Hackathon</p>
           <h1 id="pageTitle">Levantamiento de respuestas</h1>
         </div>
-        <nav class="role-nav" aria-label="Perfiles">
-          <a id="navAdmin" href="/admin">Administrador</a>
-          <a id="navProjection" href="/proyeccion">Proyección</a>
-          <a id="navStudent" href="/estudiante">Estudiante</a>
-        </nav>
+        <div class="menu-container">
+          <button id="menuButton" class="hamburger-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="roleNav">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <nav id="roleNav" class="role-nav hidden" aria-label="Perfiles">
+            <a id="navAdmin" href="/admin">Administrador</a>
+            <a id="navProjection" class="admin-only hidden" href="/proyeccion">Proyección</a>
+            <a id="navStudent" href="/estudiante">Estudiante</a>
+          </nav>
+        </div>
       </section>
 
       <section id="loginView" class="view">
@@ -205,6 +212,7 @@
           <section class="projection-window projection-video-window">
             <video id="projectionVideo" class="projection-video hidden" muted loop playsinline autoplay controls></video>
             <div id="projectionVideoPlaceholder" class="projection-video-placeholder">Video de presentación pendiente.</div>
+            <button id="playProjectionVideo" class="primary video-play-button hidden" type="button">Reproducir video</button>
           </section>
 
           <section class="projection-window projection-live-window">

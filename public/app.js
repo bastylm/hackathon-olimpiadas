@@ -90,6 +90,8 @@ function requireFreshAdminLogin(error) {
   localStorage.removeItem("olimpiadasAuth");
   clearInterval(refreshTimer);
   activeSession = null;
+  updateNavVisibility();
+  closeProfileMenu();
   setView("loginView");
   setRoleLabel("Administrador");
   $("loginUser").value = "";
@@ -111,6 +113,25 @@ function setRoleLabel(text) {
   if (text === "Administrador") $("navAdmin")?.classList.add("active");
   if (text === "Proyección") $("navProjection")?.classList.add("active");
   if (text === "Estudiante") $("navStudent")?.classList.add("active");
+}
+
+function closeProfileMenu() {
+  $("roleNav")?.classList.add("hidden");
+  $("menuButton")?.setAttribute("aria-expanded", "false");
+}
+
+function toggleProfileMenu() {
+  const nav = $("roleNav");
+  const button = $("menuButton");
+  if (!nav || !button) return;
+  const willOpen = nav.classList.contains("hidden");
+  nav.classList.toggle("hidden", !willOpen);
+  button.setAttribute("aria-expanded", String(willOpen));
+}
+
+function updateNavVisibility() {
+  const isAdmin = currentAuth("admin")?.role === "admin";
+  $("navProjection")?.classList.toggle("hidden", !isAdmin);
 }
 
 function fmt(seconds) {
@@ -611,6 +632,7 @@ async function login() {
     localStorage.setItem(authKey(result.role), JSON.stringify(result));
     localStorage.removeItem("olimpiadasAuth");
     $("loginHint").textContent = "";
+    updateNavVisibility();
     if (result.role === "admin") showAdmin();
     if (result.role === "projection") showProjection();
   } catch (error) {
@@ -628,6 +650,8 @@ function logoutAdmin() {
   $("loginPass").value = "";
   $("loginTitle").textContent = "Cuenta administradora";
   $("loginHint").textContent = "Sesión cerrada.";
+  updateNavVisibility();
+  closeProfileMenu();
   setRoleLabel("Administrador");
   setView("loginView");
 }
@@ -659,7 +683,10 @@ function requireLogin(expectedRole) {
 async function showAdmin() {
   mode = "admin";
   if (!requireLogin("admin")) return;
+  document.querySelector(".menu-container")?.classList.remove("hidden");
   $("pageTitle").textContent = "Panel administrador";
+  updateNavVisibility();
+  closeProfileMenu();
   setRoleLabel("Administrador");
   setView("adminView");
   updateProjectionVideoStatus();
@@ -681,6 +708,7 @@ async function showAdmin() {
 
 async function showProjection() {
   mode = "projection";
+  document.querySelector(".menu-container")?.classList.remove("hidden");
   $("pageTitle").textContent = "Olimpiadas Tecnológicas 2026";
   setRoleLabel("Proyección");
   setView("projectionView");
@@ -703,6 +731,7 @@ async function showProjection() {
 
 function showStudent() {
   mode = "student";
+  document.querySelector(".menu-container")?.classList.remove("hidden");
   $("pageTitle").textContent = "Cuestionario estudiantes";
   setRoleLabel("Estudiante");
   setView("studentView");
@@ -710,7 +739,7 @@ function showStudent() {
   $("studentName").value = code ? "" : student.name;
   $("studentRut").value = code ? "" : student.rut;
   if (code) {
-    document.querySelector(".role-nav").classList.add("hidden");
+    document.querySelector(".menu-container")?.classList.add("hidden");
     $("studentCode").value = code.toUpperCase();
     $("studentCodeLabel").classList.add("hidden");
     student.code = code.toUpperCase();
@@ -1498,10 +1527,12 @@ async function uploadProjectionVideo() {
 function renderProjectionVideo(video) {
   const player = $("projectionVideo");
   const placeholder = $("projectionVideoPlaceholder");
+  const playButton = $("playProjectionVideo");
   if (!player || !placeholder) return;
   const url = video?.url || "";
   player.classList.toggle("hidden", !url);
   placeholder.classList.toggle("hidden", Boolean(url));
+  playButton?.classList.toggle("hidden", !url);
   if (url && player.dataset.src !== url) {
     player.dataset.src = url;
     player.src = url;
@@ -1509,6 +1540,14 @@ function renderProjectionVideo(video) {
     player.play().catch(() => {});
   }
   ensureProjectionVideoAutoplay();
+}
+
+function playProjectionVideo() {
+  const player = $("projectionVideo");
+  if (!player?.src) return;
+  player.muted = false;
+  player.controls = true;
+  player.play().catch(() => {});
 }
 
 function ensureProjectionVideoAutoplay() {
@@ -1680,6 +1719,7 @@ async function init() {
     appData = await api("/api/data");
     fillSelectors();
     syncChallengeFromBank(false);
+    updateNavVisibility();
     const path = location.pathname.toLowerCase();
     if (path.includes("estudiante")) showStudent();
     else if (path.includes("proyeccion")) await showProjection();
@@ -1689,6 +1729,13 @@ async function init() {
     $("logoutAdmin").addEventListener("click", logoutAdmin);
     $("loginPass").addEventListener("keydown", (event) => {
       if (event.key === "Enter") login();
+    });
+    $("menuButton")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleProfileMenu();
+    });
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".menu-container")) closeProfileMenu();
     });
     $("sectionSearch").addEventListener("input", () => {
       fillSectionSelector();
@@ -1721,6 +1768,7 @@ async function init() {
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
+    $("playProjectionVideo")?.addEventListener("click", playProjectionVideo);
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
     $("publishQuiz").addEventListener("click", publishQuiz);
@@ -1732,7 +1780,7 @@ async function init() {
   } catch (error) {
     setView("studentView");
     $("pageTitle").textContent = "Cuestionario estudiantes";
-    document.querySelector(".role-nav").classList.add("hidden");
+    document.querySelector(".menu-container")?.classList.add("hidden");
     $("joinBox").classList.remove("hidden");
     $("answerBox").classList.remove("hidden");
     $("studentQuestion").textContent = "No se pudo cargar el cuestionario. Actualiza la página o pide un QR nuevo.";
