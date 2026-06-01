@@ -8,6 +8,7 @@ let editingSectionId = "";
 let editingBankId = "";
 let adminQrVisible = false;
 let projectionVideoObserver = null;
+let currentSlideIndex = 0;
 
 function safeJson(value, fallback) {
   try {
@@ -35,6 +36,13 @@ localStorage.setItem("olimpiadasStudentId", student.id);
 let draftSelection = safeJson(localStorage.getItem("olimpiadasDraftSelection"), null);
 
 const $ = (id) => document.getElementById(id);
+
+function updateProjectionSlides() {
+  const slides = document.querySelectorAll(".projection-window");
+  slides.forEach((slide, index) => {
+    slide.style.display = index === currentSlideIndex ? "" : "none";
+  });
+}
 
 function authKey(role) {
   return role === "projection" ? "olimpiadasAuthProjection" : "olimpiadasAuthAdmin";
@@ -132,6 +140,7 @@ function toggleProfileMenu() {
 function updateNavVisibility() {
   const isAdmin = currentAuth("admin")?.role === "admin";
   $("navProjection")?.classList.toggle("hidden", !isAdmin);
+  $("projNavProjection")?.classList.toggle("hidden", !isAdmin);
 }
 
 function fmt(seconds) {
@@ -683,6 +692,7 @@ function requireLogin(expectedRole) {
 async function showAdmin() {
   mode = "admin";
   if (!requireLogin("admin")) return;
+  document.querySelector(".topbar")?.classList.remove("hidden");
   document.querySelector(".menu-container")?.classList.remove("hidden");
   $("pageTitle").textContent = "Panel administrador";
   updateNavVisibility();
@@ -708,10 +718,12 @@ async function showAdmin() {
 
 async function showProjection() {
   mode = "projection";
-  document.querySelector(".menu-container")?.classList.remove("hidden");
+  document.querySelector(".topbar")?.classList.add("hidden");
   $("pageTitle").textContent = "Olimpiadas Tecnológicas 2026";
   setRoleLabel("Proyección");
   setView("projectionView");
+  currentSlideIndex = 0;
+  updateProjectionSlides();
   const code = new URLSearchParams(location.search).get("code") || localStorage.getItem("olimpiadasEvaluatorCode");
   if (code) {
     activeSession = await api(`/api/session/${code.toUpperCase()}`);
@@ -731,6 +743,7 @@ async function showProjection() {
 
 function showStudent() {
   mode = "student";
+  document.querySelector(".topbar")?.classList.remove("hidden");
   document.querySelector(".menu-container")?.classList.remove("hidden");
   $("pageTitle").textContent = "Cuestionario estudiantes";
   setRoleLabel("Estudiante");
@@ -1683,8 +1696,33 @@ async function init() {
       event.stopPropagation();
       toggleProfileMenu();
     });
+    $("projectionMenuButton")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const nav = $("projectionRoleNav");
+      if (!nav) return;
+      const willOpen = nav.classList.contains("hidden");
+      nav.classList.toggle("hidden", !willOpen);
+      $("projectionMenuButton").setAttribute("aria-expanded", String(willOpen));
+    });
     document.addEventListener("click", (event) => {
       if (!event.target.closest(".menu-container")) closeProfileMenu();
+      if (!event.target.closest(".projection-menu")) {
+        $("projectionRoleNav")?.classList.add("hidden");
+        $("projectionMenuButton")?.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (mode === "projection") {
+        const slides = document.querySelectorAll(".projection-window");
+        if (!slides.length) return;
+        if (event.key === "ArrowRight" || event.key === "PageDown") {
+          currentSlideIndex = Math.min(currentSlideIndex + 1, slides.length - 1);
+          updateProjectionSlides();
+        } else if (event.key === "ArrowLeft" || event.key === "PageUp") {
+          currentSlideIndex = Math.max(currentSlideIndex - 1, 0);
+          updateProjectionSlides();
+        }
+      }
     });
     $("sectionSearch").addEventListener("input", () => {
       fillSectionSelector();
