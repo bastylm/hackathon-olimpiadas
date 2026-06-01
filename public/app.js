@@ -34,6 +34,7 @@ const student = {
 };
 localStorage.setItem("olimpiadasStudentId", student.id);
 let draftSelection = safeJson(localStorage.getItem("olimpiadasDraftSelection"), null);
+let hiddenSessions = safeJson(localStorage.getItem("olimpiadasHiddenSessions"), []);
 
 const $ = (id) => document.getElementById(id);
 
@@ -382,7 +383,7 @@ function renderSessionManager() {
     const bankMatch = !currentBankId || session.bank?.id === currentBankId;
     return sectionMatch && bankMatch;
   });
-  const visible = selected;
+  const visible = selected.filter((session) => !hiddenSessions.includes(session.code));
   const rowFor = (session) => {
     const isActive = activeSession?.code === session.code;
     const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
@@ -397,13 +398,14 @@ function renderSessionManager() {
         <div class="session-actions">
           <button type="button" data-load-session="${session.code}">Usar</button>
           <a class="button-link small" href="/proyeccion?code=${session.code}" target="_blank">Proyectar</a>
+          <button type="button" data-hide-session="${session.code}">Ocultar</button>
           <button type="button" data-delete-session="${session.code}">Eliminar</button>
         </div>
       </div>
     `;
   };
   if (!visible.length) {
-    $("sessionManager").innerHTML = "<p class='hint'>Aún no hay formularios creados.</p>";
+    $("sessionManager").innerHTML = "<p class='hint'>Aún no hay formularios creados o visibles.</p>";
   } else {
     const groups = groupedByArea(visible, (session) => session.bank?.area || session.section?.area);
     $("sessionManager").innerHTML = Object.entries(groups)
@@ -417,12 +419,35 @@ function renderSessionManager() {
       )
       .join("");
   }
+  if (selected.length > visible.length) {
+    $("sessionManager").innerHTML += `
+      <div style="margin-top: 1rem; text-align: center;">
+        <button type="button" id="restoreHiddenSessions" class="small">Restaurar formularios ocultos (${selected.length - visible.length})</button>
+      </div>
+    `;
+  }
   document.querySelectorAll("[data-load-session]").forEach((button) => {
     button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
+  });
+  document.querySelectorAll("[data-hide-session]").forEach((button) => {
+    button.addEventListener("click", () => hideSessionByCode(button.dataset.hideSession));
   });
   document.querySelectorAll("[data-delete-session]").forEach((button) => {
     button.addEventListener("click", () => deleteSessionByCode(button.dataset.deleteSession));
   });
+  $("restoreHiddenSessions")?.addEventListener("click", () => {
+    hiddenSessions = [];
+    localStorage.removeItem("olimpiadasHiddenSessions");
+    renderSessionManager();
+  });
+}
+
+function hideSessionByCode(code) {
+  if (!hiddenSessions.includes(code)) {
+    hiddenSessions.push(code);
+    localStorage.setItem("olimpiadasHiddenSessions", JSON.stringify(hiddenSessions));
+    renderSessionManager();
+  }
 }
 
 function syncManagedSession(session) {
