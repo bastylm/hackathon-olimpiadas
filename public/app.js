@@ -1197,61 +1197,6 @@ function renderLeaderboard(id, participants) {
 }
 
 function renderResponses(participants, context = activeSession) {
-  const sectionLabel = activeSession?.section?.section || "Sin sección";
-  const bankLabel = activeSession?.bank?.name || "Sin banco";
-  const search = normalizeText($("responsesSearch")?.value || "");
-  const stats = participationStats(activeSession || { participants });
-  $("responsesSummary").innerHTML = `
-    <span>Seccion: <strong>${escapeHtml(sectionLabel)}</strong></span>
-    <span>Banco: <strong>${escapeHtml(bankLabel)}</strong></span>
-    <span>Esperados: <strong>${stats.expected}</strong></span>
-    <span>Llegaron: <strong>${stats.arrived}</strong></span>
-    <span>Completaron: <strong>${stats.completed}</strong></span>
-    <span>Pendientes: <strong>${stats.pending}</strong></span>
-  `;
-  const filtered = participants.filter((p) => {
-    if (!search) return true;
-    return normalizeText(`${p.name} ${p.rut}`).includes(search);
-  });
-  $("responsesList").innerHTML = filtered.length
-    ? filtered
-        .map(
-          (p) => `
-            <div class="response-row">
-              <div>
-                <strong>${escapeHtml(p.name)}</strong>
-                <span>${escapeHtml(p.rut || "Sin RUT")} · ${escapeHtml(sectionLabel)} · ${escapeHtml(bankLabel)}</span>
-                <span>${p.answers} respuestas · ${p.score} pts</span>
-              </div>
-              <button type="button" data-delete-student="${p.id}">Eliminar</button>
-            </div>
-          `
-        )
-        .join("")
-    : "<p class='hint'>Aún no hay respuestas registradas en esta sección.</p>";
-  if (!filtered.length) {
-    $("responsesList").innerHTML = "<p class='hint'>No hay participantes para esa búsqueda en esta sección y banco.</p>";
-  }
-  document.querySelectorAll("[data-delete-student]").forEach((button) => {
-    button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
-  });
-}
-
-async function deleteStudent(studentId) {
-  try {
-    if (!activeSession) return;
-    activeSession = await api(`/api/session/${activeSession.code}/student-delete`, {
-      method: "POST",
-      body: { studentId },
-    });
-    renderAdmin(activeSession);
-  } catch (error) {
-    if (requireFreshAdminLogin(error)) return;
-    $("currentQuestion").textContent = `No se pudo eliminar la respuesta: ${error.message}`;
-  }
-}
-
-function renderResponses(participants, context = activeSession) {
   const sectionLabel = context?.section?.section || "Sin sección";
   const bankLabel = context?.bank?.name || "Sin banco";
   const search = normalizeText($("responsesSearch")?.value || "");
