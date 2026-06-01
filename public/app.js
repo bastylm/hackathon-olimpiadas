@@ -34,7 +34,6 @@ const student = {
 };
 localStorage.setItem("olimpiadasStudentId", student.id);
 let draftSelection = safeJson(localStorage.getItem("olimpiadasDraftSelection"), null);
-let hiddenSessions = safeJson(localStorage.getItem("olimpiadasHiddenSessions"), []);
 
 const $ = (id) => document.getElementById(id);
 
@@ -383,10 +382,10 @@ function renderSessionManager() {
     const bankMatch = !currentBankId || session.bank?.id === currentBankId;
     return sectionMatch && bankMatch;
   });
-  const visible = selected.filter((session) => !hiddenSessions.includes(session.code));
   const rowFor = (session) => {
     const isActive = activeSession?.code === session.code;
     const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
+    const isVisible = session.inviteVisible !== false;
     return `
       <div class="session-row ${isActive ? "active" : ""}">
         <div>
@@ -398,16 +397,16 @@ function renderSessionManager() {
         <div class="session-actions">
           <button type="button" data-load-session="${session.code}">Usar</button>
           <a class="button-link small" href="/proyeccion?code=${session.code}" target="_blank">Proyectar</a>
-          <button type="button" data-hide-session="${session.code}">Ocultar</button>
+          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}">${isVisible ? "Ocultar" : "Mostrar"}</button>
           <button type="button" data-delete-session="${session.code}">Eliminar</button>
         </div>
       </div>
     `;
   };
-  if (!visible.length) {
-    $("sessionManager").innerHTML = "<p class='hint'>Aún no hay formularios creados o visibles.</p>";
+  if (!selected.length) {
+    $("sessionManager").innerHTML = "<p class='hint'>Aún no hay formularios creados.</p>";
   } else {
-    const groups = groupedByArea(visible, (session) => session.bank?.area || session.section?.area);
+    const groups = groupedByArea(selected, (session) => session.bank?.area || session.section?.area);
     $("sessionManager").innerHTML = Object.entries(groups)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(
@@ -419,34 +418,31 @@ function renderSessionManager() {
       )
       .join("");
   }
-  if (selected.length > visible.length) {
-    $("sessionManager").innerHTML += `
-      <div style="margin-top: 1rem; text-align: center;">
-        <button type="button" id="restoreHiddenSessions" class="small">Restaurar formularios ocultos (${selected.length - visible.length})</button>
-      </div>
-    `;
-  }
   document.querySelectorAll("[data-load-session]").forEach((button) => {
     button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
   });
-  document.querySelectorAll("[data-hide-session]").forEach((button) => {
-    button.addEventListener("click", () => hideSessionByCode(button.dataset.hideSession));
+  document.querySelectorAll("[data-toggle-visibility]").forEach((button) => {
+    button.addEventListener("click", () => toggleSessionVisibility(button.dataset.toggleVisibility, button.dataset.visible === "true"));
   });
   document.querySelectorAll("[data-delete-session]").forEach((button) => {
     button.addEventListener("click", () => deleteSessionByCode(button.dataset.deleteSession));
   });
-  $("restoreHiddenSessions")?.addEventListener("click", () => {
-    hiddenSessions = [];
-    localStorage.removeItem("olimpiadasHiddenSessions");
-    renderSessionManager();
-  });
 }
 
-function hideSessionByCode(code) {
-  if (!hiddenSessions.includes(code)) {
-    hiddenSessions.push(code);
-    localStorage.setItem("olimpiadasHiddenSessions", JSON.stringify(hiddenSessions));
-    renderSessionManager();
+async function toggleSessionVisibility(code, currentVisible) {
+  try {
+    const session = await api(`/api/session/${code}/settings`, {
+      method: "POST",
+      body: { inviteVisible: !currentVisible },
+    });
+    if (activeSession?.code === code) {
+      activeSession = session;
+      renderAdmin(activeSession);
+    }
+    syncManagedSession(session);
+  } catch (error) {
+    if (requireFreshAdminLogin(error)) return;
+    $("selectionStatus").textContent = `No se pudo cambiar la visibilidad: ${error.message}`;
   }
 }
 
@@ -1190,8 +1186,8 @@ function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
   renderProjectionVideo(session.projectionVideo || appData?.projectionVideo);
-  $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Sin código activo";
-  $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "La competencia anterior ya fue cerrada.";
+  $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Actividad en pausa";
+  $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "El administrador ha ocultado la vista temporalmente.";
   $("projectionQr").classList.toggle("hidden", !inviteVisible);
   if (inviteVisible) $("projectionQr").src = `${session.qrUrl}?t=${Math.floor(Date.now() / 30000)}`;
   $("projectionTotalParticipants").textContent = String((session.globalParticipants || []).length);
@@ -1202,7 +1198,7 @@ function renderProjection(session) {
       : "Esperando apertura de respuestas."
     : inviteVisible
       ? "Esperando que el administrador publique el cuestionario."
-      : "No hay competencia activa en este momento.";
+      : "Pantalla en modo de espera.";
   $("projectionStats").classList.toggle("hidden", !inviteVisible || finished);
   if (inviteVisible && !finished) renderParticipationStats("projectionStats", session);
   else $("projectionStats").innerHTML = "";
@@ -1212,6 +1208,7 @@ function renderProjection(session) {
     : "";
   renderParticipationRank("projectionParticipationRank", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
+  document.querySelector(".projection-side")?.classList.toggle("hidden", !inviteVisible);
   $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !inviteVisible);
   $("projectionQuestion").classList.toggle("hidden", false);
   $("projectionRanking").classList.toggle("hidden", !session.showRanking || session.winnersPublished || !inviteVisible);
