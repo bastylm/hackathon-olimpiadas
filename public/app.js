@@ -1204,6 +1204,7 @@ function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
   const hasParticipation = Boolean((session.participants || []).length || (session.globalParticipants || []).length);
+  const canShowParticipation = inviteVisible || session.quizPublished || session.acceptingAnswers || session.winnersPublished;
   renderProjectionVideo(session.projectionVideo || appData?.projectionVideo);
   $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Actividad en pausa";
   $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "El administrador ha ocultado la vista temporalmente.";
@@ -1227,8 +1228,8 @@ function renderProjection(session) {
     : "";
   renderParticipationRank("projectionParticipationRank", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
-  document.querySelector(".projection-side")?.classList.toggle("hidden", !inviteVisible && !hasParticipation);
-  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || (!inviteVisible && !hasParticipation));
+  document.querySelector(".projection-side")?.classList.toggle("hidden", !inviteVisible && !canShowParticipation);
+  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !canShowParticipation || (!inviteVisible && !hasParticipation));
   $("projectionQuestion").classList.toggle("hidden", false);
   $("projectionRanking").classList.toggle("hidden", !session.showRanking || session.winnersPublished || !inviteVisible);
   if (session.showRanking && !session.winnersPublished && inviteVisible) renderLeaderboard("projectionRanking", session.participants);
@@ -1539,16 +1540,29 @@ function renderProjectionVideo(video) {
   player.playsInline = true;
   if (url && player.dataset.src !== url) {
     player.dataset.src = url;
+    player.dataset.userStopped = "false";
     player.src = url;
     player.load();
   }
-  if (url) requestAnimationFrame(() => attemptProjectionVideoPlay(true));
+  updateProjectionVideoButtons();
+  if (url && player.dataset.userStopped !== "true") requestAnimationFrame(() => attemptProjectionVideoPlay(true));
   ensureProjectionVideoAutoplay();
 }
 
-function attemptProjectionVideoPlay(withSound = false) {
+function updateProjectionVideoButtons() {
+  const player = $("projectionVideo");
+  const playButton = $("playProjectionVideo");
+  const stopButton = $("stopProjectionVideo");
+  if (!player) return;
+  if (playButton) playButton.textContent = player.muted ? "Activar sonido" : "Sonido activado";
+  if (stopButton) stopButton.textContent = player.dataset.userStopped === "true" ? "Video detenido" : "Stop";
+}
+
+function attemptProjectionVideoPlay(withSound = false, force = false) {
   const player = $("projectionVideo");
   if (!player?.src) return Promise.resolve();
+  if (player.dataset.userStopped === "true" && !force) return Promise.resolve();
+  player.dataset.userStopped = "false";
   player.volume = 1;
   player.muted = !withSound;
   player.controls = true;
@@ -1557,18 +1571,24 @@ function attemptProjectionVideoPlay(withSound = false) {
     player.muted = true;
     player.dataset.soundEnabled = "false";
     return player.play().catch(() => {});
+  }).finally(() => {
+    updateProjectionVideoButtons();
   });
 }
 
 function playProjectionVideo() {
-  attemptProjectionVideoPlay(true);
+  attemptProjectionVideoPlay(true, true);
 }
 
 function stopProjectionVideo() {
   const player = $("projectionVideo");
   if (!player) return;
+  player.dataset.userStopped = "true";
+  player.dataset.soundEnabled = "false";
+  player.autoplay = false;
   player.pause();
   player.currentTime = 0;
+  updateProjectionVideoButtons();
 }
 
 function ensureProjectionVideoAutoplay() {
@@ -1578,7 +1598,7 @@ function ensureProjectionVideoAutoplay() {
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.45 && player.src) {
-          attemptProjectionVideoPlay(player.dataset.soundEnabled === "true");
+          if (player.dataset.userStopped !== "true") attemptProjectionVideoPlay(player.dataset.soundEnabled === "true");
         } else if (!entry.isIntersecting) {
           player.pause();
         }
@@ -1813,10 +1833,18 @@ async function init() {
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
-    $("playProjectionVideo")?.addEventListener("click", playProjectionVideo);
-    $("stopProjectionVideo")?.addEventListener("click", stopProjectionVideo);
+    $("playProjectionVideo")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      playProjectionVideo();
+    });
+    $("stopProjectionVideo")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      stopProjectionVideo();
+    });
     $("projectionVideo")?.addEventListener("canplay", () => {
-      if (mode === "projection") {
+      if (mode === "projection" && $("projectionVideo").dataset.userStopped !== "true") {
         attemptProjectionVideoPlay(true);
       }
     });

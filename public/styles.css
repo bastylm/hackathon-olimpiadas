@@ -1295,6 +1295,7 @@ body[data-view="projectionView"] .shell {
 }
 
 .projection-video-window {
+  position: relative;
   display: grid;
   place-items: center;
   align-content: center;
@@ -1329,10 +1330,16 @@ body[data-view="projectionView"] .shell {
 }
 
 .projection-video-actions {
+  position: relative;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
+}
+
+.projection-video-actions button {
+  pointer-events: auto;
 }
 
 .projection-live-window {
