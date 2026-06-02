@@ -395,8 +395,6 @@ function renderSessionManager() {
           <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
         </div>
         <div class="session-actions">
-          <button type="button" data-load-session="${session.code}">Usar</button>
-          <a class="button-link small" href="/proyeccion?code=${session.code}" target="_blank">Proyectar</a>
           <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}">${isVisible ? "Ocultar" : "Mostrar"}</button>
           <button type="button" data-delete-session="${session.code}">Eliminar</button>
         </div>
@@ -418,9 +416,6 @@ function renderSessionManager() {
       )
       .join("");
   }
-  document.querySelectorAll("[data-load-session]").forEach((button) => {
-    button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
-  });
   document.querySelectorAll("[data-toggle-visibility]").forEach((button) => {
     button.addEventListener("click", () => toggleSessionVisibility(button.dataset.toggleVisibility, button.dataset.visible === "true"));
   });
@@ -1158,8 +1153,17 @@ function renderParticipationStats(id, session) {
 }
 
 function renderParticipationRank(id, session) {
-  const participants = [...(session.participants || [])]
+  const source = (session.participants || []).length ? session.participants : (session.globalParticipants || []);
+  const participants = [...source]
     .sort((a, b) => (b.answers || 0) - (a.answers || 0) || String(a.name || "").localeCompare(String(b.name || "")));
+  const careerCounts = source.reduce((counts, participant) => {
+    const career = participant.career || "Sin carrera";
+    counts[career] = (counts[career] || 0) + 1;
+    return counts;
+  }, {});
+  const careerSummary = Object.entries(careerCounts)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 6);
   $(id).innerHTML = `
     <h3>Participación en vivo</h3>
     <div style="max-height: 45vh; overflow-y: auto; padding-right: 8px;">
@@ -1171,7 +1175,7 @@ function renderParticipationRank(id, session) {
                   <div class="participation-rank-row">
                     <strong>${index + 1}</strong>
                     <span>${escapeHtml(p.name || "Participante")}</span>
-                    <em>${p.answers || 0} respuestas</em>
+                    <em>${escapeHtml(p.career || "Sin carrera")} - ${p.answers || 0} respuestas</em>
                   </div>
                 `
               )
@@ -1180,11 +1184,26 @@ function renderParticipationRank(id, session) {
       }
     </div>
   `;
+  if (session.inviteVisible === false) {
+    $(id).querySelector("h3").textContent = "Participantes registrados";
+  }
+  const heading = $(id).querySelector("h3");
+  if (heading) {
+    const summary = document.createElement("div");
+    summary.className = "career-summary";
+    summary.innerHTML = `
+      <strong>${source.length}</strong>
+      <span>${source.length === 1 ? "participante" : "participantes"}</span>
+      ${careerSummary.length ? `<small>${careerSummary.map(([career, total]) => `${escapeHtml(career)}: ${total}`).join(" | ")}</small>` : "<small>Sin carreras registradas.</small>"}
+    `;
+    heading.insertAdjacentElement("afterend", summary);
+  }
 }
 
 function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
+  const hasParticipation = Boolean((session.participants || []).length || (session.globalParticipants || []).length);
   renderProjectionVideo(session.projectionVideo || appData?.projectionVideo);
   $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Actividad en pausa";
   $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "El administrador ha ocultado la vista temporalmente.";
@@ -1208,8 +1227,8 @@ function renderProjection(session) {
     : "";
   renderParticipationRank("projectionParticipationRank", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
-  document.querySelector(".projection-side")?.classList.toggle("hidden", !inviteVisible);
-  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !inviteVisible);
+  document.querySelector(".projection-side")?.classList.toggle("hidden", !inviteVisible && !hasParticipation);
+  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || (!inviteVisible && !hasParticipation));
   $("projectionQuestion").classList.toggle("hidden", false);
   $("projectionRanking").classList.toggle("hidden", !session.showRanking || session.winnersPublished || !inviteVisible);
   if (session.showRanking && !session.winnersPublished && inviteVisible) renderLeaderboard("projectionRanking", session.participants);
@@ -1508,13 +1527,13 @@ async function uploadProjectionVideo() {
 function renderProjectionVideo(video) {
   const player = $("projectionVideo");
   const placeholder = $("projectionVideoPlaceholder");
-  const playButton = $("playProjectionVideo");
+  const actions = $("projectionVideoActions");
   if (!player || !placeholder) return;
   const url = video?.url || "";
   player.classList.toggle("hidden", !url);
   placeholder.classList.toggle("hidden", Boolean(url));
-  playButton?.classList.toggle("hidden", !url);
-  player.muted = true;
+  actions?.classList.toggle("hidden", !url);
+  player.volume = 1;
   player.autoplay = true;
   player.loop = true;
   player.playsInline = true;
@@ -1523,16 +1542,33 @@ function renderProjectionVideo(video) {
     player.src = url;
     player.load();
   }
-  if (url) requestAnimationFrame(() => player.play().catch(() => {}));
+  if (url) requestAnimationFrame(() => attemptProjectionVideoPlay(true));
   ensureProjectionVideoAutoplay();
 }
 
-function playProjectionVideo() {
+function attemptProjectionVideoPlay(withSound = false) {
   const player = $("projectionVideo");
-  if (!player?.src) return;
-  player.muted = false;
+  if (!player?.src) return Promise.resolve();
+  player.volume = 1;
+  player.muted = !withSound;
   player.controls = true;
-  player.play().catch(() => {});
+  player.dataset.soundEnabled = withSound ? "true" : "false";
+  return player.play().catch(() => {
+    player.muted = true;
+    player.dataset.soundEnabled = "false";
+    return player.play().catch(() => {});
+  });
+}
+
+function playProjectionVideo() {
+  attemptProjectionVideoPlay(true);
+}
+
+function stopProjectionVideo() {
+  const player = $("projectionVideo");
+  if (!player) return;
+  player.pause();
+  player.currentTime = 0;
 }
 
 function ensureProjectionVideoAutoplay() {
@@ -1542,8 +1578,7 @@ function ensureProjectionVideoAutoplay() {
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.45 && player.src) {
-          player.muted = true;
-          player.play().catch(() => {});
+          attemptProjectionVideoPlay(player.dataset.soundEnabled === "true");
         } else if (!entry.isIntersecting) {
           player.pause();
         }
@@ -1779,10 +1814,10 @@ async function init() {
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
     $("playProjectionVideo")?.addEventListener("click", playProjectionVideo);
+    $("stopProjectionVideo")?.addEventListener("click", stopProjectionVideo);
     $("projectionVideo")?.addEventListener("canplay", () => {
       if (mode === "projection") {
-        $("projectionVideo").muted = true;
-        $("projectionVideo").play().catch(() => {});
+        attemptProjectionVideoPlay(true);
       }
     });
     $("createSession").addEventListener("click", createSession);

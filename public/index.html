@@ -226,7 +226,10 @@
           <section class="projection-window projection-video-window">
             <video id="projectionVideo" class="projection-video hidden" muted loop playsinline autoplay controls></video>
             <div id="projectionVideoPlaceholder" class="projection-video-placeholder">Video de presentación pendiente.</div>
-            <button id="playProjectionVideo" class="primary video-play-button hidden" type="button">Reproducir video</button>
+            <div id="projectionVideoActions" class="projection-video-actions hidden">
+              <button id="playProjectionVideo" class="primary video-play-button" type="button">Activar sonido</button>
+              <button id="stopProjectionVideo" class="video-play-button" type="button">Stop</button>
+            </div>
           </section>
 
           <section class="projection-window projection-live-window">

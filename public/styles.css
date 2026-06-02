@@ -759,6 +759,38 @@ input {
   font-weight: 700;
 }
 
+.career-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f5f0ff;
+}
+
+.career-summary strong {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 22px;
+}
+
+.career-summary span {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.career-summary small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .participation-rank-row {
   display: grid;
   grid-template-columns: 34px 1fr auto;
@@ -1294,6 +1326,13 @@ body[data-view="projectionView"] .shell {
   min-width: min(320px, 92%);
   padding: 0 24px;
   font-size: clamp(18px, 2vw, 28px);
+}
+
+.projection-video-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
 }
 
 .projection-live-window {

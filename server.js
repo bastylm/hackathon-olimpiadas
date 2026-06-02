@@ -309,6 +309,7 @@ function rankParticipants(session) {
 
 function rankStoredParticipants(sectionId, bankId, selected = []) {
   const stored = Object.values(responseStoreForSelection(sectionId, bankId).students);
+  const section = data.sections.find((item) => item.id === sectionId);
   const participants = stored.map((student) => ({
     id: student.id,
     name: student.name,
@@ -318,6 +319,7 @@ function rankStoredParticipants(sectionId, bankId, selected = []) {
     answerMap: student.answers || {},
     sectionId,
     bankId,
+    career: section?.career || "",
     answeredCurrent: selected.length > 0 && selected.every((index) => student.answers[index] !== undefined),
   }));
   participants.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
@@ -340,6 +342,7 @@ function rankAllParticipants() {
         sectionId: record.sectionId,
         bankId: record.bankId,
         section: section?.section || "Sin sección",
+        career: section?.career || "Sin carrera",
         bank: bank?.name || "Sin banco",
       });
     }
