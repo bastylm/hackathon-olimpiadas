@@ -1166,7 +1166,7 @@ function renderParticipationRank(id, session) {
     .slice(0, 6);
   $(id).innerHTML = `
     <h3>Participación en vivo</h3>
-    <div style="max-height: 45vh; overflow-y: auto; padding-right: 8px;">
+    <div class="participation-rank-scroll">
       ${
         participants.length
           ? participants
@@ -1186,6 +1186,7 @@ function renderParticipationRank(id, session) {
   `;
   if (session.inviteVisible === false) {
     $(id).querySelector("h3").textContent = "Participantes registrados";
+    $(id).querySelector(".participation-rank-scroll")?.classList.add("hidden");
   }
   const heading = $(id).querySelector("h3");
   if (heading) {

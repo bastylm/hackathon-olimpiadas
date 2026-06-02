@@ -759,6 +759,14 @@ input {
   font-weight: 700;
 }
 
+.participation-rank-scroll {
+  display: grid;
+  gap: 8px;
+  max-height: 45vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
 .career-summary {
   display: grid;
   grid-template-columns: auto 1fr;
