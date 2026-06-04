@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Olimpiadas - levantamiento de respuestas</title>
     <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .projection-live-window {
+        position: relative;
+      }
+      .projection-paused-overlay {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        inset: 0;
+        background: #1e1b24;
+        z-index: 50;
+      }
+      .projection-live-window.paused > .projection-paused-overlay {
+        display: flex;
+      }
+      .projection-live-window.paused > .projection-hero,
+      .projection-live-window.paused > .projection-side {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <main class="shell">
@@ -224,15 +249,15 @@
           </section>
 
           <section class="projection-window projection-video-window">
-            <video id="projectionVideo" class="projection-video hidden" muted loop playsinline autoplay controls></video>
+            <video id="projectionVideo" class="projection-video hidden" loop playsinline></video>
             <div id="projectionVideoPlaceholder" class="projection-video-placeholder">Video de presentación pendiente.</div>
-            <div id="projectionVideoActions" class="projection-video-actions hidden">
-              <button id="playProjectionVideo" class="primary video-play-button" type="button">Activar sonido</button>
-              <button id="stopProjectionVideo" class="video-play-button" type="button">Stop</button>
-            </div>
           </section>
 
           <section class="projection-window projection-live-window">
+            <div class="projection-paused-overlay">
+              <h2>Actividad en pausa</h2>
+              <p>El administrador ha ocultado la vista temporalmente.</p>
+            </div>
             <div class="projection-hero">
               <p class="eyebrow">Ingreso estudiantes</p>
               <h2 id="projectionCode">Código -----</h2>
