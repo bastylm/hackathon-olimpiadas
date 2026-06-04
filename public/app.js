@@ -1826,33 +1826,47 @@ async function init() {
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
-    $("projectionVideo")?.addEventListener("click", function(e) {
-      const rect = this.getBoundingClientRect();
-      if (e.clientY - rect.top > rect.height * 0.85) return;
-      if (this.paused) this.play();
-      else this.pause();
-    });
-    $("projectionVideo")?.addEventListener("mouseenter", function() {
-      this.controls = true;
-    });
-    $("projectionVideo")?.addEventListener("mouseleave", function() {
-      if (this.dataset.seeking !== "true") this.controls = false;
-    });
-    $("projectionVideo")?.addEventListener("seeking", function() {
-      this.dataset.seeking = "true";
-    });
-    $("projectionVideo")?.addEventListener("seeked", function() {
-      this.dataset.seeking = "false";
-      if (!this.matches(":hover")) this.controls = false;
-    });
-    $("projectionVideo")?.addEventListener("play", function() {
-      $("projectionVideoPlayIcon")?.classList.add("hidden");
-    });
-    $("projectionVideo")?.addEventListener("pause", function() {
-      if (!this.classList.contains("hidden")) {
-        $("projectionVideoPlayIcon")?.classList.remove("hidden");
-      }
-    });
+    const video = $("projectionVideo");
+    const clickArea = $("projectionVideoClickArea");
+    const videoWindow = video?.closest(".projection-video-window");
+    if (video && clickArea && videoWindow) {
+      clickArea.addEventListener("click", () => {
+        if (video.paused) video.play();
+        else video.pause();
+      });
+      videoWindow.addEventListener("mouseenter", () => {
+        video.controls = true;
+      });
+      videoWindow.addEventListener("mouseleave", () => {
+        if (video.dataset.interacting !== "true") {
+          video.controls = false;
+        }
+      });
+      video.addEventListener("mousedown", () => {
+        video.dataset.interacting = "true";
+      });
+      window.addEventListener("mouseup", () => {
+        if (video.dataset.interacting === "true") {
+          video.dataset.interacting = "false";
+          if (!videoWindow.matches(":hover")) video.controls = false;
+        }
+      });
+      video.addEventListener("seeking", () => {
+        video.dataset.interacting = "true";
+      });
+      video.addEventListener("seeked", () => {
+        video.dataset.interacting = "false";
+        if (!videoWindow.matches(":hover")) video.controls = false;
+      });
+      video.addEventListener("play", () => {
+        $("projectionVideoPlayIcon")?.classList.add("hidden");
+      });
+      video.addEventListener("pause", () => {
+        if (!video.classList.contains("hidden")) {
+          $("projectionVideoPlayIcon")?.classList.remove("hidden");
+        }
+      });
+    }
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
     $("publishQuiz").addEventListener("click", publishQuiz);
