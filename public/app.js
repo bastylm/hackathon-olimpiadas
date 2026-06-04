@@ -1576,85 +1576,20 @@ async function uploadProjectionVideo() {
 function renderProjectionVideo(video) {
   const player = $("projectionVideo");
   const placeholder = $("projectionVideoPlaceholder");
-  const actions = $("projectionVideoActions");
   if (!player || !placeholder) return;
   const url = video?.url || "";
   player.classList.toggle("hidden", !url);
   placeholder.classList.toggle("hidden", Boolean(url));
-  actions?.classList.toggle("hidden", !url);
   player.volume = 1;
-  player.autoplay = true;
+  player.autoplay = false;
   player.loop = true;
   player.playsInline = true;
   if (url && player.dataset.src !== url) {
     player.dataset.src = url;
-    player.dataset.userStopped = "false";
     player.src = url;
     player.load();
+    player.pause();
   }
-  updateProjectionVideoButtons();
-  if (url && player.dataset.userStopped !== "true") requestAnimationFrame(() => attemptProjectionVideoPlay(true));
-  ensureProjectionVideoAutoplay();
-}
-
-function updateProjectionVideoButtons() {
-  const player = $("projectionVideo");
-  const playButton = $("playProjectionVideo");
-  const stopButton = $("stopProjectionVideo");
-  if (!player) return;
-  if (playButton) playButton.textContent = player.muted ? "Activar sonido" : "Sonido activado";
-  if (stopButton) stopButton.textContent = player.dataset.userStopped === "true" ? "Video detenido" : "Stop";
-}
-
-function attemptProjectionVideoPlay(withSound = false, force = false) {
-  const player = $("projectionVideo");
-  if (!player?.src) return Promise.resolve();
-  if (player.dataset.userStopped === "true" && !force) return Promise.resolve();
-  player.dataset.userStopped = "false";
-  player.volume = 1;
-  player.muted = !withSound;
-  player.controls = true;
-  player.dataset.soundEnabled = withSound ? "true" : "false";
-  return player.play().catch(() => {
-    player.muted = true;
-    player.dataset.soundEnabled = "false";
-    return player.play().catch(() => {});
-  }).finally(() => {
-    updateProjectionVideoButtons();
-  });
-}
-
-function playProjectionVideo() {
-  attemptProjectionVideoPlay(true, true);
-}
-
-function stopProjectionVideo() {
-  const player = $("projectionVideo");
-  if (!player) return;
-  player.dataset.userStopped = "true";
-  player.dataset.soundEnabled = "false";
-  player.autoplay = false;
-  player.pause();
-  player.currentTime = 0;
-  updateProjectionVideoButtons();
-}
-
-function ensureProjectionVideoAutoplay() {
-  const player = $("projectionVideo");
-  if (!player || projectionVideoObserver || !("IntersectionObserver" in window)) return;
-  projectionVideoObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.45 && player.src) {
-          if (player.dataset.userStopped !== "true") attemptProjectionVideoPlay(player.dataset.soundEnabled === "true");
-        } else if (!entry.isIntersecting) {
-          player.pause();
-        }
-      });
-    },
-    { threshold: [0, 0.45, 0.75] }
-  );
-  projectionVideoObserver.observe(player);
 }
 
 async function answerQuestion(questionIndex, answerIndex) {
@@ -1897,7 +1832,9 @@ async function init() {
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
-    $("projectionVideo")?.addEventListener("click", function() {
+    $("projectionVideo")?.addEventListener("click", function(e) {
+      const rect = this.getBoundingClientRect();
+      if (e.clientY - rect.top > rect.height * 0.85) return;
       if (this.paused) this.play();
       else this.pause();
     });
@@ -1905,7 +1842,14 @@ async function init() {
       this.controls = true;
     });
     $("projectionVideo")?.addEventListener("mouseleave", function() {
-      this.controls = false;
+      if (this.dataset.seeking !== "true") this.controls = false;
+    });
+    $("projectionVideo")?.addEventListener("seeking", function() {
+      this.dataset.seeking = "true";
+    });
+    $("projectionVideo")?.addEventListener("seeked", function() {
+      this.dataset.seeking = "false";
+      if (!this.matches(":hover")) this.controls = false;
     });
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
