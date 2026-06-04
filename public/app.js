@@ -9,6 +9,8 @@ let editingBankId = "";
 let adminQrVisible = false;
 let projectionVideoObserver = null;
 let currentSlideIndex = 0;
+let touchStartX = 0;
+let touchStartY = 0;
 
 function safeJson(value, fallback) {
   try {
@@ -40,8 +42,41 @@ const $ = (id) => document.getElementById(id);
 function updateProjectionSlides() {
   const slides = document.querySelectorAll(".projection-window");
   slides.forEach((slide, index) => {
-    slide.style.display = index === currentSlideIndex ? "" : "none";
+    const isVisible = index === currentSlideIndex;
+    slide.style.display = isVisible ? "" : "none";
+    if (slide.classList.contains("projection-video-window")) {
+      const video = $("projectionVideo");
+      if (video) {
+        if (!isVisible) {
+          if (!video.paused) {
+            video.dataset.wasPlaying = "true";
+            video.pause();
+          }
+        } else if (video.dataset.wasPlaying === "true") {
+          video.play();
+          video.dataset.wasPlaying = "false";
+        }
+      }
+    }
   });
+}
+
+function handleSwipe(touchEndX, touchEndY) {
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  const minSwipeDistance = 50;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+    const slides = document.querySelectorAll(".projection-window");
+    if (!slides.length) return;
+
+    if (deltaX > 0) {
+      currentSlideIndex = Math.max(currentSlideIndex - 1, 0);
+    } else {
+      currentSlideIndex = Math.min(currentSlideIndex + 1, slides.length - 1);
+    }
+    updateProjectionSlides();
+  }
 }
 
 function authKey(role) {
@@ -1164,7 +1199,11 @@ function renderParticipationRank(id, session) {
   const careerSummary = Object.entries(careerCounts)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 6);
-  $(id).innerHTML = `
+  const container = $(id);
+  const scrollElement = container.querySelector(".participation-rank-scroll");
+  const currentScrollTop = scrollElement ? scrollElement.scrollTop : 0;
+
+  container.innerHTML = `
     <h3>Participación en vivo</h3>
     <div class="participation-rank-scroll">
       ${
@@ -1184,11 +1223,15 @@ function renderParticipationRank(id, session) {
       }
     </div>
   `;
-  if (session.inviteVisible === false) {
-    $(id).querySelector("h3").textContent = "Participantes registrados";
-    $(id).querySelector(".participation-rank-scroll")?.classList.add("hidden");
+  const newScrollElement = container.querySelector(".participation-rank-scroll");
+  if (newScrollElement && currentScrollTop > 0) {
+    newScrollElement.scrollTop = currentScrollTop;
   }
-  const heading = $(id).querySelector("h3");
+  if (session.inviteVisible === false) {
+    container.querySelector("h3").textContent = "Participantes registrados";
+    container.querySelector(".participation-rank-scroll")?.classList.add("hidden");
+  }
+  const heading = container.querySelector("h3");
   if (heading) {
     const summary = document.createElement("div");
     summary.className = "career-summary";
@@ -1203,6 +1246,10 @@ function renderParticipationRank(id, session) {
 
 function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
+  const liveWindow = document.querySelector(".projection-live-window");
+  if (liveWindow) {
+    liveWindow.classList.toggle("paused", !inviteVisible);
+  }
   const finished = session.winnersPublished || (session.quizPublished && !session.acceptingAnswers && Number(session.remainingSeconds || 0) <= 0);
   const hasParticipation = Boolean((session.participants || []).length || (session.globalParticipants || []).length);
   const canShowParticipation = inviteVisible || session.quizPublished || session.acceptingAnswers || session.winnersPublished;
@@ -1803,6 +1850,22 @@ async function init() {
         }
       }
     });
+    const projectionView = $("projectionView");
+    projectionView.addEventListener(
+      "touchstart",
+      (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      },
+      { passive: true }
+    );
+    projectionView.addEventListener(
+      "touchend",
+      (e) => {
+        if (mode === "projection") handleSwipe(e.changedTouches[0].screenX, e.changedTouches[0].screenY);
+      },
+      { passive: true }
+    );
     $("sectionSearch").addEventListener("input", () => {
       fillSectionSelector();
       loadResponsesForSelected();
@@ -1834,20 +1897,15 @@ async function init() {
     $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
     $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
-    $("playProjectionVideo")?.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      playProjectionVideo();
+    $("projectionVideo")?.addEventListener("click", function() {
+      if (this.paused) this.play();
+      else this.pause();
     });
-    $("stopProjectionVideo")?.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      stopProjectionVideo();
+    $("projectionVideo")?.addEventListener("mouseenter", function() {
+      this.controls = true;
     });
-    $("projectionVideo")?.addEventListener("canplay", () => {
-      if (mode === "projection" && $("projectionVideo").dataset.userStopped !== "true") {
-        attemptProjectionVideoPlay(true);
-      }
+    $("projectionVideo")?.addEventListener("mouseleave", function() {
+      this.controls = false;
     });
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
