@@ -47,14 +47,8 @@ function updateProjectionSlides() {
     if (slide.classList.contains("projection-video-window")) {
       const video = $("projectionVideo");
       if (video) {
-        if (!isVisible) {
-          if (!video.paused) {
-            video.dataset.wasPlaying = "true";
-            video.pause();
-          }
-        } else if (video.dataset.wasPlaying === "true") {
-          video.play();
-          video.dataset.wasPlaying = "false";
+        if (!isVisible && !video.paused) {
+          video.pause();
         }
       }
     }
@@ -1850,6 +1844,14 @@ async function init() {
     $("projectionVideo")?.addEventListener("seeked", function() {
       this.dataset.seeking = "false";
       if (!this.matches(":hover")) this.controls = false;
+    });
+    $("projectionVideo")?.addEventListener("play", function() {
+      $("projectionVideoPlayIcon")?.classList.add("hidden");
+    });
+    $("projectionVideo")?.addEventListener("pause", function() {
+      if (!this.classList.contains("hidden")) {
+        $("projectionVideoPlayIcon")?.classList.remove("hidden");
+      }
     });
     $("createSession").addEventListener("click", createSession);
     $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
