@@ -21,6 +21,20 @@
         inset: 0;
         background: var(--panel);
         z-index: 50;
+        border-radius: 8px;
+      }
+      .projection-paused-overlay h2 {
+        color: var(--ink);
+        font-size: clamp(54px, 8vw, 110px);
+        line-height: 1.05;
+        margin: 0 0 16px;
+      }
+      .projection-paused-overlay p:not(.eyebrow) {
+        color: var(--muted);
+        font-size: clamp(20px, 2.5vw, 32px);
+        font-weight: 700;
+        margin: 0;
+        max-width: 80%;
       }
       .projection-live-window.paused > .projection-paused-overlay {
         display: flex;
@@ -251,10 +265,12 @@
           <section class="projection-window projection-video-window">
             <video id="projectionVideo" class="projection-video hidden" loop playsinline></video>
             <div id="projectionVideoPlaceholder" class="projection-video-placeholder">Video de presentación pendiente.</div>
+            <div id="projectionVideoPlayIcon" class="projection-video-play-icon hidden">&#9654;</div>
           </section>
 
           <section class="projection-window projection-live-window">
             <div class="projection-paused-overlay">
+              <p class="eyebrow">Modo de espera</p>
               <h2>Actividad en pausa</h2>
               <p>El administrador ha ocultado la vista temporalmente.</p>
             </div>
