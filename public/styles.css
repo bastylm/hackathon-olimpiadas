@@ -1350,6 +1350,15 @@ body[data-view="projectionView"] .shell {
   pointer-events: auto;
 }
 
+.projection-video-click-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 80px;
+  z-index: 5;
+}
+
 .projection-video-play-icon {
   position: absolute;
   top: 50%;
