@@ -134,7 +134,8 @@ function requireFreshAdminLogin(error) {
 function setView(view) {
   document.body.dataset.view = view;
   ["loginView", "adminView", "projectionView", "studentView"].forEach((id) => {
-    $(id).classList.toggle("active", id === view);
+    const el = $(id);
+    if (el) el.classList.toggle("active", id === view);
   });
 }
 
@@ -886,10 +887,10 @@ async function refreshSession() {
     if (mode === "projection") renderProjection(activeSession);
     if (mode === "student") renderStudentSession(activeSession);
   } catch (error) {
-    if (mode === "admin") $("currentQuestion").textContent = `Sesión no disponible: ${error.message}`;
+    if (mode === "admin" && $("currentQuestion")) $("currentQuestion").textContent = `Sesión no disponible: ${error.message}`;
     activeSession = null;
     localStorage.removeItem("olimpiadasEvaluatorCode");
-    $("sessionCard").classList.add("hidden");
+    $("sessionCard")?.classList.add("hidden");
     clearInterval(refreshTimer);
   }
 }
@@ -903,7 +904,7 @@ async function ensureActiveSession() {
     } catch {
       activeSession = null;
       localStorage.removeItem("olimpiadasEvaluatorCode");
-      $("sessionCard").classList.add("hidden");
+      $("sessionCard")?.classList.add("hidden");
     }
   }
   const savedCode = localStorage.getItem("olimpiadasEvaluatorCode");
@@ -931,7 +932,7 @@ async function launchQuestion(questionIndex) {
     syncManagedSession(activeSession);
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
-    $("currentQuestion").textContent = `No se pudo publicar la pregunta: ${error.message}`;
+    if ($("currentQuestion")) $("currentQuestion").textContent = `No se pudo publicar la pregunta: ${error.message}`;
   }
 }
 
@@ -1006,16 +1007,16 @@ async function toggleRanking() {
     syncManagedSession(activeSession);
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
-    $("currentQuestion").textContent = `No se pudo cambiar el ranking: ${error.message}`;
+    if ($("currentQuestion")) $("currentQuestion").textContent = `No se pudo cambiar el ranking: ${error.message}`;
   } finally {
-    $("toggleRanking").disabled = false;
+    if ($("toggleRanking")) $("toggleRanking").disabled = false;
   }
 }
 
 async function toggleAnswers() {
   try {
-    $("toggleAnswers").disabled = true;
-    $("currentQuestion").textContent = "Preparando apertura de respuestas...";
+    if ($("toggleAnswers")) $("toggleAnswers").disabled = true;
+    if ($("currentQuestion")) $("currentQuestion").textContent = "Preparando apertura de respuestas...";
     await ensureActiveSession();
     if (!activeSession.quizPublished) {
       activeSession = await api(`/api/session/${activeSession.code}/publish`, {
@@ -1038,15 +1039,15 @@ async function toggleAnswers() {
     startRefresh();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
-    $("currentQuestion").textContent = `No se pudo abrir/cerrar respuestas: ${error.message}`;
+    if ($("currentQuestion")) $("currentQuestion").textContent = `No se pudo abrir/cerrar respuestas: ${error.message}`;
   } finally {
-    $("toggleAnswers").disabled = false;
+    if ($("toggleAnswers")) $("toggleAnswers").disabled = false;
   }
 }
 
 async function publishWinners() {
   try {
-    $("publishWinners").disabled = true;
+    if ($("publishWinners")) $("publishWinners").disabled = true;
     await ensureActiveSession();
     activeSession = await api(`/api/session/${activeSession.code}/settings`, {
       method: "POST",
@@ -1057,18 +1058,18 @@ async function publishWinners() {
     startRefresh();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
-    $("currentQuestion").textContent = `No se pudo publicar ganadores: ${error.message}`;
+    if ($("currentQuestion")) $("currentQuestion").textContent = `No se pudo publicar ganadores: ${error.message}`;
   } finally {
-    $("publishWinners").disabled = false;
+    if ($("publishWinners")) $("publishWinners").disabled = false;
   }
 }
 
 function studentAnswerFor(session, questionIndex) {
   const rut = normalizeRut(student.rut);
   const name = normalizeText(student.name);
-  const me = session.participants.find((p) => p.id === student.id)
-    || session.participants.find((p) => rut && normalizeRut(p.rut) === rut)
-    || session.participants.find((p) => !rut && name && normalizeText(p.name) === name);
+  const me = (session.participants || []).find((p) => p.id === student.id)
+    || (session.participants || []).find((p) => rut && normalizeRut(p.rut) === rut)
+    || (session.participants || []).find((p) => !rut && name && normalizeText(p.name) === name);
   const localAnswer = student.answers[studentAnswerKey(session.code, questionIndex)];
   if (localAnswer !== undefined) return localAnswer;
   return me?.answerMap?.[questionIndex];
@@ -1092,17 +1093,17 @@ function studentAnswerKey(code, questionIndex) {
 }
 
 function renderStudentReview(session) {
-  $("answerReview").classList.remove("hidden");
-  $("answerReview").innerHTML = session.quizQuestions
+  $("answerReview")?.classList.remove("hidden");
+  if ($("answerReview")) $("answerReview").innerHTML = (session.quizQuestions || [])
     .map((question, idx) => {
       const chosen = studentAnswerFor(session, question.index);
-      const selected = question.answers[chosen];
-      const correct = [...question.answers].sort((a, b) => b.points - a.points)[0];
+      const selected = (question.answers || [])[chosen];
+      const correct = [...(question.answers || [])].sort((a, b) => b.points - a.points)[0];
       return `
         <article class="review-item">
           <h3>${idx + 1}. ${escapeHtml(question.text.replace(/^\d+\.\s*/, ""))}</h3>
           <p>Tu respuesta: <strong>${selected ? escapeHtml(selected.text) : "Sin responder"}</strong>${selected ? ` · ${selected.points} pts` : ""}</p>
-          <p>Respuesta de mayor puntaje: <strong>${escapeHtml(correct.text)}</strong> (${correct.points} pts)</p>
+          <p>Respuesta de mayor puntaje: <strong>${correct ? escapeHtml(correct.text) : "Sin alternativas"}</strong> (${correct ? correct.points : 0} pts)</p>
         </article>
       `;
     })
@@ -1110,18 +1111,18 @@ function renderStudentReview(session) {
 }
 
 function renderAdmin(session) {
-  $("currentQuestion").textContent = session.quizPublished
+  if ($("currentQuestion")) $("currentQuestion").textContent = session.quizPublished
     ? `Cuestionario publicado: ${session.quizQuestions.length} preguntas. ${session.acceptingAnswers ? "Respuestas abiertas." : "Respuestas cerradas."}`
     : "Selecciona preguntas y publica el cuestionario.";
-  $("toggleAnswers").textContent = session.acceptingAnswers ? "Cerrar respuestas" : "Abrir respuestas";
-  $("toggleRanking").textContent = session.showRanking ? "Ocultar ranking" : "Mostrar ranking";
-  $("rankingStatus").textContent = session.winnersPublished ? "Ganadores publicados" : session.showRanking ? "Ranking visible" : "Ranking oculto";
-  $("adminElapsed").textContent = fmt(session.remainingSeconds ?? session.durationSeconds);
-  if (session.expectedParticipants !== undefined && document.activeElement !== $("expectedParticipants")) $("expectedParticipants").value = session.expectedParticipants || 0;
-  if (document.activeElement !== $("challengeText")) $("challengeText").value = session.challengeText || "";
+  if ($("toggleAnswers")) $("toggleAnswers").textContent = session.acceptingAnswers ? "Cerrar respuestas" : "Abrir respuestas";
+  if ($("toggleRanking")) $("toggleRanking").textContent = session.showRanking ? "Ocultar ranking" : "Mostrar ranking";
+  if ($("rankingStatus")) $("rankingStatus").textContent = session.winnersPublished ? "Ganadores publicados" : session.showRanking ? "Ranking visible" : "Ranking oculto";
+  if ($("adminElapsed")) $("adminElapsed").textContent = fmt(session.remainingSeconds ?? session.durationSeconds);
+  if (session.expectedParticipants !== undefined && document.activeElement !== $("expectedParticipants") && $("expectedParticipants")) $("expectedParticipants").value = session.expectedParticipants || 0;
+  if (document.activeElement !== $("challengeText") && $("challengeText")) $("challengeText").value = session.challengeText || "";
   if (session.showRanking && !session.winnersPublished) renderLeaderboard("leaderboard", session.participants);
-  else $("leaderboard").innerHTML = "";
-  $("podium").classList.toggle("hidden", !session.winnersPublished);
+  else if ($("leaderboard")) $("leaderboard").innerHTML = "";
+  $("podium")?.classList.toggle("hidden", !session.winnersPublished);
   if (session.winnersPublished) renderPodium("podium", session.participants);
   const selectedMatchesSession = $("sectionSelect").value === session.section?.id && $("bankSelect").value === session.bank?.id;
   if (selectedMatchesSession) {
@@ -1145,20 +1146,23 @@ function participationStats(session) {
 
 function renderParticipationStats(id, session) {
   const stats = participationStats(session);
-  $(id).innerHTML = `
-    <div>
-      <span>Deben responder</span>
-      <strong>${stats.expected}</strong>
-    </div>
-    <div>
-      <span>Llegaron</span>
-      <strong>${stats.arrived}</strong>
-    </div>
-    <div>
-      <span>Completaron</span>
-      <strong>${stats.completed}/${stats.expected}</strong>
-    </div>
-  `;
+  const el = $(id);
+  if (el) {
+    el.innerHTML = `
+      <div>
+        <span>Deben responder</span>
+        <strong>${stats.expected}</strong>
+      </div>
+      <div>
+        <span>Llegaron</span>
+        <strong>${stats.arrived}</strong>
+      </div>
+      <div>
+        <span>Completaron</span>
+        <strong>${stats.completed}/${stats.expected}</strong>
+      </div>
+    `;
+  }
 }
 
 function renderParticipationRank(id, session) {
@@ -1174,6 +1178,7 @@ function renderParticipationRank(id, session) {
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 6);
   const container = $(id);
+  if (!container) return;
   const scrollElement = container.querySelector(".participation-rank-scroll");
   const currentScrollTop = scrollElement ? scrollElement.scrollTop : 0;
 
@@ -1228,40 +1233,42 @@ function renderProjection(session) {
   const hasParticipation = Boolean((session.participants || []).length || (session.globalParticipants || []).length);
   const canShowParticipation = inviteVisible || session.quizPublished || session.acceptingAnswers || session.winnersPublished;
   renderProjectionVideo(session.projectionVideo || appData?.projectionVideo);
-  $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Actividad en pausa";
-  $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "El administrador ha ocultado la vista temporalmente.";
-  $("projectionQr").classList.toggle("hidden", !inviteVisible);
-  if (inviteVisible) $("projectionQr").src = `${session.qrUrl}?t=${Math.floor(Date.now() / 30000)}`;
-  $("projectionTotalParticipants").textContent = String((session.globalParticipants || []).length);
-  $("projectionElapsed").textContent = !inviteVisible ? "Sin actividad" : finished ? "Finalizado" : session.timerStartedAt ? fmt(session.remainingSeconds) : fmt(session.durationSeconds);
-  $("projectionQuestion").textContent = session.quizPublished
+  if ($("projectionCode")) $("projectionCode").textContent = inviteVisible ? `Código ${session.code}` : "Actividad en pausa";
+  if ($("projectionJoin")) $("projectionJoin").textContent = inviteVisible ? session.joinUrl : "El administrador ha ocultado la vista temporalmente.";
+  $("projectionQr")?.classList.toggle("hidden", !inviteVisible);
+  if (inviteVisible && $("projectionQr")) $("projectionQr").src = `${session.qrUrl}?t=${Math.floor(Date.now() / 30000)}`;
+  if ($("projectionTotalParticipants")) $("projectionTotalParticipants").textContent = String((session.globalParticipants || []).length);
+  if ($("projectionElapsed")) $("projectionElapsed").textContent = !inviteVisible ? "Sin actividad" : finished ? "Finalizado" : session.timerStartedAt ? fmt(session.remainingSeconds) : fmt(session.durationSeconds);
+  if ($("projectionQuestion")) $("projectionQuestion").textContent = session.quizPublished
     ? session.acceptingAnswers
       ? `Cuestionario abierto con ${session.quizQuestions.length} preguntas. Escanea el QR para responder.`
       : "Esperando apertura de respuestas."
     : inviteVisible
       ? "Esperando que el administrador publique el cuestionario."
       : "Pantalla en modo de espera.";
-  $("projectionStats").classList.toggle("hidden", !inviteVisible || finished);
+  $("projectionStats")?.classList.toggle("hidden", !inviteVisible || finished);
   if (inviteVisible && !finished) renderParticipationStats("projectionStats", session);
-  else $("projectionStats").innerHTML = "";
-  $("projectionChallenge").classList.toggle("hidden", !session.challengeText || !inviteVisible);
-  $("projectionChallenge").innerHTML = session.challengeText && inviteVisible
+  else if ($("projectionStats")) $("projectionStats").innerHTML = "";
+  $("projectionChallenge")?.classList.toggle("hidden", !session.challengeText || !inviteVisible);
+  if ($("projectionChallenge")) $("projectionChallenge").innerHTML = session.challengeText && inviteVisible
     ? `<strong>Desafío</strong><span>${escapeHtml(session.challengeText)}</span>`
     : "";
   renderParticipationRank("projectionParticipationRank", session);
   document.querySelector(".projection-side")?.classList.toggle("winners-mode", Boolean(session.winnersPublished));
   document.querySelector(".projection-side")?.classList.toggle("hidden", !inviteVisible && !canShowParticipation);
-  $("projectionParticipationRank").classList.toggle("hidden", Boolean(session.winnersPublished) || !canShowParticipation || (!inviteVisible && !hasParticipation));
-  $("projectionQuestion").classList.toggle("hidden", false);
-  $("projectionRanking").classList.toggle("hidden", !session.showRanking || session.winnersPublished || !inviteVisible);
+  $("projectionParticipationRank")?.classList.toggle("hidden", Boolean(session.winnersPublished) || !canShowParticipation || (!inviteVisible && !hasParticipation));
+  $("projectionQuestion")?.classList.toggle("hidden", false);
+  $("projectionRanking")?.classList.toggle("hidden", !session.showRanking || session.winnersPublished || !inviteVisible);
   if (session.showRanking && !session.winnersPublished && inviteVisible) renderLeaderboard("projectionRanking", session.participants);
-  $("projectionPodium").classList.toggle("hidden", !session.winnersPublished);
+  $("projectionPodium")?.classList.toggle("hidden", !session.winnersPublished);
   if (session.winnersPublished) renderPodium("projectionPodium", session.participants);
 }
 
 function renderLeaderboard(id, participants) {
-  $(id).innerHTML = participants.length
-    ? participants
+  const el = $(id);
+  if (!el) return;
+  el.innerHTML = (participants || []).length
+    ? (participants || [])
         .map(
           (p) => `
           <li>
@@ -1279,19 +1286,22 @@ function renderResponses(participants, context = activeSession) {
   const bankLabel = context?.bank?.name || "Sin banco";
   const search = normalizeText($("responsesSearch")?.value || "");
   const stats = participationStats({ ...(context || {}), participants });
-  $("responsesSummary").innerHTML = `
-    <span>Seccion: <strong>${escapeHtml(sectionLabel)}</strong></span>
-    <span>Banco: <strong>${escapeHtml(bankLabel)}</strong></span>
-    <span>Esperados: <strong>${stats.expected}</strong></span>
-    <span>Llegaron: <strong>${stats.arrived}</strong></span>
-    <span>Completaron: <strong>${stats.completed}</strong></span>
-    <span>Pendientes: <strong>${stats.pending}</strong></span>
-  `;
-  const filtered = participants.filter((p) => {
+  if ($("responsesSummary")) {
+    $("responsesSummary").innerHTML = `
+      <span>Seccion: <strong>${escapeHtml(sectionLabel)}</strong></span>
+      <span>Banco: <strong>${escapeHtml(bankLabel)}</strong></span>
+      <span>Esperados: <strong>${stats.expected}</strong></span>
+      <span>Llegaron: <strong>${stats.arrived}</strong></span>
+      <span>Completaron: <strong>${stats.completed}</strong></span>
+      <span>Pendientes: <strong>${stats.pending}</strong></span>
+    `;
+  }
+  const filtered = (participants || []).filter((p) => {
     if (!search) return true;
     return normalizeText(`${p.name} ${p.rut}`).includes(search);
   });
-  $("responsesList").innerHTML = filtered.length
+  if ($("responsesList")) {
+    $("responsesList").innerHTML = filtered.length
     ? filtered
         .map(
           (p) => `
@@ -1307,6 +1317,7 @@ function renderResponses(participants, context = activeSession) {
         )
         .join("")
     : "<p class='hint'>No hay participantes para esa búsqueda en esta sección y banco.</p>";
+  }
   document.querySelectorAll("[data-delete-student]").forEach((button) => {
     button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
   });
@@ -1329,15 +1340,19 @@ async function deleteStudent(studentId) {
     }
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
-    $("currentQuestion").textContent = `No se pudo eliminar la respuesta: ${error.message}`;
+    if ($("currentQuestion")) {
+      $("currentQuestion").textContent = `No se pudo eliminar la respuesta: ${error.message}`;
+    }
   }
 }
 
 function renderPodium(id, participants) {
-  const top = participants.slice(0, 3);
+  const el = $(id);
+  if (!el) return;
+  const top = (participants || []).slice(0, 3);
   const ordered = [top[1], top[0], top[2]];
   const labels = ["2°", "1°", "3°"];
-  $(id).innerHTML = ordered
+  el.innerHTML = ordered
     .map(
       (p, idx) => `
         <div class="podium-card">
@@ -1589,7 +1604,7 @@ async function answerQuestion(questionIndex, answerIndex) {
 function finishQuiz() {
   if (!activeSession) return;
   renderStudentReview(activeSession);
-  $("answerResult").textContent = "Respuestas publicadas para tu participación.";
+  if ($("answerResult")) $("answerResult").textContent = "Respuestas publicadas para tu participación.";
   document.querySelectorAll("[data-answer]").forEach((button) => (button.disabled = true));
 }
 
@@ -1632,7 +1647,7 @@ async function downloadInterventionRecord() {
     activeSession?.section?.id === context.section?.id && activeSession?.bank?.id === context.bank?.id;
   const codeLabel = activeMatchesContext ? activeSession.code : "Registro por filtro";
   const now = new Date();
-  const interventions = $("interventionLog").value
+  const interventions = $("interventionLog")?.value
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
@@ -1863,12 +1878,12 @@ async function init() {
     $("finishQuiz")?.addEventListener("click", finishQuiz);
   } catch (error) {
     setView("studentView");
-    $("pageTitle").textContent = "Cuestionario estudiantes";
+    if ($("pageTitle")) $("pageTitle").textContent = "Cuestionario estudiantes";
     document.querySelector(".menu-container")?.classList.add("hidden");
-    $("joinBox").classList.remove("hidden");
-    $("answerBox").classList.remove("hidden");
-    $("studentQuestion").textContent = "No se pudo cargar el cuestionario. Actualiza la página o pide un QR nuevo.";
-    $("answerResult").textContent = error.message;
+    if ($("joinBox")) $("joinBox").classList.remove("hidden");
+    if ($("answerBox")) $("answerBox").classList.remove("hidden");
+    if ($("studentQuestion")) $("studentQuestion").textContent = "No se pudo cargar el cuestionario. Actualiza la página o pide un QR nuevo.";
+    if ($("answerResult")) $("answerResult").textContent = error.message;
   }
 }
 
