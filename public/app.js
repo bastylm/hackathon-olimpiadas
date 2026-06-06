@@ -398,12 +398,11 @@ function sessionStateLabel(session) {
 }
 
 function renderSessionManager() {
-  const currentSectionId = $("sectionSelect")?.value || "";
-  const currentBankId = $("bankSelect")?.value || "";
+  const search = normalizeText($("sessionHistorySearch")?.value || "");
   const selected = managedSessions.filter((session) => {
-    const sectionMatch = !currentSectionId || session.section?.id === currentSectionId;
-    const bankMatch = !currentBankId || session.bank?.id === currentBankId;
-    return sectionMatch && bankMatch;
+    if (!search) return true;
+    const text = `${session.code} ${session.section?.section || ""} ${session.bank?.name || ""} ${sessionStateLabel(session)}`;
+    return normalizeText(text).includes(search);
   });
   const rowFor = (session) => {
     const isActive = activeSession?.code === session.code;
@@ -418,6 +417,7 @@ function renderSessionManager() {
           <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
         </div>
         <div class="session-actions">
+          <button type="button" data-load-session="${session.code}">Abrir</button>
           <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}">${isVisible ? "Ocultar" : "Mostrar"}</button>
           <button type="button" data-delete-session="${session.code}">Eliminar</button>
         </div>
@@ -427,18 +427,27 @@ function renderSessionManager() {
   if (!selected.length) {
     $("sessionManager").innerHTML = "<p class='hint'>Aún no hay formularios creados.</p>";
   } else {
-    const groups = groupedByArea(selected, (session) => session.bank?.area || session.section?.area);
+    const groups = groupedByArea(selected, (session) => {
+      if (session.winnersPublished) return "Finalizados";
+      if (session.acceptingAnswers) return "En curso";
+      if (session.quizPublished) return "Publicados (cerrados)";
+      return "Borradores";
+    });
+    const order = { "En curso": 1, "Publicados (cerrados)": 2, "Borradores": 3, "Finalizados": 4 };
     $("sessionManager").innerHTML = Object.entries(groups)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => (order[a] || 5) - (order[b] || 5))
       .map(
-        ([area, sessions]) => `
-          <details class="area-group" open>
-            <summary>${escapeHtml(area)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
+        ([status, sessions]) => `
+          <details class="area-group" ${status !== "Finalizados" || search ? "open" : ""}>
+            <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
             <div class="area-group-body">${sessions.map(rowFor).join("")}</div>
           </details>`
       )
       .join("");
   }
+  document.querySelectorAll("[data-load-session]").forEach((button) => {
+    button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
+  });
   document.querySelectorAll("[data-toggle-visibility]").forEach((button) => {
     button.addEventListener("click", () => toggleSessionVisibility(button.dataset.toggleVisibility, button.dataset.visible === "true"));
   });
@@ -1799,6 +1808,9 @@ async function init() {
     $("sectionSearch")?.addEventListener("input", () => {
       fillSectionSelector();
       loadResponsesForSelected();
+      renderSessionManager();
+    });
+    $("sessionHistorySearch")?.addEventListener("input", () => {
       renderSessionManager();
     });
     $("sectionSelect")?.addEventListener("change", () => {

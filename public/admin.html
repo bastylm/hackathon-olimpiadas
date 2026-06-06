@@ -147,8 +147,6 @@
               <p id="joinUrl"></p>
               <a id="projectionLink" class="button-link" href="/proyeccion" target="_blank">Abrir proyección</a>
             </div>
-            <h2>Formularios creados</h2>
-            <div id="sessionManager" class="session-manager"></div>
           </section>
 
           <section class="panel questions">
@@ -184,6 +182,15 @@
             <button id="downloadRecord" type="button">Descargar registro Word</button>
           </section>
         </div>
+        
+        <section class="panel session-history" style="margin-top: 16px;">
+          <div class="panel-head">
+            <h2>Formularios creados</h2>
+            <input id="sessionHistorySearch" class="responses-search" autocomplete="off" placeholder="Buscar por código, sección, banco o estado..." style="max-width: 400px; margin-bottom: 0;" />
+          </div>
+          <div id="sessionManager" class="session-manager horizontal-manager"></div>
+        </section>
+
       </section>
     </main>
     <script src="/app.js"></script>
