@@ -339,12 +339,24 @@ input {
 
 .session-manager {
   display: grid;
+  align-content: start;
   gap: 10px;
   margin-top: 8px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbf8ff;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.horizontal-manager {
+  max-height: none;
+  overflow-y: visible;
+}
+
+.horizontal-manager .area-group-body {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
 .session-row {
