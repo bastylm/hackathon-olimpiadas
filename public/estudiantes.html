@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Olimpiadas - Cuestionario estudiantes</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="studentView">
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <img class="brand-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+          <p class="eyebrow">Etapa Hackathon</p>
+          <h1 id="pageTitle">Cuestionario estudiantes</h1>
+        </div>
+        <div class="menu-container">
+          <button id="menuButton" class="hamburger-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="roleNav">
+            <span class="hamburger-lines" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <strong>Menú</strong>
+          </button>
+          <nav id="roleNav" class="role-nav hidden" aria-label="Perfiles">
+            <a id="navAdmin" href="/admin">Admin</a>
+            <a id="navProjection" class="admin-only hidden" href="/proyeccion">Proyección</a>
+            <a id="navStudent" href="/estudiante" class="active">Estudiante</a>
+          </nav>
+        </div>
+      </section>
+
+      <section id="studentView" class="view active">
+        <section class="student-card">
+          <p class="eyebrow">Etapa Hackathon</p>
+          <div id="joinBox">
+            <h2>Identificación</h2>
+            <label id="studentCodeLabel">
+              Código
+              <input id="studentCode" autocomplete="one-time-code" placeholder="ABCDE" />
+            </label>
+            <label>
+              Nombre
+              <input id="studentName" autocomplete="name" placeholder="Nombre y apellido" />
+            </label>
+            <label>
+              RUT
+              <input id="studentRut" autocomplete="off" placeholder="12.345.678-9" />
+            </label>
+            <button id="joinSession" class="primary" type="button">Entrar</button>
+          </div>
+          <div id="answerBox" class="hidden">
+            <div class="student-meta">
+              <p id="studentStatus" class="status"></p>
+              <strong id="studentElapsed">00:00</strong>
+            </div>
+            <p id="studentChallenge" class="student-challenge hidden"></p>
+            <h2 id="studentQuestion"></h2>
+            <p class="student-warning">Lee bien cada pregunta antes de seleccionar. Una vez marcada una alternativa, no se puede cambiar.</p>
+            <div id="answerOptions" class="answers"></div>
+            <div id="quizQuestions" class="quiz-questions"></div>
+            <button id="finishQuiz" class="primary hidden" type="button">Finalizar y ver respuestas</button>
+            <div id="answerReview" class="answer-review hidden"></div>
+            <p id="answerResult" class="result"></p>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

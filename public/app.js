@@ -127,14 +127,7 @@ function requireFreshAdminLogin(error) {
   localStorage.removeItem("olimpiadasAuth");
   clearInterval(refreshTimer);
   activeSession = null;
-  updateNavVisibility();
-  closeProfileMenu();
-  setView("loginView");
-  setRoleLabel("Administrador");
-  $("loginUser").value = "";
-  $("loginPass").value = "";
-  $("loginTitle").textContent = "Cuenta administradora";
-  $("loginHint").textContent = "La sesión guardada no era válida. Ingresa nuevamente con tu cuenta autorizada.";
+  location.href = "/";
   return true;
 }
 
@@ -685,12 +678,11 @@ async function login() {
     });
     localStorage.setItem(authKey(result.role), JSON.stringify(result));
     localStorage.removeItem("olimpiadasAuth");
-    $("loginHint").textContent = "";
-    updateNavVisibility();
-    if (result.role === "admin") showAdmin();
-    if (result.role === "projection") showProjection();
+    if ($("loginHint")) $("loginHint").textContent = "";
+    if (result.role === "admin") location.href = "/admin";
+    if (result.role === "projection") location.href = "/proyeccion";
   } catch (error) {
-    $("loginHint").textContent = error.message;
+    if ($("loginHint")) $("loginHint").textContent = error.message;
   }
 }
 
@@ -700,14 +692,7 @@ function logoutAdmin() {
   clearInterval(refreshTimer);
   activeSession = null;
   responseContext = null;
-  $("loginUser").value = "";
-  $("loginPass").value = "";
-  $("loginTitle").textContent = "Cuenta administradora";
-  $("loginHint").textContent = "Sesión cerrada.";
-  updateNavVisibility();
-  closeProfileMenu();
-  setRoleLabel("Administrador");
-  setView("loginView");
+  location.href = "/";
 }
 
 function currentAuth(expectedRole) {
@@ -725,12 +710,7 @@ function currentAuth(expectedRole) {
 function requireLogin(expectedRole) {
   const current = currentAuth(expectedRole);
   if (current?.role === expectedRole) return true;
-  setView("loginView");
-  $("loginUser").value = "";
-  $("loginPass").value = "";
-  $("loginTitle").textContent = expectedRole === "admin" ? "Cuenta administradora" : "Cuenta de proyección";
-  $("loginHint").textContent = "Ingresa con la cuenta autorizada para este perfil.";
-  setRoleLabel(expectedRole === "admin" ? "Administrador" : "Proyección");
+  location.href = "/";
   return false;
 }
 
@@ -1734,17 +1714,23 @@ async function init() {
       return;
     }
     appData = await api("/api/data");
-    fillSelectors();
-    syncChallengeFromBank(false);
-    updateNavVisibility();
     const path = location.pathname.toLowerCase();
     if (path.includes("estudiante")) showStudent();
-    else if (path.includes("proyeccion")) await showProjection();
-    else await showAdmin();
+    else if (path.includes("proyeccion")) {
+      updateNavVisibility();
+      await showProjection();
+    } else if (path.includes("admin")) {
+      fillSelectors();
+      syncChallengeFromBank(false);
+      updateNavVisibility();
+      await showAdmin();
+    } else {
+      setView("loginView");
+    }
 
-    $("loginButton").addEventListener("click", login);
-    $("logoutAdmin").addEventListener("click", logoutAdmin);
-    $("loginPass").addEventListener("keydown", (event) => {
+    $("loginButton")?.addEventListener("click", login);
+    $("logoutAdmin")?.addEventListener("click", logoutAdmin);
+    $("loginPass")?.addEventListener("keydown", (event) => {
       if (event.key === "Enter") login();
     });
     $("menuButton")?.addEventListener("click", (event) => {
@@ -1757,7 +1743,7 @@ async function init() {
       if (!nav) return;
       const willOpen = nav.classList.contains("hidden");
       nav.classList.toggle("hidden", !willOpen);
-      $("projectionMenuButton").setAttribute("aria-expanded", String(willOpen));
+      $("projectionMenuButton")?.setAttribute("aria-expanded", String(willOpen));
     });
     document.addEventListener("click", (event) => {
       if (!event.target.closest(".menu-container")) closeProfileMenu();
@@ -1780,7 +1766,7 @@ async function init() {
       }
     });
     const projectionView = $("projectionView");
-    projectionView.addEventListener(
+    projectionView?.addEventListener(
       "touchstart",
       (e) => {
         touchStartX = e.changedTouches[0].screenX;
@@ -1788,44 +1774,44 @@ async function init() {
       },
       { passive: true }
     );
-    projectionView.addEventListener(
+    projectionView?.addEventListener(
       "touchend",
       (e) => {
         if (mode === "projection") handleSwipe(e.changedTouches[0].screenX, e.changedTouches[0].screenY);
       },
       { passive: true }
     );
-    $("sectionSearch").addEventListener("input", () => {
+    $("sectionSearch")?.addEventListener("input", () => {
       fillSectionSelector();
       loadResponsesForSelected();
       renderSessionManager();
     });
-    $("sectionSelect").addEventListener("change", () => {
+    $("sectionSelect")?.addEventListener("change", () => {
       updateSectionEditor();
       loadResponsesForSelected();
       renderSessionManager();
     });
-    $("saveSection").addEventListener("click", saveSection);
-    $("newSection").addEventListener("click", () => {
+    $("saveSection")?.addEventListener("click", saveSection);
+    $("newSection")?.addEventListener("click", () => {
       updateSectionEditor(true);
       $("sectionStatus").textContent = "Completa los datos y guarda una nueva sección.";
     });
-    $("deleteSection").addEventListener("click", deleteCurrentSection);
-    $("bankSelect").addEventListener("change", handleBankChange);
-    $("expectedParticipants").addEventListener("change", updateExpectedParticipants);
-    $("responsesSearch").addEventListener("input", () => {
+    $("deleteSection")?.addEventListener("click", deleteCurrentSection);
+    $("bankSelect")?.addEventListener("change", handleBankChange);
+    $("expectedParticipants")?.addEventListener("change", updateExpectedParticipants);
+    $("responsesSearch")?.addEventListener("input", () => {
       if (responseContext) renderResponses(responseContext.participants || [], responseContext);
       else if (activeSession) renderResponses(activeSession.participants || [], activeSession);
     });
-    $("downloadRecord").addEventListener("click", downloadInterventionRecord);
-    $("newBank").addEventListener("click", clearBankEditor);
-    $("saveBank").addEventListener("click", saveBank);
-    $("addQuestion").addEventListener("click", addQuestionToBank);
-    $("deleteBank").addEventListener("click", deleteCurrentBank);
-    $("wordUpload").addEventListener("change", handleWordFileSelection);
-    $("uploadWordButton").addEventListener("click", importWordQuestionnaire);
-    $("projectionVideoUpload").addEventListener("change", handleProjectionVideoSelection);
-    $("uploadProjectionVideo").addEventListener("click", uploadProjectionVideo);
+    $("downloadRecord")?.addEventListener("click", downloadInterventionRecord);
+    $("newBank")?.addEventListener("click", clearBankEditor);
+    $("saveBank")?.addEventListener("click", saveBank);
+    $("addQuestion")?.addEventListener("click", addQuestionToBank);
+    $("deleteBank")?.addEventListener("click", deleteCurrentBank);
+    $("wordUpload")?.addEventListener("change", handleWordFileSelection);
+    $("uploadWordButton")?.addEventListener("click", importWordQuestionnaire);
+    $("projectionVideoUpload")?.addEventListener("change", handleProjectionVideoSelection);
+    $("uploadProjectionVideo")?.addEventListener("click", uploadProjectionVideo);
     const video = $("projectionVideo");
     const clickArea = $("projectionVideoClickArea");
     const videoWindow = video?.closest(".projection-video-window");
@@ -1867,14 +1853,14 @@ async function init() {
         }
       });
     }
-    $("createSession").addEventListener("click", createSession);
-    $("toggleQrVisibility").addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
-    $("publishQuiz").addEventListener("click", publishQuiz);
-    $("toggleAnswers").addEventListener("click", toggleAnswers);
-    $("toggleRanking").addEventListener("click", toggleRanking);
-    $("publishWinners").addEventListener("click", publishWinners);
-    $("joinSession").addEventListener("click", joinSession);
-    $("finishQuiz").addEventListener("click", finishQuiz);
+    $("createSession")?.addEventListener("click", createSession);
+    $("toggleQrVisibility")?.addEventListener("click", () => setAdminQrVisibility(!adminQrVisible, activeSession));
+    $("publishQuiz")?.addEventListener("click", publishQuiz);
+    $("toggleAnswers")?.addEventListener("click", toggleAnswers);
+    $("toggleRanking")?.addEventListener("click", toggleRanking);
+    $("publishWinners")?.addEventListener("click", publishWinners);
+    $("joinSession")?.addEventListener("click", joinSession);
+    $("finishQuiz")?.addEventListener("click", finishQuiz);
   } catch (error) {
     setView("studentView");
     $("pageTitle").textContent = "Cuestionario estudiantes";

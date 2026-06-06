@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Olimpiadas - Panel Administrador</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="adminView">
+    <main class="shell">
+      <section class="topbar">
+        <div>
+          <img class="brand-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+          <p class="eyebrow">Etapa Hackathon</p>
+          <h1 id="pageTitle">Panel administrador</h1>
+        </div>
+        <div class="menu-container">
+          <button id="menuButton" class="hamburger-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="roleNav">
+            <span class="hamburger-lines" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <strong>Menú</strong>
+          </button>
+          <nav id="roleNav" class="role-nav hidden" aria-label="Perfiles">
+            <a id="navAdmin" href="/admin" class="active">Admin</a>
+            <a id="navProjection" class="admin-only hidden" href="/proyeccion">Proyección</a>
+            <a id="navStudent" href="/estudiante">Estudiante</a>
+          </nav>
+        </div>
+      </section>
+
+      <section id="adminView" class="view active">
+        <div class="admin-grid">
+          <section class="panel setup">
+            <div class="admin-title-row">
+              <h2>Administrador</h2>
+              <button id="logoutAdmin" type="button">Cerrar sesión</button>
+            </div>
+            <label>
+              Buscar y seleccionar sección
+              <input id="sectionSearch" autocomplete="off" placeholder="Filtrar por código, sección, docente o asignatura" />
+              <select id="sectionSelect" style="margin-top: 8px;"></select>
+            </label>
+            <details class="section-editor">
+              <summary>Gestión de sección</summary>
+              <div class="section-editor-body">
+              <input id="sectionCode" placeholder="Código" />
+              <input id="sectionName" placeholder="Sección" />
+              <input id="sectionSubject" placeholder="Asignatura" />
+              <input id="sectionTeacher" placeholder="Docente" />
+              <input id="sectionCareer" placeholder="Carrera" />
+              <input id="sectionArea" placeholder="Área" />
+              <input id="sectionDate" type="date" />
+              <div class="section-actions">
+                <button id="saveSection" type="button">Guardar sección</button>
+                <button id="newSection" type="button">Nueva</button>
+                <button id="deleteSection" type="button">Eliminar</button>
+              </div>
+              <p id="sectionStatus" class="hint"></p>
+              </div>
+            </details>
+            <details class="section-editor bank-workspace" open>
+              <summary>Bancos de preguntas por área</summary>
+              <div class="section-editor-body">
+                <label>
+                  Banco de preguntas
+                  <select id="bankSelect"></select>
+                </label>
+                <button id="deleteBank" type="button">Eliminar banco de preguntas</button>
+                <div class="bank-editor-grid">
+                  <label>
+                    Nombre del banco
+                    <input id="bankNameInput" placeholder="Ej: Software ERP (ADMO05)" />
+                  </label>
+                  <label>
+                    Área de trabajo
+                    <input id="bankAreaInput" placeholder="Ej: Área Administración" />
+                  </label>
+                  <label>
+                    Asignatura asociada
+                    <input id="bankSubjectInput" placeholder="Ej: Software ERP" />
+                  </label>
+                  <label>
+                    Carrera asociada
+                    <input id="bankCareerInput" placeholder="Ej: Administración de Empresas" />
+                  </label>
+                  <button id="newBank" type="button">Nuevo banco</button>
+                  <button id="saveBank" type="button">Guardar banco</button>
+                </div>
+                <label>
+                  Descripción breve o pregunta esencial
+                  <textarea id="challengeText" class="challenge-text" maxlength="600" placeholder="Ej: ¿Cuál es el desafío principal que debe resolver esta sección?"></textarea>
+                </label>
+                <details class="question-editor">
+                  <summary>Registrar pregunta nueva</summary>
+                  <div class="section-editor-body">
+                    <label>
+                      Pregunta
+                      <textarea id="newQuestionText" class="challenge-text" maxlength="500" placeholder="Escribe la pregunta para el banco seleccionado"></textarea>
+                    </label>
+                    <div class="answer-editor-grid">
+                      <label>Alternativa 100 pts <input id="answerText100" placeholder="Respuesta más pertinente" /></label>
+                      <label>Alternativa 75 pts <input id="answerText75" placeholder="Buena respuesta" /></label>
+                      <label>Alternativa 50 pts <input id="answerText50" placeholder="Parcialmente adecuada" /></label>
+                      <label>Alternativa 25 pts <input id="answerText25" placeholder="Poco pertinente pero válida" /></label>
+                    </div>
+                    <button id="addQuestion" type="button">Agregar pregunta al banco</button>
+                  </div>
+                </details>
+                <label>
+                  Seleccionar cuestionario Word
+                  <input id="wordUpload" type="file" accept=".docx" />
+                </label>
+                <button id="uploadWordButton" type="button" disabled>Cargar banco de preguntas</button>
+                <div id="uploadManager" class="upload-manager"></div>
+                <details class="question-editor">
+                  <summary>Video para pantalla de proyección</summary>
+                  <div class="section-editor-body">
+                    <label>
+                      Seleccionar video
+                      <input id="projectionVideoUpload" type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" />
+                    </label>
+                    <button id="uploadProjectionVideo" type="button" disabled>Cargar video de proyección</button>
+                    <p id="projectionVideoStatus" class="hint">Aún no hay video cargado para proyección.</p>
+                  </div>
+                </details>
+              </div>
+            </details>
+            <label>
+              Duración del cuestionario (minutos)
+              <input id="durationMinutes" type="number" min="1" max="180" value="10" />
+            </label>
+            <label>
+              Cantidad esperada de participantes
+              <input id="expectedParticipants" type="number" min="0" max="500" value="0" />
+            </label>
+            <button id="createSession" class="primary" type="button">Crear código</button>
+            <div id="sessionCard" class="session-card hidden">
+              <span>Código estudiantes</span>
+              <strong id="sessionCode">-----</strong>
+              <button id="toggleQrVisibility" type="button" aria-expanded="false">Mostrar QR</button>
+              <div id="qrPanel" class="qr-panel hidden">
+                <img id="qrImage" alt="QR para estudiantes" />
+              </div>
+              <p id="joinUrl"></p>
+              <a id="projectionLink" class="button-link" href="/proyeccion" target="_blank">Abrir proyección</a>
+            </div>
+            <h2>Formularios creados</h2>
+            <div id="sessionManager" class="session-manager"></div>
+          </section>
+
+          <section class="panel questions">
+            <div class="panel-head">
+              <h2>Preguntas autorizadas</h2>
+              <button id="publishQuiz" class="primary" type="button">Guardar selección</button>
+            </div>
+            <p id="selectionStatus" class="hint">La selección se guarda sin generar código.</p>
+            <div id="questionList" class="question-list"></div>
+          </section>
+
+          <section class="panel live">
+            <h2>Control Hackathon</h2>
+            <div id="currentQuestion" class="current-question">Crea una sesión para iniciar.</div>
+            <div class="control-grid">
+              <button id="toggleAnswers" type="button">Abrir respuestas</button>
+              <button id="toggleRanking" type="button">Mostrar ranking</button>
+              <div id="rankingStatus" class="status-pill">Ranking oculto</div>
+              <button id="publishWinners" class="mystery" type="button">Publicar ganadores</button>
+            </div>
+            <div class="timer-strip">
+              <span>Tiempo restante</span>
+              <strong id="adminElapsed">00:00</strong>
+            </div>
+            <ol id="leaderboard" class="leaderboard"></ol>
+            <div id="podium" class="podium hidden"></div>
+            <h2>Respuestas por sección</h2>
+            <div id="responsesSummary" class="responses-summary"></div>
+            <input id="responsesSearch" class="responses-search" placeholder="Buscar por nombre o RUT" />
+            <div id="responsesList" class="responses-list"></div>
+            <h2>Registro de intervención</h2>
+            <textarea id="interventionLog" class="intervention-log" placeholder="Escribe una intervención por línea. Ej: [x] Presentación inicial realizada"></textarea>
+            <button id="downloadRecord" type="button">Descargar registro Word</button>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
