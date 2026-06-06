@@ -745,14 +745,14 @@ function serveStatic(req, res) {
     return;
   }
   let file =
-    url.pathname === "/" ||
-    url.pathname === "/admin" ||
-    url.pathname === "/admin/" ||
-    url.pathname === "/proyeccion" ||
-    url.pathname === "/proyeccion/" ||
-    url.pathname === "/estudiante" ||
-    url.pathname === "/estudiante/"
+    url.pathname === "/"
       ? "index.html"
+      : url.pathname === "/admin" || url.pathname === "/admin/"
+      ? "admin.html"
+      : url.pathname === "/proyeccion" || url.pathname === "/proyeccion/"
+      ? "proyeccion.html"
+      : url.pathname === "/estudiante" || url.pathname === "/estudiante/"
+      ? "estudiantes.html"
       : url.pathname.slice(1);
   file = path.normalize(file).replace(/^(\.\.[/\\])+/, "");
   const full = path.join(PUBLIC, file);

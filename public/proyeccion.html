@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Olimpiadas - Proyección</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-view="projectionView">
+    <main class="shell">
+      <section id="projectionView" class="view active">
+        <div class="projection-show">
+          <section class="projection-window projection-brand-window" style="position: relative;">
+            <div class="menu-container projection-menu" style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 100;">
+              <button id="projectionMenuButton" class="hamburger-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="projectionRoleNav">
+                <span class="hamburger-lines" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </button>
+              <nav id="projectionRoleNav" class="role-nav hidden" aria-label="Perfiles">
+                <a href="/admin">Admin</a>
+                <a id="projNavProjection" class="active admin-only hidden" href="/proyeccion">Proyección</a>
+                <a href="/estudiante">Estudiante</a>
+              </nav>
+            </div>
+            <img class="projection-main-logo" src="/assets/desafiat-logo.png" alt="DesafíaT-TP Olimpiadas Tecnológicas 2026" />
+            <h2 id="pageTitle">Etapa 1 · Hackathon</h2>
+          </section>
+
+          <section class="projection-window projection-video-window">
+            <video id="projectionVideo" class="projection-video hidden" loop playsinline></video>
+            <div id="projectionVideoClickArea" class="projection-video-click-area hidden"></div>
+            <div id="projectionVideoPlaceholder" class="projection-video-placeholder">Video de presentación pendiente.</div>
+            <div id="projectionVideoPlayIcon" class="projection-video-play-icon hidden">&#9654;</div>
+          </section>
+
+          <section class="projection-window projection-live-window">
+            <div class="projection-paused-overlay">
+              <p class="eyebrow">Modo de espera</p>
+              <h2>Actividad en pausa</h2>
+              <p>El administrador ha ocultado la vista temporalmente.</p>
+            </div>
+            <div class="projection-hero">
+              <p class="eyebrow">Ingreso estudiantes</p>
+              <h2 id="projectionCode">Código -----</h2>
+              <img id="projectionQr" alt="QR para estudiantes" />
+              <p id="projectionJoin"></p>
+            </div>
+            <div class="projection-side">
+              <div class="timer-card">
+                <div class="projection-total-count">
+                  <span>Participación total</span>
+                  <strong id="projectionTotalParticipants">0</strong>
+                </div>
+                <span>Tiempo restante</span>
+                <strong id="projectionElapsed">00:00</strong>
+              </div>
+              <div id="projectionStats" class="participation-stats"></div>
+              <div id="projectionChallenge" class="challenge-card hidden"></div>
+              <div id="projectionParticipationRank" class="participation-rank"></div>
+              <div id="projectionQuestion" class="current-question">Esperando al administrador.</div>
+            </div>
+          </section>
+
+          <section class="projection-window projection-winners-window">
+            <p class="eyebrow">Resultados</p>
+            <h2>Ranking de ganadores</h2>
+            <ol id="projectionRanking" class="leaderboard hidden"></ol>
+            <div id="projectionPodium" class="podium hidden"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
