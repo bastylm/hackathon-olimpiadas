@@ -315,12 +315,12 @@ function rankStoredParticipants(sectionId, bankId, selected = []) {
     name: student.name,
     rut: student.rut || "",
     score: student.score,
-    answers: Object.keys(student.answers).length,
+    answers: Object.keys(student.answers || {}).length,
     answerMap: student.answers || {},
     sectionId,
     bankId,
     career: section?.career || "",
-    answeredCurrent: selected.length > 0 && selected.every((index) => student.answers[index] !== undefined),
+    answeredCurrent: selected.length > 0 && selected.every((index) => (student.answers || {})[index] !== undefined),
   }));
   participants.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   return participants.map((student, index) => ({ ...student, place: index + 1 }));
@@ -372,19 +372,21 @@ function selectedQuestionIndexes(session) {
 function publicQuestionsFor(session) {
   const bank = data.banks.find((item) => item.id === session.bankId);
   if (!bank || !session.quizPublished || !session.acceptingAnswers) return [];
-  return selectedQuestionIndexes(session).map((index) => {
+  return selectedQuestionIndexes(session)
+    .map((index) => {
     const question = bank.questions[index];
+    if (!question) return null;
     const answers = Array.isArray(question?.answers) ? question.answers : [];
     const order = shuffledAnswerOrder(session.code, index, answers.length);
     return {
       index,
-      text: question.text,
+      text: question?.text || "",
       answers: order.map((answerIndex) => ({
         ...answers[answerIndex],
         originalIndex: answerIndex,
       })),
     };
-  });
+  }).filter(Boolean);
 }
 
 function receiveVideoUpload(req, res) {
