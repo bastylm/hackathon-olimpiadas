@@ -399,6 +399,11 @@ function sessionStateLabel(session) {
 
 function renderSessionManager() {
   const search = normalizeText($("sessionHistorySearch")?.value || "");
+  const openStates = {};
+  document.querySelectorAll("#sessionManager details.area-group").forEach((details) => {
+    const status = details.getAttribute("data-status");
+    if (status) openStates[status] = details.open;
+  });
   const selected = managedSessions.filter((session) => {
     if (!search) return true;
     const text = `${session.code} ${session.section?.section || ""} ${session.bank?.name || ""} ${sessionStateLabel(session)}`;
@@ -417,7 +422,7 @@ function renderSessionManager() {
           <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
         </div>
         <div class="session-actions">
-          <button type="button" data-load-session="${session.code}">Abrir</button>
+          <button type="button" data-load-session="${session.code}">${isActive ? "Cerrar" : "Abrir"}</button>
           <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}">${isVisible ? "Ocultar" : "Mostrar"}</button>
           <button type="button" data-delete-session="${session.code}">Eliminar</button>
         </div>
@@ -437,23 +442,20 @@ function renderSessionManager() {
     $("sessionManager").innerHTML = Object.entries(groups)
       .sort(([a], [b]) => (order[a] || 5) - (order[b] || 5))
       .map(
-        ([status, sessions]) => `
-          <details class="area-group" ${status !== "Finalizados" || search ? "open" : ""}>
+        ([status, sessions]) => {
+          let isOpen = status !== "Finalizados" || search ? "open" : "";
+          if (openStates[status] !== undefined && !search) {
+            isOpen = openStates[status] ? "open" : "";
+          }
+          return `
+          <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
             <div class="area-group-body">${sessions.map(rowFor).join("")}</div>
-          </details>`
+          </details>`;
+        }
       )
       .join("");
   }
-  document.querySelectorAll("[data-load-session]").forEach((button) => {
-    button.addEventListener("click", () => loadSessionByCode(button.dataset.loadSession));
-  });
-  document.querySelectorAll("[data-toggle-visibility]").forEach((button) => {
-    button.addEventListener("click", () => toggleSessionVisibility(button.dataset.toggleVisibility, button.dataset.visible === "true"));
-  });
-  document.querySelectorAll("[data-delete-session]").forEach((button) => {
-    button.addEventListener("click", () => deleteSessionByCode(button.dataset.deleteSession));
-  });
 }
 
 async function toggleSessionVisibility(code, currentVisible) {
@@ -481,6 +483,23 @@ function syncManagedSession(session) {
   renderSessionManager();
 }
 
+function unloadActiveSession() {
+  activeSession = null;
+  localStorage.removeItem("olimpiadasEvaluatorCode");
+  $("sessionCard")?.classList.add("hidden");
+  clearInterval(refreshTimer);
+  renderAdmin({
+    quizPublished: false,
+    quizQuestions: [],
+    acceptingAnswers: false,
+    winnersPublished: false,
+    participants: [],
+    elapsedSeconds: 0,
+    durationSeconds: Number($("durationMinutes")?.value || 10) * 60,
+  });
+  renderSessionManager();
+}
+
 async function loadSessionByCode(code) {
   try {
     activeSession = await api(`/api/session/${code}`);
@@ -500,22 +519,15 @@ async function loadSessionByCode(code) {
 
 async function deleteSessionByCode(code) {
   try {
-    if (!confirm(`Eliminar formulario/código ${code}? Las respuestas guardadas por sección y banco se conservan.`)) return;
+    const input = prompt(`Para eliminar el formulario, escribe su código (${code}):\n\nLas respuestas guardadas por sección y banco se conservan.`);
+    if (input === null) return; // El usuario presionó cancelar
+    if (input.trim().toUpperCase() !== code.toUpperCase()) {
+      alert("El código ingresado no coincide. Operación cancelada.");
+      return;
+    }
     await api(`/api/session/${code}`, { method: "DELETE" });
     if (activeSession?.code === code) {
-      activeSession = null;
-      localStorage.removeItem("olimpiadasEvaluatorCode");
-      $("sessionCard").classList.add("hidden");
-      clearInterval(refreshTimer);
-      renderAdmin({
-        quizPublished: false,
-        quizQuestions: [],
-        acceptingAnswers: false,
-        winnersPublished: false,
-        participants: [],
-        elapsedSeconds: 0,
-        durationSeconds: Number($("durationMinutes").value || 10) * 60,
-      });
+      unloadActiveSession();
     }
     $("selectionStatus").textContent = `Formulario ${code} eliminado.`;
     await loadManagedSessions();
@@ -556,10 +568,7 @@ async function deleteBankById(bankId) {
     fillSelectors();
     await loadManagedSessions();
     if (activeSession?.bank?.id === bank.id || result.removedSessions) {
-      activeSession = null;
-      localStorage.removeItem("olimpiadasEvaluatorCode");
-      $("sessionCard").classList.add("hidden");
-      clearInterval(refreshTimer);
+      unloadActiveSession();
     }
     $("selectionStatus").textContent = result.uploadDeleted
       ? "Banco de preguntas y archivo Word eliminados."
@@ -1327,9 +1336,6 @@ function renderResponses(participants, context = activeSession) {
         .join("")
     : "<p class='hint'>No hay participantes para esa búsqueda en esta sección y banco.</p>";
   }
-  document.querySelectorAll("[data-delete-student]").forEach((button) => {
-    button.addEventListener("click", () => deleteStudent(button.dataset.deleteStudent));
-  });
 }
 
 async function deleteStudent(studentId) {
@@ -1481,9 +1487,6 @@ function renderStudentSession(session) {
       `;
     })
     .join("");
-  document.querySelectorAll("[data-answer]").forEach((button) => {
-    button.addEventListener("click", () => answerQuestion(Number(button.dataset.questionIndex), Number(button.dataset.answer)));
-  });
   if (!session.acceptingAnswers) {
     $("answerResult").textContent = "La pregunta está cerrada.";
   } else {
@@ -1812,6 +1815,29 @@ async function init() {
     });
     $("sessionHistorySearch")?.addEventListener("input", () => {
       renderSessionManager();
+    });
+    $("sessionManager")?.addEventListener("click", (event) => {
+      const loadBtn = event.target.closest("[data-load-session]");
+      if (loadBtn) {
+        if (activeSession?.code === loadBtn.dataset.loadSession) {
+          return unloadActiveSession();
+        }
+        return loadSessionByCode(loadBtn.dataset.loadSession);
+      }
+      const toggleBtn = event.target.closest("[data-toggle-visibility]");
+      if (toggleBtn) return toggleSessionVisibility(toggleBtn.dataset.toggleVisibility, toggleBtn.dataset.visible === "true");
+      const deleteBtn = event.target.closest("[data-delete-session]");
+      if (deleteBtn) return deleteSessionByCode(deleteBtn.dataset.deleteSession);
+    });
+    $("responsesList")?.addEventListener("click", (event) => {
+      const deleteBtn = event.target.closest("[data-delete-student]");
+      if (deleteBtn) deleteStudent(deleteBtn.dataset.deleteStudent);
+    });
+    $("quizQuestions")?.addEventListener("click", (event) => {
+      const answerBtn = event.target.closest("[data-answer]");
+      if (answerBtn && !answerBtn.disabled) {
+        answerQuestion(Number(answerBtn.dataset.questionIndex), Number(answerBtn.dataset.answer));
+      }
     });
     $("sectionSelect")?.addEventListener("change", () => {
       updateSectionEditor();
