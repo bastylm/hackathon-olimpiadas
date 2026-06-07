@@ -11,6 +11,7 @@ let projectionVideoObserver = null;
 let currentSlideIndex = 0;
 let touchStartX = 0;
 let touchStartY = 0;
+let sessionManagerPagination = {};
 
 function safeJson(value, fallback) {
   try {
@@ -443,14 +444,37 @@ function renderSessionManager() {
       .sort(([a], [b]) => (order[a] || 5) - (order[b] || 5))
       .map(
         ([status, sessions]) => {
-          let isOpen = status !== "Finalizados" || search ? "open" : "";
+          let isOpen = search ? "open" : "";
           if (openStates[status] !== undefined && !search) {
             isOpen = openStates[status] ? "open" : "";
           }
+          
+          const pageSize = 4;
+          const currentPage = sessionManagerPagination[status] || 0;
+          const totalPages = Math.ceil(sessions.length / pageSize);
+          const validPage = Math.min(Math.max(0, currentPage), Math.max(0, totalPages - 1));
+          sessionManagerPagination[status] = validPage;
+          
+          const visibleSessions = sessions.slice(validPage * pageSize, (validPage + 1) * pageSize);
+          
+          let paginationHtml = "";
+          if (totalPages > 1) {
+            paginationHtml = `
+              <div class="session-pagination" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 12px; padding-top: 12px; border-top: 1px solid #ded1ef;">
+                <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="padding: 4px 12px; font-weight: bold;">&larr;</button>
+                <span style="font-size: 0.9rem; color: #5b21b6; font-weight: bold;">Página ${validPage + 1} de ${totalPages}</span>
+                <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === totalPages - 1 ? "disabled" : ""} style="padding: 4px 12px; font-weight: bold;">&rarr;</button>
+              </div>
+            `;
+          }
+
           return `
           <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
-            <div class="area-group-body">${sessions.map(rowFor).join("")}</div>
+            <div class="area-group-body">
+              ${visibleSessions.map(rowFor).join("")}
+              ${paginationHtml}
+            </div>
           </details>`;
         }
       )
@@ -1828,6 +1852,14 @@ async function init() {
       if (toggleBtn) return toggleSessionVisibility(toggleBtn.dataset.toggleVisibility, toggleBtn.dataset.visible === "true");
       const deleteBtn = event.target.closest("[data-delete-session]");
       if (deleteBtn) return deleteSessionByCode(deleteBtn.dataset.deleteSession);
+
+      const paginateBtn = event.target.closest("[data-paginate-group]");
+      if (paginateBtn) {
+        const group = paginateBtn.dataset.paginateGroup;
+        const dir = Number(paginateBtn.dataset.paginateDir);
+        sessionManagerPagination[group] = (sessionManagerPagination[group] || 0) + dir;
+        renderSessionManager();
+      }
     });
     $("responsesList")?.addEventListener("click", (event) => {
       const deleteBtn = event.target.closest("[data-delete-student]");
