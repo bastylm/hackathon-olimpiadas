@@ -418,22 +418,24 @@ function renderSessionManager() {
       ? `<div title="${escapeHtml(session.challengeText)}" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; margin: 8px 0; color: #555;">${escapeHtml(session.challengeText)}</div>`
       : "";
     return `
-      <div class="session-row ${isActive ? "active" : ""}" style="display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; margin-bottom: 0; padding: 16px; height: 100%; box-sizing: border-box;">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <strong style="font-size: 1.2rem; color: #4c1d95;">${escapeHtml(session.code)}</strong>
-          <span style="font-size: 0.85rem; font-weight: 600; color: #333;">${escapeHtml(session.section?.section || "Sin sección")}</span>
-          <span style="font-size: 0.8rem; color: #666;">${escapeHtml(session.bank?.name || "Sin banco")}</span>
+      <div class="session-row ${isActive ? "active" : ""}" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 0; padding: 12px 16px; border: 1px solid #ded1ef; border-radius: 8px; background: ${isActive ? '#f5f0ff' : '#fff'}; box-sizing: border-box;">
+        <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+            <strong style="font-size: 1.1rem; color: #4c1d95;">${escapeHtml(session.code)}</strong>
+            <span style="font-size: 0.85rem; font-weight: 600; color: #333;">${escapeHtml(session.section?.section || "Sin sección")}</span>
+            <span style="font-size: 0.8rem; color: #666;">- ${escapeHtml(session.bank?.name || "Sin banco")}</span>
+          </div>
           ${challengeHtml}
-          <div style="font-size: 0.8rem; color: #666; margin-top: 4px;">
-            <div><strong>Estado:</strong> ${sessionStateLabel(session)}</div>
-            <div><strong>Tiempo:</strong> ${fmt(session.remainingSeconds ?? session.durationSeconds)}</div>
-            <div><strong>Creado:</strong> ${created}</div>
+          <div style="font-size: 0.75rem; color: #666; display: flex; gap: 12px; margin-top: 4px; flex-wrap: wrap;">
+            <span><strong>Estado:</strong> ${sessionStateLabel(session)}</span>
+            <span><strong>Tiempo:</strong> ${fmt(session.remainingSeconds ?? session.durationSeconds)}</span>
+            <span><strong>Creado:</strong> ${created}</span>
           </div>
         </div>
-        <div class="session-actions" style="display: flex; gap: 6px; justify-content: stretch; margin-top: 12px; width: 100%;">
-          <button type="button" data-load-session="${session.code}" style="flex: 1; padding: 6px 0; font-size: 0.8rem;">${isActive ? "Cerrar" : "Abrir"}</button>
-          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}" style="flex: 1; padding: 6px 0; font-size: 0.8rem;">${isVisible ? "Ocultar" : "Mostrar"}</button>
-          <button type="button" data-delete-session="${session.code}" style="flex: 1; padding: 6px 0; font-size: 0.8rem; background: #fee2e2; color: #991b1b; border-color: #fca5a5;">Eliminar</button>
+        <div class="session-actions" style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; width: 90px; margin-top: 0; padding: 0; border: none; background: transparent;">
+          <button type="button" data-load-session="${session.code}" style="width: 100%; padding: 6px 0; font-size: 0.8rem;">${isActive ? "Cerrar" : "Abrir"}</button>
+          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}" style="width: 100%; padding: 6px 0; font-size: 0.8rem;">${isVisible ? "Ocultar" : "Mostrar"}</button>
+          <button type="button" data-delete-session="${session.code}" style="width: 100%; padding: 6px 0; font-size: 0.8rem; background: #fee2e2; color: #991b1b; border-color: #fca5a5;">Eliminar</button>
         </div>
       </div>
     `;
@@ -473,7 +475,7 @@ function renderSessionManager() {
                 <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
                   <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === 0 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === 0 ? 'default' : 'pointer'}; color: ${validPage === 0 ? '#ccc' : '#4c1d95'};">&larr;</button>
                   <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0;">
-                    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%;">
+                    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%;">
                       ${visibleSessions.map(rowFor).join("")}
                     </div>
                     <div style="text-align: center; font-size: 0.85rem; color: #5b21b6; font-weight: bold;">Página ${validPage + 1} de ${totalPages}</div>
@@ -488,7 +490,7 @@ function renderSessionManager() {
           <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
             <div class="area-group-body">
-              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%;">
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%;">
                 ${visibleSessions.map(rowFor).join("")}
               </div>
             </div>
