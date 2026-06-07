@@ -461,13 +461,13 @@ function renderSessionManager() {
           
           const pageSize = 4;
           const currentPage = sessionManagerPagination[status] || 0;
-          const totalPages = Math.ceil(sessions.length / pageSize);
-          const validPage = Math.min(Math.max(0, currentPage), Math.max(0, totalPages - 1));
+          const maxPage = Math.max(0, sessions.length - pageSize);
+          const validPage = Math.min(Math.max(0, currentPage), maxPage);
           sessionManagerPagination[status] = validPage;
-          
-          const visibleSessions = sessions.slice(validPage * pageSize, (validPage + 1) * pageSize);
-          
-          if (totalPages > 1) {
+
+          const visibleSessions = sessions.slice(validPage, validPage + pageSize);
+
+          if (sessions.length > pageSize) {
             return `
             <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
               <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
@@ -475,12 +475,12 @@ function renderSessionManager() {
                 <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
                   <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === 0 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === 0 ? 'default' : 'pointer'}; color: ${validPage === 0 ? '#ccc' : '#4c1d95'};">&larr;</button>
                   <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0;">
-                    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%;">
+                    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%;">
                       ${visibleSessions.map(rowFor).join("")}
                     </div>
-                    <div style="text-align: center; font-size: 0.85rem; color: #5b21b6; font-weight: bold;">Página ${validPage + 1} de ${totalPages}</div>
+                    <div style="text-align: center; font-size: 0.85rem; color: #5b21b6; font-weight: bold;">Mostrando ${validPage + 1} - ${validPage + visibleSessions.length} de ${sessions.length}</div>
                   </div>
-                  <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === totalPages - 1 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === totalPages - 1 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === totalPages - 1 ? 'default' : 'pointer'}; color: ${validPage === totalPages - 1 ? '#ccc' : '#4c1d95'};">&rarr;</button>
+                  <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === maxPage ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === maxPage ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === maxPage ? 'default' : 'pointer'}; color: ${validPage === maxPage ? '#ccc' : '#4c1d95'};">&rarr;</button>
                 </div>
               </div>
             </details>`;
@@ -490,12 +490,11 @@ function renderSessionManager() {
           <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
             <div class="area-group-body">
-              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%;">
+              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%;">
                 ${visibleSessions.map(rowFor).join("")}
               </div>
             </div>
-          </details>`;
-        }
+          </details>`;        }
       )
       .join("");
   }
