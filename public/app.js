@@ -414,18 +414,21 @@ function renderSessionManager() {
     const isActive = activeSession?.code === session.code;
     const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
     const isVisible = session.inviteVisible !== false;
+    const challengeHtml = session.challengeText
+      ? `<span title="${escapeHtml(session.challengeText)}">${escapeHtml(session.challengeText.slice(0, 120))}${session.challengeText.length > 120 ? "..." : ""}</span>`
+      : "";
     return `
       <div class="session-row ${isActive ? "active" : ""}">
         <div>
           <strong>${escapeHtml(session.code)}</strong>
           <span>${escapeHtml(session.section?.section || "Sin sección")} - ${escapeHtml(session.bank?.name || "Sin banco")}</span>
-          ${session.challengeText ? `<span>${escapeHtml(session.challengeText)}</span>` : ""}
+          ${challengeHtml}
           <span>${sessionStateLabel(session)} - ${fmt(session.remainingSeconds ?? session.durationSeconds)} - ${created}</span>
         </div>
         <div class="session-actions">
-          <button type="button" data-load-session="${session.code}">${isActive ? "Cerrar" : "Abrir"}</button>
-          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}">${isVisible ? "Ocultar" : "Mostrar"}</button>
-          <button type="button" data-delete-session="${session.code}">Eliminar</button>
+          <button type="button" data-load-session="${session.code}" style="width: 90px;">${isActive ? "Cerrar" : "Abrir"}</button>
+          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}" style="width: 90px;">${isVisible ? "Ocultar" : "Mostrar"}</button>
+          <button type="button" data-delete-session="${session.code}" style="width: 90px;">Eliminar</button>
         </div>
       </div>
     `;
@@ -457,15 +460,21 @@ function renderSessionManager() {
           
           const visibleSessions = sessions.slice(validPage * pageSize, (validPage + 1) * pageSize);
           
-          let paginationHtml = "";
           if (totalPages > 1) {
-            paginationHtml = `
-              <div class="session-pagination" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 12px; padding-top: 12px; border-top: 1px solid #ded1ef;">
-                <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="padding: 4px 12px; font-weight: bold;">&larr;</button>
-                <span style="font-size: 0.9rem; color: #5b21b6; font-weight: bold;">Página ${validPage + 1} de ${totalPages}</span>
-                <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === totalPages - 1 ? "disabled" : ""} style="padding: 4px 12px; font-weight: bold;">&rarr;</button>
+            return `
+            <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
+              <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
+              <div class="area-group-body">
+                <div style="display: flex; align-items: stretch; gap: 12px; width: 100%;">
+                  <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; border: 1px solid #ded1ef; background: ${validPage === 0 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === 0 ? 'default' : 'pointer'}; color: ${validPage === 0 ? '#ccc' : '#4c1d95'};">&larr;</button>
+                  <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+                    ${visibleSessions.map(rowFor).join("")}
+                    <div style="text-align: center; font-size: 0.85rem; color: #5b21b6; font-weight: bold;">Página ${validPage + 1} de ${totalPages}</div>
+                  </div>
+                  <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === totalPages - 1 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; border: 1px solid #ded1ef; background: ${validPage === totalPages - 1 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === totalPages - 1 ? 'default' : 'pointer'}; color: ${validPage === totalPages - 1 ? '#ccc' : '#4c1d95'};">&rarr;</button>
+                </div>
               </div>
-            `;
+            </details>`;
           }
 
           return `
@@ -473,7 +482,6 @@ function renderSessionManager() {
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
             <div class="area-group-body">
               ${visibleSessions.map(rowFor).join("")}
-              ${paginationHtml}
             </div>
           </details>`;
         }
