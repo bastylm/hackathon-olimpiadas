@@ -475,8 +475,11 @@ function renderSessionManager() {
                 <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
                   <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === 0 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === 0 ? 'default' : 'pointer'}; color: ${validPage === 0 ? '#ccc' : '#4c1d95'};">&larr;</button>
                   <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0;">
-                    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%;">
-                      ${visibleSessions.map(rowFor).join("")}
+                    <div style="display: flex; gap: 12px; width: 100%; overflow-x: auto; padding-bottom: 8px;">
+                      ${visibleSessions.map(session => {
+                        const rowHtml = rowFor(session);
+                        return rowHtml.replace('class="session-row', 'class="session-row" style="min-width: 320px; flex: 1;"');
+                      }).join("")}
                     </div>
                     <div style="text-align: center; font-size: 0.85rem; color: #5b21b6; font-weight: bold;">Mostrando ${validPage + 1} - ${validPage + visibleSessions.length} de ${sessions.length}</div>
                   </div>
@@ -490,8 +493,11 @@ function renderSessionManager() {
           <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
             <div class="area-group-body">
-              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%;">
-                ${visibleSessions.map(rowFor).join("")}
+              <div style="display: flex; gap: 12px; width: 100%; overflow-x: auto; padding-bottom: 8px;">
+                ${visibleSessions.map(session => {
+                  const rowHtml = rowFor(session);
+                  return rowHtml.replace('class="session-row', 'class="session-row" style="min-width: 320px; flex: 1;"');
+                }).join("")}
               </div>
             </div>
           </details>`;        }
