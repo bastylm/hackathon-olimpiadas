@@ -397,9 +397,10 @@ input {
 
 .session-cards-wrapper {
   display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
   gap: 12px;
   width: 100%;
-  overflow-x: auto;
   padding-bottom: 8px;
 }
 
@@ -413,8 +414,9 @@ input {
   border-radius: 8px;
   background: #fff;
   box-sizing: border-box;
-  min-width: 320px;
-  flex: 1;
+  min-width: 0;
+  flex: 1 1 calc(25% - 12px);
+  max-width: calc(25% - 9px);
 }
 
 .session-row.active {
@@ -426,6 +428,14 @@ input {
   display: flex;
   flex-direction: column;
   width: 100%;
+}
+
+.session-info p,
+.session-info span,
+.session-info strong,
+.session-info div {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .session-header {
