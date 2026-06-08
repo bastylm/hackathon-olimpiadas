@@ -415,27 +415,27 @@ function renderSessionManager() {
     const created = session.createdAt ? new Date(session.createdAt).toLocaleString("es-CL") : "Sin fecha";
     const isVisible = session.inviteVisible !== false;
     const challengeHtml = session.challengeText
-      ? `<div title="${escapeHtml(session.challengeText)}" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; margin: 8px 0; color: #555;">${escapeHtml(session.challengeText)}</div>`
+      ? `<div class="session-challenge" title="${escapeHtml(session.challengeText)}">${escapeHtml(session.challengeText)}</div>`
       : "";
     return `
-      <div class="session-row ${isActive ? "active" : ""}" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 0; padding: 12px 16px; border: 1px solid #ded1ef; border-radius: 8px; background: ${isActive ? '#f5f0ff' : '#fff'}; box-sizing: border-box;">
-        <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
-          <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
-            <strong style="font-size: 1.1rem; color: #4c1d95;">${escapeHtml(session.code)}</strong>
-            <span style="font-size: 0.85rem; font-weight: 600; color: #333;">${escapeHtml(session.section?.section || "Sin sección")}</span>
-            <span style="font-size: 0.8rem; color: #666;">- ${escapeHtml(session.bank?.name || "Sin banco")}</span>
+      <div class="session-row ${isActive ? "active" : ""}">
+        <div class="session-info">
+          <div class="session-header">
+            <strong>${escapeHtml(session.code)}</strong>
+            <span class="session-section">${escapeHtml(session.section?.section || "Sin sección")}</span>
+            <span class="session-bank">- ${escapeHtml(session.bank?.name || "Sin banco")}</span>
           </div>
           ${challengeHtml}
-          <div style="font-size: 0.75rem; color: #666; display: flex; gap: 12px; margin-top: 4px; flex-wrap: wrap;">
+          <div class="session-meta">
             <span><strong>Estado:</strong> ${sessionStateLabel(session)}</span>
             <span><strong>Tiempo:</strong> ${fmt(session.remainingSeconds ?? session.durationSeconds)}</span>
             <span><strong>Creado:</strong> ${created}</span>
           </div>
         </div>
-        <div class="session-actions" style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; width: 90px; margin-top: 0; padding: 0; border: none; background: transparent;">
-          <button type="button" data-load-session="${session.code}" style="width: 100%; padding: 6px 0; font-size: 0.8rem;">${isActive ? "Cerrar" : "Abrir"}</button>
-          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}" style="width: 100%; padding: 6px 0; font-size: 0.8rem;">${isVisible ? "Ocultar" : "Mostrar"}</button>
-          <button type="button" data-delete-session="${session.code}" style="width: 100%; padding: 6px 0; font-size: 0.8rem; background: #fee2e2; color: #991b1b; border-color: #fca5a5;">Eliminar</button>
+        <div class="session-actions">
+          <button type="button" data-load-session="${session.code}">${isActive ? "Cerrar" : "Abrir"}</button>
+          <button type="button" data-toggle-visibility="${session.code}" data-visible="${isVisible}">${isVisible ? "Ocultar" : "Mostrar"}</button>
+          <button type="button" class="btn-delete" data-delete-session="${session.code}">Eliminar</button>
         </div>
       </div>
     `;
@@ -471,20 +471,15 @@ function renderSessionManager() {
             return `
             <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
               <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
-              <div class="area-group-body">
-                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
-                  <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === 0 ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === 0 ? 'default' : 'pointer'}; color: ${validPage === 0 ? '#ccc' : '#4c1d95'};">&larr;</button>
-                  <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0;">
-                    <div style="display: flex; gap: 12px; width: 100%; overflow-x: auto; padding-bottom: 8px;">
-                      ${visibleSessions.map(session => {
-                        const rowHtml = rowFor(session);
-                        return rowHtml.replace('class="session-row', 'class="session-row" style="min-width: 320px; flex: 1;"');
-                      }).join("")}
-                    </div>
-                    <div style="text-align: center; font-size: 0.85rem; color: #5b21b6; font-weight: bold;">Mostrando ${validPage + 1} - ${validPage + visibleSessions.length} de ${sessions.length}</div>
+              <div class="area-group-body carousel-container">
+                <button type="button" class="carousel-btn" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""}>&larr;</button>
+                <div class="carousel-content">
+                  <div class="session-cards-wrapper">
+                    ${visibleSessions.map(rowFor).join("")}
                   </div>
-                  <button type="button" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === maxPage ? "disabled" : ""} style="flex-shrink: 0; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 1px solid #ded1ef; background: ${validPage === maxPage ? '#f9f9f9' : '#fff'}; border-radius: 8px; font-weight: bold; font-size: 1.2rem; cursor: ${validPage === maxPage ? 'default' : 'pointer'}; color: ${validPage === maxPage ? '#ccc' : '#4c1d95'};">&rarr;</button>
+                  <div class="carousel-indicator">Mostrando ${validPage + 1} - ${validPage + visibleSessions.length} de ${sessions.length}</div>
                 </div>
+                <button type="button" class="carousel-btn" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === maxPage ? "disabled" : ""}>&rarr;</button>
               </div>
             </details>`;
           }
@@ -492,12 +487,11 @@ function renderSessionManager() {
           return `
           <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
-            <div class="area-group-body">
-              <div style="display: flex; gap: 12px; width: 100%; overflow-x: auto; padding-bottom: 8px;">
-                ${visibleSessions.map(session => {
-                  const rowHtml = rowFor(session);
-                  return rowHtml.replace('class="session-row', 'class="session-row" style="min-width: 320px; flex: 1;"');
-                }).join("")}
+            <div class="area-group-body carousel-container">
+              <div class="carousel-content">
+                <div class="session-cards-wrapper">
+                  ${visibleSessions.map(rowFor).join("")}
+                </div>
               </div>
             </div>
           </details>`;        }
