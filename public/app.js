@@ -471,15 +471,17 @@ function renderSessionManager() {
             return `
             <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
               <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
-              <div class="area-group-body carousel-container">
-                <button type="button" class="carousel-btn" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""}>&larr;</button>
-                <div class="carousel-content">
-                  <div class="session-cards-wrapper">
-                    ${visibleSessions.map(rowFor).join("")}
+              <div class="area-group-body">
+                <div class="carousel-container">
+                  <button type="button" class="carousel-btn" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="-1" ${validPage === 0 ? "disabled" : ""}>&larr;</button>
+                  <div class="carousel-content">
+                    <div class="session-cards-wrapper">
+                      ${visibleSessions.map(rowFor).join("")}
+                    </div>
                   </div>
-                  <div class="carousel-indicator">Mostrando ${validPage + 1} - ${validPage + visibleSessions.length} de ${sessions.length}</div>
+                  <button type="button" class="carousel-btn" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === maxPage ? "disabled" : ""}>&rarr;</button>
                 </div>
-                <button type="button" class="carousel-btn" data-paginate-group="${escapeHtml(status)}" data-paginate-dir="1" ${validPage === maxPage ? "disabled" : ""}>&rarr;</button>
+                <div class="carousel-indicator">Mostrando ${validPage + 1} - ${validPage + visibleSessions.length} de ${sessions.length}</div>
               </div>
             </details>`;
           }
@@ -487,10 +489,12 @@ function renderSessionManager() {
           return `
           <details class="area-group" data-status="${escapeHtml(status)}" ${isOpen}>
             <summary>${escapeHtml(status)} <span>${sessions.length} formulario${sessions.length === 1 ? "" : "s"}</span></summary>
-            <div class="area-group-body carousel-container">
-              <div class="carousel-content">
-                <div class="session-cards-wrapper">
-                  ${visibleSessions.map(rowFor).join("")}
+            <div class="area-group-body">
+              <div class="carousel-container">
+                <div class="carousel-content">
+                  <div class="session-cards-wrapper">
+                    ${visibleSessions.map(rowFor).join("")}
+                  </div>
                 </div>
               </div>
             </div>
