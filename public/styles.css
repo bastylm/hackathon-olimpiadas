@@ -353,6 +353,7 @@ input {
 .carousel-container {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   width: 100%;
 }
@@ -404,8 +405,7 @@ input {
 
 .session-row {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
   justify-content: space-between;
   gap: 12px;
   padding: 12px 16px;
@@ -425,8 +425,7 @@ input {
 .session-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .session-header {
@@ -473,14 +472,13 @@ input {
 
 .session-actions {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex-shrink: 0;
-  width: 90px;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
 }
 
 .session-actions button {
-  width: 100%;
+  flex: 1;
   padding: 6px 0;
   font-size: 0.8rem;
   min-height: 34px;
@@ -1885,5 +1883,8 @@ body[data-view="projectionView"] .projection-winners-window .podium-card:nth-chi
 }
 .projection-live-window.paused > .projection-hero,
 .projection-live-window.paused > .projection-side {
+  display: none;
+}
+ive-window.paused > .projection-side {
   display: none;
 }
