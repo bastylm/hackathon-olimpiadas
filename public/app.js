@@ -12,6 +12,7 @@ let currentSlideIndex = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 let sessionManagerPagination = {};
+let currentWizardStep = 1;
 
 function safeJson(value, fallback) {
   try {
@@ -165,6 +166,49 @@ function updateNavVisibility() {
   const isAdmin = currentAuth("admin")?.role === "admin";
   $("navProjection")?.classList.toggle("hidden", !isAdmin);
   $("projNavProjection")?.classList.toggle("hidden", !isAdmin);
+}
+
+function updateWizardUI() {
+  document.querySelectorAll(".wizard-step-content").forEach((el) => {
+    const step = Number(el.dataset.step);
+    el.classList.toggle("hidden", step !== currentWizardStep);
+    el.classList.toggle("active", step === currentWizardStep);
+  });
+
+  document.querySelectorAll(".wizard-step-indicator").forEach((el) => {
+    const step = Number(el.dataset.indicator);
+    el.classList.toggle("active", step === currentWizardStep);
+    el.classList.toggle("completed", step < currentWizardStep);
+  });
+
+  const prevBtn = document.getElementById("wizardPrev");
+  const nextBtn = document.getElementById("wizardNext");
+  if (prevBtn) prevBtn.classList.toggle("hidden", currentWizardStep === 1);
+  if (nextBtn) {
+    nextBtn.classList.toggle("hidden", currentWizardStep === 3);
+  }
+}
+
+function handleWizardNext() {
+  if (currentWizardStep === 1) {
+    const sectionId = document.getElementById("sectionSelect").value;
+    const bankId = document.getElementById("bankSelect").value;
+    if (!sectionId || !bankId) {
+      alert("Debes seleccionar una sección y un banco antes de continuar.");
+      return;
+    }
+  }
+  if (currentWizardStep < 3) {
+    currentWizardStep++;
+    updateWizardUI();
+  }
+}
+
+function handleWizardPrev() {
+  if (currentWizardStep > 1) {
+    currentWizardStep--;
+    updateWizardUI();
+  }
 }
 
 function fmt(seconds) {
@@ -333,6 +377,7 @@ async function loadResponsesForSelected() {
   try {
     responseContext = await api(`/api/responses?sectionId=${encodeURIComponent(sectionId)}&bankId=${encodeURIComponent(bankId)}`);
     renderResponses(responseContext.participants || [], responseContext);
+    updateWizardUI();
   } catch (error) {
     if (requireFreshAdminLogin(error)) return;
     responseContext = selectedResponseContext();
@@ -804,6 +849,7 @@ async function showAdmin() {
   }
   await loadManagedSessions();
   loadResponsesForSelected();
+  updateWizardUI();
 }
 
 async function showProjection() {
@@ -1968,6 +2014,8 @@ async function init() {
     $("publishWinners")?.addEventListener("click", publishWinners);
     $("joinSession")?.addEventListener("click", joinSession);
     $("finishQuiz")?.addEventListener("click", finishQuiz);
+    $("wizardPrev")?.addEventListener("click", handleWizardPrev);
+    $("wizardNext")?.addEventListener("click", handleWizardNext);
   } catch (error) {
     setView("studentView");
     if ($("pageTitle")) $("pageTitle").textContent = "Cuestionario estudiantes";

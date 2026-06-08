@@ -32,8 +32,25 @@
       </section>
 
       <section id="adminView" class="view active">
-        <div class="admin-grid">
-          <section class="panel setup">
+        <div class="wizard-container">
+          <div class="wizard-progress">
+            <div class="wizard-step-indicator active" data-indicator="1">
+              <span class="step-num">1</span>
+              <span class="step-label">Configuración</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-indicator" data-indicator="2">
+              <span class="step-num">2</span>
+              <span class="step-label">Selección de Preguntas</span>
+            </div>
+            <div class="wizard-step-line"></div>
+            <div class="wizard-step-indicator" data-indicator="3">
+              <span class="step-num">3</span>
+              <span class="step-label">Control en Vivo</span>
+            </div>
+          </div>
+          <div class="wizard-step-content active" data-step="1">
+            <section class="panel setup">
             <div class="admin-title-row">
               <h2>Administrador</h2>
               <button id="logoutAdmin" type="button">Cerrar sesión</button>
@@ -148,8 +165,10 @@
               <a id="projectionLink" class="button-link" href="/proyeccion" target="_blank">Abrir proyección</a>
             </div>
           </section>
+          </div>
 
-          <section class="panel questions">
+          <div class="wizard-step-content hidden" data-step="2">
+            <section class="panel questions">
             <div class="panel-head">
               <h2>Preguntas autorizadas</h2>
               <button id="publishQuiz" class="primary" type="button">Guardar selección</button>
@@ -157,8 +176,10 @@
             <p id="selectionStatus" class="hint">La selección se guarda sin generar código.</p>
             <div id="questionList" class="question-list"></div>
           </section>
+          </div>
 
-          <section class="panel live">
+          <div class="wizard-step-content hidden" data-step="3">
+            <section class="panel live">
             <h2>Control Hackathon</h2>
             <div id="currentQuestion" class="current-question">Crea una sesión para iniciar.</div>
             <div class="control-grid">
@@ -181,8 +202,13 @@
             <textarea id="interventionLog" class="intervention-log" placeholder="Escribe una intervención por línea. Ej: [x] Presentación inicial realizada"></textarea>
             <button id="downloadRecord" type="button">Descargar registro Word</button>
           </section>
+          </div>
+          <div class="wizard-navigation">
+            <button id="wizardPrev" type="button" class="hidden">Anterior</button>
+            <button id="wizardNext" class="primary" type="button">Siguiente</button>
+          </div>
         </div>
-        
+
         <section class="panel session-history" style="margin-top: 16px;">
           <div class="panel-head">
             <h2>Formularios creados</h2>
