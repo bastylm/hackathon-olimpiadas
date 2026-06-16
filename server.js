@@ -321,8 +321,15 @@ function rankStoredParticipants(sectionId, bankId, selected = []) {
     bankId,
     career: section?.career || "",
     answeredCurrent: selected.length > 0 && selected.every((index) => (student.answers || {})[index] !== undefined),
+    updatedAt: student.updatedAt || "",
   }));
-  participants.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  participants.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : Infinity;
+    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : Infinity;
+    if (timeA !== timeB) return timeA - timeB;
+    return a.name.localeCompare(b.name);
+  });
   return participants.map((student, index) => ({ ...student, place: index + 1 }));
 }
 
@@ -344,10 +351,17 @@ function rankAllParticipants() {
         section: section?.section || "Sin sección",
         career: section?.career || "Sin carrera",
         bank: bank?.name || "Sin banco",
+        updatedAt: student.updatedAt || "",
       });
     }
   }
-  entries.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  entries.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : Infinity;
+    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : Infinity;
+    if (timeA !== timeB) return timeA - timeB;
+    return a.name.localeCompare(b.name);
+  });
   return entries.map((student, index) => ({ ...student, place: index + 1 }));
 }
 
