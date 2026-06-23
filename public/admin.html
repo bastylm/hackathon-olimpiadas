@@ -143,6 +143,17 @@
                     <p id="projectionVideoStatus" class="hint">Aún no hay video cargado para proyección.</p>
                   </div>
                 </details>
+                <details class="question-editor">
+                  <summary>Galería de fotos para proyección</summary>
+                  <div class="section-editor-body">
+                    <label>
+                      Seleccionar imágenes
+                      <input id="galleryImageUpload" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple />
+                    </label>
+                    <button id="uploadGalleryButton" type="button" disabled>Cargar fotos</button>
+                    <div id="galleryManager" class="gallery-manager" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-top: 16px;"></div>
+                  </div>
+                </details>
               </div>
             </details>
             <label>

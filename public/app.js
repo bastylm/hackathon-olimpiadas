@@ -1343,6 +1343,84 @@ function renderParticipationRank(id, session) {
   }
 }
 
+let currentGalleryIndex = 0;
+let galleryInterval = null;
+let lastGalleryImagesJson = "";
+
+function renderProjectionGallery(images = []) {
+  const container = $("galleryContainer");
+  const dotsContainer = $("galleryDots");
+  const galleryBanner = $("projectionGallery");
+  if (!container || !dotsContainer || !galleryBanner) return;
+
+  if (!images.length) {
+    galleryBanner.classList.add("hidden");
+    container.innerHTML = "";
+    dotsContainer.innerHTML = "";
+    lastGalleryImagesJson = "";
+    if (galleryInterval) {
+      clearInterval(galleryInterval);
+      galleryInterval = null;
+    }
+    return;
+  }
+
+  galleryBanner.classList.remove("hidden");
+
+  const currentJson = JSON.stringify(images);
+  if (currentJson === lastGalleryImagesJson) return;
+  lastGalleryImagesJson = currentJson;
+
+  if (galleryInterval) {
+    clearInterval(galleryInterval);
+    galleryInterval = null;
+  }
+
+  currentGalleryIndex = 0;
+  container.innerHTML = images
+    .map(
+      (img, idx) => `
+      <img src="${img.url}" class="gallery-img ${idx === 0 ? "active" : ""}" alt="Foto Olimpiadas" />
+    `
+    )
+    .join("");
+
+  dotsContainer.innerHTML = images
+    .map(
+      (_, idx) => `
+      <span class="gallery-dot ${idx === 0 ? "active" : ""}" data-index="${idx}"></span>
+    `
+    )
+    .join("");
+
+  dotsContainer.querySelectorAll(".gallery-dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      showGallerySlide(Number(dot.dataset.index));
+    });
+  });
+
+  if (images.length > 1) {
+    galleryInterval = setInterval(() => {
+      const nextIndex = (currentGalleryIndex + 1) % images.length;
+      showGallerySlide(nextIndex);
+    }, 4000);
+  }
+}
+
+function showGallerySlide(index) {
+  const images = document.querySelectorAll(".gallery-img");
+  const dots = document.querySelectorAll(".gallery-dot");
+  if (!images.length || index < 0 || index >= images.length) return;
+
+  images[currentGalleryIndex]?.classList.remove("active");
+  dots[currentGalleryIndex]?.classList.remove("active");
+
+  currentGalleryIndex = index;
+
+  images[currentGalleryIndex]?.classList.add("active");
+  dots[currentGalleryIndex]?.classList.add("active");
+}
+
 function renderProjection(session) {
   const inviteVisible = session.inviteVisible !== false;
   const liveWindow = document.querySelector(".projection-live-window");
@@ -1382,6 +1460,7 @@ function renderProjection(session) {
   if (session.showRanking && !session.winnersPublished && inviteVisible) renderLeaderboard("projectionRanking", session.participants);
   $("projectionPodium")?.classList.toggle("hidden", !session.winnersPublished);
   if (session.winnersPublished) renderPodium("projectionPodium", session.participants);
+  renderProjectionGallery(session.projectionGallery || []);
 }
 
 function renderLeaderboard(id, participants) {
@@ -1695,6 +1774,82 @@ function renderProjectionVideo(video) {
   }
 }
 
+function handleGallerySelection() {
+  const files = $("galleryImageUpload")?.files;
+  const btn = $("uploadGalleryButton");
+  if (btn) {
+    btn.disabled = !files || !files.length;
+    if (files && files.length) {
+      btn.textContent = `Cargar ${files.length} foto(s)`;
+    } else {
+      btn.textContent = "Cargar fotos";
+    }
+  }
+}
+
+async function uploadGalleryImages() {
+  const files = $("galleryImageUpload")?.files;
+  if (!files || !files.length) return;
+  const btn = $("uploadGalleryButton");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Cargando...";
+  }
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const formData = new FormData();
+    formData.append("galleryImage", file);
+    try {
+      const result = await apiForm("/api/projection-gallery", formData);
+      appData.projectionGallery = result.projectionGallery;
+    } catch (err) {
+      alert(`No se pudo cargar la foto ${file.name}: ${err.message}`);
+    }
+  }
+  if (btn) {
+    btn.textContent = "Cargar fotos";
+    btn.disabled = true;
+  }
+  const input = $("galleryImageUpload");
+  if (input) input.value = "";
+  renderGalleryManager(appData.projectionGallery || []);
+}
+
+function renderGalleryManager(images = []) {
+  const container = $("galleryManager");
+  if (!container) return;
+  container.innerHTML = images.length
+    ? images
+        .map(
+          (img) => `
+        <div class="gallery-item" style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 4 / 3; background: #f9f7fd;">
+          <img src="${img.url}" alt="${escapeHtml(img.originalName)}" style="width: 100%; height: 100%; object-fit: cover;" />
+          <button type="button" class="gallery-item-delete" data-filename="${escapeHtml(img.filename)}" style="position: absolute; top: 4px; right: 4px; background: rgba(211, 47, 47, 0.9); color: #fff; border: none; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; cursor: pointer; opacity: 0.8; transition: opacity 0.2s ease;">X</button>
+        </div>
+      `
+        )
+        .join("")
+    : "<p class='hint' style='grid-column: 1 / -1;'>Aún no hay fotos en la galería.</p>";
+
+  container.querySelectorAll(".gallery-item-delete").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const filename = btn.dataset.filename;
+      if (confirm("¿Estás seguro de eliminar esta foto?")) {
+        try {
+          const result = await api("/api/projection-gallery/delete", {
+            method: "POST",
+            body: { filename },
+          });
+          appData.projectionGallery = result.projectionGallery;
+          renderGalleryManager(appData.projectionGallery || []);
+        } catch (err) {
+          alert(`No se pudo eliminar la foto: ${err.message}`);
+        }
+      }
+    });
+  });
+}
+
 async function answerQuestion(questionIndex, answerIndex) {
   try {
     document.querySelectorAll(`[data-question-index="${questionIndex}"]`).forEach((button) => (button.disabled = true));
@@ -1853,6 +2008,7 @@ async function init() {
       syncChallengeFromBank(false);
       updateNavVisibility();
       await showAdmin();
+      renderGalleryManager(appData.projectionGallery || []);
     } else {
       setView("loginView");
     }
@@ -1975,6 +2131,8 @@ async function init() {
     $("uploadWordButton")?.addEventListener("click", importWordQuestionnaire);
     $("projectionVideoUpload")?.addEventListener("change", handleProjectionVideoSelection);
     $("uploadProjectionVideo")?.addEventListener("click", uploadProjectionVideo);
+    $("galleryImageUpload")?.addEventListener("change", handleGallerySelection);
+    $("uploadGalleryButton")?.addEventListener("click", uploadGalleryImages);
     const video = $("projectionVideo");
     const clickArea = $("projectionVideoClickArea");
     const videoWindow = video?.closest(".projection-video-window");

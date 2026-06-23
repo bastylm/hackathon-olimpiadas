@@ -75,6 +75,35 @@ const videoUpload = multer({
   },
 });
 
+const imageUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, callback) => callback(null, UPLOADS_DIR),
+    filename: (_req, file, callback) => {
+      const ext = path.extname(file.originalname || ".jpg").toLowerCase() || ".jpg";
+      const base = path.basename(file.originalname || "galeria", ext).replace(/[^\w.-]+/g, "_").slice(0, 70) || "galeria";
+      callback(null, `${Date.now()}-${crypto.randomInt(10000)}-${base}${ext}`);
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, callback) => {
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    if (![".jpg", ".jpeg", ".png", ".webp", ".gif"].includes(ext)) {
+      callback(new Error("Solo se permiten imágenes .jpg, .jpeg, .png, .webp o .gif"));
+      return;
+    }
+    callback(null, true);
+  },
+});
+
+function receiveImageUpload(req, res) {
+  return new Promise((resolve, reject) => {
+    imageUpload.single("galleryImage")(req, res, (error) => {
+      if (error) reject(error);
+      else resolve(req.file);
+    });
+  });
+}
+
 function sendJson(res, status, payload) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
@@ -775,6 +804,7 @@ function publicSession(session, req) {
     remainingSeconds: remainingSeconds(session),
     questionElapsedSeconds: elapsedSeconds(session.questionStartedAt),
     projectionVideo: data.projectionVideo || null,
+    projectionGallery: data.projectionGallery || [],
     joinUrl: `${inviteBase(req)}/estudiante?code=${session.code}`,
     projectionUrl: `${inviteBase(req)}/proyeccion?code=${session.code}`,
     qrUrl: `/api/session/${session.code}/qr`,
@@ -877,6 +907,59 @@ const server = http.createServer(async (req, res) => {
     } catch (error) {
       sendJson(res, 400, { error: error.message || "No se pudo cargar el video" });
     }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/projection-gallery") {
+    if (!requireAdmin(req, res)) return;
+    try {
+      const file = await receiveImageUpload(req, res);
+      if (!file) {
+        sendJson(res, 400, { error: "Selecciona una imagen para la galería" });
+        return;
+      }
+      if (!data.projectionGallery) data.projectionGallery = [];
+      const img = {
+        originalName: file.originalname,
+        filename: file.filename,
+        url: `/uploads/${encodeURIComponent(file.filename)}`,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+      };
+      data.projectionGallery.push(img);
+      saveData();
+      sendJson(res, 200, { projectionGallery: data.projectionGallery });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message || "No se pudo cargar la imagen" });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/projection-gallery/delete") {
+    if (!requireAdmin(req, res)) return;
+    const body = await readBody(req);
+    const filename = String(body.filename || "").trim();
+    if (!filename) {
+      sendJson(res, 400, { error: "Nombre de archivo no proporcionado" });
+      return;
+    }
+    if (!data.projectionGallery) data.projectionGallery = [];
+    const index = data.projectionGallery.findIndex((img) => img.filename === filename);
+    if (index < 0) {
+      sendJson(res, 404, { error: "Imagen no encontrada en la galería" });
+      return;
+    }
+    data.projectionGallery.splice(index, 1);
+    saveData();
+    try {
+      const full = path.resolve(UPLOADS_DIR, filename);
+      if (full.startsWith(path.resolve(UPLOADS_DIR)) && fs.existsSync(full)) {
+        fs.unlinkSync(full);
+      }
+    } catch (e) {
+      console.error("Error al eliminar imagen de galería físicamente:", e);
+    }
+    sendJson(res, 200, { projectionGallery: data.projectionGallery });
     return;
   }
 
