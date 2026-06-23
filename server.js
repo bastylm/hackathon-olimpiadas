@@ -310,19 +310,51 @@ function rankParticipants(session) {
 function rankStoredParticipants(sectionId, bankId, selected = []) {
   const stored = Object.values(responseStoreForSelection(sectionId, bankId).students);
   const section = data.sections.find((item) => item.id === sectionId);
-  const participants = stored.map((student) => ({
-    id: student.id,
-    name: student.name,
-    rut: student.rut || "",
-    score: student.score,
-    answers: Object.keys(student.answers || {}).length,
-    answerMap: student.answers || {},
-    sectionId,
-    bankId,
-    career: section?.career || "",
-    answeredCurrent: selected.length > 0 && selected.every((index) => (student.answers || {})[index] !== undefined),
-    updatedAt: student.updatedAt || "",
-  }));
+  const bank = data.banks.find((item) => item.id === bankId);
+  const session = [...sessions.values()]
+    .reverse()
+    .find((s) => s.sectionId === sectionId && s.bankId === bankId);
+
+  const participants = stored.map((student) => {
+    const pointsMap = {};
+    if (bank && session) {
+      const startTimeStr = session.timerStartedAt || session.questionStartedAt || session.createdAt;
+      const startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
+      const totalDuration = Math.max(60, Number(session.initialDurationSeconds || session.durationSeconds || 600));
+
+      for (const [qIdx, aIdx] of Object.entries(student.answers || {})) {
+        const question = bank.questions[Number(qIdx)];
+        const answer = question?.answers?.[Number(aIdx)];
+        const basePoints = Number(answer?.points || 0);
+        let points = basePoints;
+        if (basePoints > 0) {
+          const answeredAtStr = student.answerTimes?.[qIdx];
+          if (answeredAtStr) {
+            const answeredAt = new Date(answeredAtStr).getTime();
+            const elapsed = Math.max(0, (answeredAt - startTime) / 1000);
+            const ratio = Math.min(1, elapsed / totalDuration);
+            points = Math.round(basePoints * (1 - 0.25 * ratio));
+          }
+        }
+        pointsMap[qIdx] = points;
+      }
+    }
+
+    return {
+      id: student.id,
+      name: student.name,
+      rut: student.rut || "",
+      score: student.score,
+      answers: Object.keys(student.answers || {}).length,
+      answerMap: student.answers || {},
+      pointsMap,
+      sectionId,
+      bankId,
+      career: section?.career || "",
+      answeredCurrent: selected.length > 0 && selected.every((index) => (student.answers || {})[index] !== undefined),
+      updatedAt: student.updatedAt || "",
+    };
+  });
   participants.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : Infinity;
@@ -425,12 +457,28 @@ function recomputeStudentScore(session, student) {
   const bank = data.banks.find((item) => item.id === session.bankId);
   if (!bank) return 0;
   let score = 0;
+  const startTimeStr = session.timerStartedAt || session.questionStartedAt || session.createdAt;
+  const startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
+  const totalDuration = Math.max(60, Number(session.initialDurationSeconds || session.durationSeconds || 600));
+
   for (const [questionIndex, answerIndex] of Object.entries(student.answers)) {
     const answer = bank.questions[Number(questionIndex)]?.answers?.[Number(answerIndex)];
-    score += Number(answer?.points || 0);
+    const basePoints = Number(answer?.points || 0);
+    
+    let points = basePoints;
+    if (basePoints > 0) {
+      const answeredAtStr = student.answerTimes?.[questionIndex];
+      if (answeredAtStr) {
+        const answeredAt = new Date(answeredAtStr).getTime();
+        const elapsed = Math.max(0, (answeredAt - startTime) / 1000);
+        const ratio = Math.min(1, elapsed / totalDuration);
+        points = basePoints * (1 - 0.25 * ratio);
+      }
+    }
+    score += points;
   }
-  student.score = score;
-  return score;
+  student.score = Math.round(score);
+  return student.score;
 }
 
 function normalizeText(value) {
@@ -1249,8 +1297,12 @@ const server = http.createServer(async (req, res) => {
       let student = session.students.get(id);
       if (!student) {
         student = storedStudent
-          ? { ...storedStudent, answers: { ...(storedStudent.answers || {}) } }
-          : { id, name, rut, score: 0, answers: {} };
+          ? {
+              ...storedStudent,
+              answers: { ...(storedStudent.answers || {}) },
+              answerTimes: { ...(storedStudent.answerTimes || {}) },
+            }
+          : { id, name, rut, score: 0, answers: {}, answerTimes: {} };
         session.students.set(id, student);
       }
       if (student.answers[questionIndex] !== undefined) {
@@ -1260,6 +1312,9 @@ const server = http.createServer(async (req, res) => {
       student.name = name;
       if (rut) student.rut = rut;
       student.answers[questionIndex] = answerIndex;
+      if (!student.answerTimes) student.answerTimes = {};
+      student.answerTimes[questionIndex] = new Date().toISOString();
+
       recomputeStudentScore(session, student);
       const stored = storeFor(session);
       stored.students[id] = {
@@ -1268,13 +1323,27 @@ const server = http.createServer(async (req, res) => {
         rut: student.rut || "",
         score: student.score,
         answers: student.answers,
+        answerTimes: student.answerTimes,
         updatedAt: new Date().toISOString(),
       };
       saveResponseStore();
       touchSession(session);
+
+      // Calcular puntos reales con descuento de tiempo para la respuesta JSON
+      let actualPoints = Number(answer.points || 0);
+      if (actualPoints > 0) {
+        const startTimeStr = session.timerStartedAt || session.questionStartedAt || session.createdAt;
+        const startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
+        const totalDuration = Math.max(60, Number(session.initialDurationSeconds || session.durationSeconds || 600));
+        const answeredAt = new Date(student.answerTimes[questionIndex]).getTime();
+        const elapsed = Math.max(0, (answeredAt - startTime) / 1000);
+        const ratio = Math.min(1, elapsed / totalDuration);
+        actualPoints = Math.round(actualPoints * (1 - 0.25 * ratio));
+      }
+
       const ranking = rankParticipants(session);
       const ranked = ranking.find((item) => item.id === id);
-      sendJson(res, 200, { studentId: id, points: answer.points, total: student.score, place: ranked?.place });
+      sendJson(res, 200, { studentId: id, points: actualPoints, total: student.score, place: ranked?.place });
       return;
     }
 

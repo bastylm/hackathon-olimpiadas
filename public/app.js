@@ -1204,15 +1204,25 @@ function studentAnswerKey(code, questionIndex) {
 
 function renderStudentReview(session) {
   $("answerReview")?.classList.remove("hidden");
+  const rut = normalizeRut(student.rut);
+  const name = normalizeText(student.name);
+  const me = (session.participants || []).find((p) => p.id === student.id)
+    || (session.participants || []).find((p) => rut && normalizeRut(p.rut) === rut)
+    || (session.participants || []).find((p) => !rut && name && normalizeText(p.name) === name);
+
   if ($("answerReview")) $("answerReview").innerHTML = (session.quizQuestions || [])
     .map((question, idx) => {
       const chosen = studentAnswerFor(session, question.index);
       const selected = (question.answers || [])[chosen];
       const correct = [...(question.answers || [])].sort((a, b) => b.points - a.points)[0];
+      const pointsEarned = me?.pointsMap?.[question.index] !== undefined
+        ? me.pointsMap[question.index]
+        : (selected ? selected.points : 0);
+
       return `
         <article class="review-item">
           <h3>${idx + 1}. ${escapeHtml(question.text.replace(/^\d+\.\s*/, ""))}</h3>
-          <p>Tu respuesta: <strong>${selected ? escapeHtml(selected.text) : "Sin responder"}</strong>${selected ? ` · ${selected.points} pts` : ""}</p>
+          <p>Tu respuesta: <strong>${selected ? escapeHtml(selected.text) : "Sin responder"}</strong>${selected ? ` · ${pointsEarned} pts` : ""}</p>
           <p>Respuesta de mayor puntaje: <strong>${correct ? escapeHtml(correct.text) : "Sin alternativas"}</strong> (${correct ? correct.points : 0} pts)</p>
         </article>
       `;
@@ -1697,7 +1707,7 @@ async function answerQuestion(questionIndex, answerIndex) {
     student.answeredQuestion = questionIndex;
     student.answers[studentAnswerKey(student.code, questionIndex)] = answerIndex;
     localStorage.setItem("olimpiadasStudentAnswers", JSON.stringify(student.answers));
-    $("answerResult").textContent = "Respuesta registrada. No se puede editar.";
+    $("answerResult").textContent = `Respuesta registrada (+${result.points || 0} pts). No se puede editar.`;
     await refreshSession();
   } catch (error) {
     $("answerResult").textContent = error.message;
