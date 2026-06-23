@@ -2016,14 +2016,15 @@ body[data-view="projectionView"] .projection-winners-window .podium-card:nth-chi
 /* Carrusel de Galería en Proyección */
 .projection-gallery-banner {
   position: relative;
-  width: min(800px, 85vw);
-  height: clamp(260px, 32vh, 380px);
+  aspect-ratio: 16 / 9;
+  width: min(680px, 80vw);
+  max-height: 38vh;
   margin: 16px auto 0;
   overflow: hidden;
   border-radius: 12px;
   border: 2px solid var(--line);
   box-shadow: 0 16px 36px rgba(91, 33, 182, 0.12);
-  background: #000;
+  background: transparent;
 }
 
 .gallery-container {
@@ -2038,10 +2039,9 @@ body[data-view="projectionView"] .projection-winners-window .podium-card:nth-chi
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   opacity: 0;
   transition: opacity 1s ease-in-out;
-  background: #000;
 }
 
 .gallery-img.active {
