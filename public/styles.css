@@ -1507,22 +1507,28 @@ body[data-view="projectionView"] .shell {
 }
 
 .projection-brand-window {
-  display: grid;
-  place-items: center;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .projection-main-logo {
-  width: min(780px, 78vw);
+  max-width: min(480px, 50vw);
+  max-height: 18vh;
   height: auto;
+  object-fit: contain;
 }
 
 .projection-brand-window h2 {
-  margin: 10px 0 0;
+  margin: 8px 0;
   color: var(--ink);
-  font-size: clamp(64px, 9vw, 144px);
-  line-height: 0.95;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .projection-video-window {
@@ -2011,8 +2017,8 @@ body[data-view="projectionView"] .projection-winners-window .podium-card:nth-chi
 .projection-gallery-banner {
   position: relative;
   width: min(800px, 85vw);
-  height: clamp(300px, 35vh, 450px);
-  margin: 32px auto 0;
+  height: clamp(260px, 32vh, 380px);
+  margin: 16px auto 0;
   overflow: hidden;
   border-radius: 12px;
   border: 2px solid var(--line);
